@@ -107,6 +107,7 @@ only that, if you do, the three fit together without friction.
     ├── contacto/                 # form (GET/POST + CSRF + flash)
     ├── auth/                    # username/password authentication (login/account, reuses identity)
     ├── oauth/                    # OAuth 2.0 authentication (reuses identity), stdlib
+    ├── otw/                      # BFF: HTML over the wire from a token-gated external API
     ├── openapi/                  # openapi.json + vendored Swagger UI
     └── site/                     # robots.txt, sitemap.xml, /static
         └── static/
@@ -157,6 +158,7 @@ reflection).
 | `GET /oauth/login`        | starts OAuth 2.0 (redirects to the provider)         |
 | `GET /oauth/callback`     | OAuth callback: token → userinfo → `identity.Login`  |
 | `GET /oauth/me`           | HTML — **protected** (shows the OAuth identity)      |
+| `GET /otw/panel`          | HTML fragment — BFF: server renders a token-gated external API |
 | `GET /openapi.json`       | OpenAPI 3.0 spec of the API (hand-written, no deps)  |
 | `GET /docs`               | Swagger UI (vendored, self-contained)                |
 | `GET /docs-assets/...`    | embedded Swagger UI assets (css/js)                  |
@@ -220,6 +222,7 @@ docker run -p 8888:8888 -v agogo-data:/data agogo
 | `AGOGO_BASE_URL`  | `http://localhost:8888`    | Base URL (canonical, sitemap)|
 | `AGOGO_SECRET_KEY`| (insecure dev key)         | Session signing (HMAC). In production, ≥32 chars. |
 | `OAUTH_CLIENT_ID` … | (empty)                    | Config for the `oauth` module (CLIENT_ID/SECRET, AUTH/TOKEN/USERINFO_URL, SCOPE). Without it, `/oauth/login` returns 503. |
+| `OTW_API_URL`, `OTW_API_TOKEN` | (empty)         | Config for the `otw` module (BFF): external API + server-side bearer token (e.g. `https://api.github.com/repos/golang/go` + a PAT). Without it, `/otw/panel` uses a built-in simulated GitHub API. |
 
 ## HTTP protocols (HTTP/1.1, HTTP/2, HTTP/3)
 

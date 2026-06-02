@@ -314,6 +314,32 @@ navigation with the full page. SEO and robustness do not depend on the JS; this
 is just an experience improvement on top. It does not replace lumen nor does it
 stream (it is not full Turbo): it only avoids re-rendering what does not change.
 
+### BFF: HTML over the wire from a token-gated API (`otw` module)
+
+The usual SPA flow is: the browser fetches JSON and a view builds the DOM. When
+the data lives behind **a secret you can't expose** (an external API gated by a
+token), that flow forces the token into the browser. The `otw` module shows the
+alternative — a **backend-for-frontend**. The concrete example fetches a GitHub
+repo's stats (the GitHub API, which you call with a PAT for a higher rate limit
+or private repos):
+
+1. The browser asks the server for a section (`GET /otw/panel`), triggered by a
+   button on the *Quiénes somos* page.
+2. The **server** calls the GitHub API with the bearer token (the token lives
+   only on the server, never reaches the client), gets JSON, and renders it as
+   an **HTML fragment** (`html/template`, so external data is auto-escaped).
+3. The client just does `innerHTML` on the section (`static/js/otw.js`, ~15
+   lines, no framework, no JSON on the page).
+
+This is "HTML over the wire": rendering and the secret stay on the server; only
+HTML crosses. It's the right shape for token-gated/external data — NOT for your
+own DB (there you render the fragment directly from the query, no internal HTTP
+call). Configured by its own env (`OTW_API_URL`, `OTW_API_TOKEN`); unconfigured,
+the BFF points at a built-in `/otw/demo-api` that returns the **same shape**
+GitHub does (also token-gated), so the demo runs without credentials — the
+decode code is identical for the live and simulated APIs. The BFF absorbs
+upstream failures (logs the real error, returns a friendly fragment).
+
 ## Configuration and sessions
 
 - **`config`**: reads the environment **once**, typed and validated
