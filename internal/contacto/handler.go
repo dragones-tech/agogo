@@ -55,7 +55,7 @@ func (h *Handler) Mostrar(w http.ResponseWriter, r *http.Request) {
 		s.Delete("flash")
 		h.sess.Save(w, s)
 	}
-	view.Render(w, tplForm, formPage{
+	view.Render(w, r, tplForm, formPage{
 		Meta:   h.meta(r),
 		Token:  csrf.Issue(w, h.secure),
 		Flash:  flash,
@@ -93,7 +93,7 @@ func (h *Handler) Recibir(w http.ResponseWriter, r *http.Request) {
 
 	if len(errs) > 0 {
 		w.WriteHeader(http.StatusUnprocessableEntity)
-		view.Render(w, tplForm, formPage{
+		view.Render(w, r, tplForm, formPage{
 			Meta:   h.meta(r),
 			Token:  csrf.Issue(w, h.secure),
 			Errors: errs,

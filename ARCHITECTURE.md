@@ -267,6 +267,29 @@ Lo específico de agogo NO vive en el vendor, sino en `internal/site/static/styl
 Para clonar y correr: tras `git clone`, ejecutar `./scripts/vendor-frontend.sh`
 una vez (trae scc/lumen); luego `go run .` como siempre.
 
+### Navegación parcial (estilo Turbo, propia)
+
+Pieza **propia de agogo** (no de lumen), del lado servidor + un JS chico: al
+cambiar de sección no se recarga el documento, solo se reemplaza `<main>`. Header,
+footer, CSS y el propio script quedan fijos → sin parpadeo, sin re-parsear assets.
+
+Aprovecha que el bloque **`content` ya es un partial**:
+
+- **Servidor** (`view.Render`): si la petición trae la cabecera `X-Fragment`,
+  renderiza solo el bloque `fragment` (título + `content` + `scripts`), no la
+  página entera. Responde con `Vary: X-Fragment`.
+- **Cliente** (`static/js/nav.js`): intercepta los clics en enlaces internos,
+  pide el fragmento, y reemplaza `<main>` (con `document.startViewTransition` si
+  hay soporte, para un crossfade en la misma página). Reejecuta los `<script>` de
+  la página con una URL única (`?v=`) para recablear el `<main>` nuevo; sus
+  imports siguen cacheados. Actualiza título e historial (`pushState`/`popstate`).
+
+**Degrada limpio:** sin JS, ante un error de red, una respuesta no-HTML (un
+`/api/...` JSON), un acceso directo, un refresh o un crawler → navegación normal
+del navegador con la página completa. El SEO y la robustez no dependen del JS;
+esto es solo una mejora de experiencia encima. No reemplaza a lumen ni hace
+streaming (no es Turbo completo): solo evita re-renderizar lo que no cambia.
+
 ## Configuración y sesiones
 
 - **`config`**: lee el entorno **una sola vez**, tipado y validado

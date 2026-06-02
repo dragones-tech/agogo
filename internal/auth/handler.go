@@ -49,7 +49,7 @@ type loginPage struct {
 
 // GET /login
 func (h *Handler) LoginForm(w http.ResponseWriter, r *http.Request) {
-	view.Render(w, tplLogin, loginPage{Meta: h.meta(r, "Acceder — Agogo"), Token: csrf.Issue(w, h.secure)})
+	view.Render(w, r, tplLogin, loginPage{Meta: h.meta(r, "Acceder — Agogo"), Token: csrf.Issue(w, h.secure)})
 }
 
 // POST /login: valida CSRF, verifica credenciales, inicia sesión.
@@ -73,7 +73,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	// No revelamos si el correo existe: mismo mensaje para "no existe" y "mala contraseña".
 	if errors.Is(err, sql.ErrNoRows) || !password.Match(pass, u.PasswordHash) {
 		w.WriteHeader(http.StatusUnauthorized)
-		view.Render(w, tplLogin, loginPage{
+		view.Render(w, r, tplLogin, loginPage{
 			Meta:  h.meta(r, "Acceder — Agogo"),
 			Token: csrf.Issue(w, h.secure),
 			Error: "Correo o contraseña incorrectos.",
@@ -116,5 +116,5 @@ func (h *Handler) Cuenta(w http.ResponseWriter, r *http.Request) {
 	}
 	// Página autenticada: que ningún intermediario ni el navegador la cacheen.
 	w.Header().Set("Cache-Control", "no-store")
-	view.Render(w, tplCuenta, cuentaPage{Meta: h.meta(r, "Mi cuenta — Agogo"), Token: csrf.Issue(w, h.secure), Email: u.Email})
+	view.Render(w, r, tplCuenta, cuentaPage{Meta: h.meta(r, "Mi cuenta — Agogo"), Token: csrf.Issue(w, h.secure), Email: u.Email})
 }

@@ -51,7 +51,7 @@ func (r Resource[T]) ListHTML(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "error interno", http.StatusInternalServerError)
 		return
 	}
-	view.Render(w, r.TplList, Page[T]{Meta: r.ListMeta(r.url(req)), Items: items})
+	view.Render(w, req, r.TplList, Page[T]{Meta: r.ListMeta(r.url(req)), Items: items})
 }
 
 func (r Resource[T]) DetailHTML(w http.ResponseWriter, req *http.Request) {
@@ -63,7 +63,7 @@ func (r Resource[T]) DetailHTML(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "error interno", http.StatusInternalServerError)
 		return
 	}
-	view.Render(w, r.TplItem, ItemPage[T]{Meta: r.ItemMeta(it, r.url(req)), Item: it})
+	view.Render(w, req, r.TplItem, ItemPage[T]{Meta: r.ItemMeta(it, r.url(req)), Item: it})
 }
 
 func (r Resource[T]) ListJSON(w http.ResponseWriter, req *http.Request) {

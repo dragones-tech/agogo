@@ -112,6 +112,7 @@ si los usas, los tres encajan sin fricción.
             ├── scc/              # vendor (gitignored): CSS semántico — re-baja con scripts/vendor-frontend.sh
             ├── lumen/            # vendor (gitignored): UI vanilla-JS — idem
             ├── js/               # nuestro JS, package-by-feature (como el Go)
+            │   ├── nav.js        #   navegación parcial del sitio (solo cambia <main>)
             │   ├── catalog/      #   product.js (Model) · product-item.js, catalog-view.js (View) · index.js (entry)
             │   └── contact/      #   index.js (validación del form)
             └── style.css         # marco de página (layout) + marca de agogo; el diseño lo pone scc

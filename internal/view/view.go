@@ -44,15 +44,29 @@ func Layout(contentFS fs.FS, files ...string) *template.Template {
 	return template.Must(t.ParseFS(contentFS, files...))
 }
 
-// Render ejecuta el layout "base" con los datos de la página. Renderiza primero
-// a un buffer: si la plantilla falla a mitad, aún podemos responder 500 limpio
-// en vez de un 200 con HTML truncado ya enviado al cliente.
-func Render(w http.ResponseWriter, t *template.Template, data any) {
+// FragmentHeader es la cabecera que el cliente manda para pedir SOLO el bloque
+// de contenido (navegación parcial), en vez de la página completa.
+const FragmentHeader = "X-Fragment"
+
+// Render ejecuta la plantilla con los datos de la página. Si la petición trae
+// X-Fragment (navegación parcial del sitio), renderiza solo el bloque "fragment"
+// (título + content + scripts); si no, la página completa ("base"). Así una
+// navegación suave reusa header/footer/CSS y solo cambia <main>, pero un acceso
+// directo, un crawler o sin-JS reciben el documento entero (SEO intacto).
+//
+// Renderiza primero a un buffer: si la plantilla falla a mitad, respondemos 500
+// limpio en vez de un 200 con HTML truncado ya enviado al cliente.
+func Render(w http.ResponseWriter, r *http.Request, t *template.Template, data any) {
+	block := "base"
+	if r.Header.Get(FragmentHeader) != "" {
+		block = "fragment"
+	}
 	var buf bytes.Buffer
-	if err := t.ExecuteTemplate(&buf, "base", data); err != nil {
+	if err := t.ExecuteTemplate(&buf, block, data); err != nil {
 		http.Error(w, "error de plantilla", http.StatusInternalServerError)
 		return
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Header().Add("Vary", FragmentHeader) // misma URL, dos respuestas según la cabecera
 	_, _ = buf.WriteTo(w)
 }

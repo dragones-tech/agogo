@@ -26,5 +26,16 @@
 </main>
 <footer class="shell"><small>Agogo · Go stdlib + sqlc · estilo con scc · UI con lumen — el mismo no-magia en las tres capas</small></footer>
 {{block "scripts" .}}{{end}}
+<script type="module" src="/static/js/nav.js"></script>
 </body>
 </html>{{end}}
+
+{{/* fragment: la respuesta de una navegación PARCIAL (X-Fragment). Solo lo que
+     cambia entre secciones — título, el contenido de <main> y los scripts de la
+     página — sin re-renderizar header/footer/marco. El cliente (nav.js) lo pide,
+     reemplaza <main> y reejecuta los scripts. */}}
+{{define "fragment" -}}
+<title>{{.Meta.Title}}</title>
+{{block "content" .}}{{end}}
+{{block "scripts" .}}{{end}}
+{{- end}}

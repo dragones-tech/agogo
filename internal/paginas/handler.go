@@ -16,7 +16,7 @@ var tplFS embed.FS
 func QuienesSomos(baseURL string) http.HandlerFunc {
 	tpl := view.Layout(tplFS, "templates/quienes-somos.html")
 	return func(w http.ResponseWriter, r *http.Request) {
-		view.Render(w, tpl, struct{ Meta view.Meta }{view.Meta{
+		view.Render(w, r, tpl, struct{ Meta view.Meta }{view.Meta{
 			Title:       "Quiénes somos — Agogo",
 			Description: "Qué es Agogo y por qué lo construimos con Go puro, sin dependencias de más.",
 			Canonical:   baseURL + r.URL.Path,
