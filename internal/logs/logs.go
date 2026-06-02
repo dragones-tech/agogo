@@ -41,3 +41,11 @@ func (r *statusRecorder) WriteHeader(code int) {
 	r.status = code
 	r.ResponseWriter.WriteHeader(code)
 }
+
+// Flush preserva la interfaz http.Flusher del ResponseWriter envuelto (streaming,
+// SSE); sin esto, envolverlo la ocultaría.
+func (r *statusRecorder) Flush() {
+	if f, ok := r.ResponseWriter.(http.Flusher); ok {
+		f.Flush()
+	}
+}
