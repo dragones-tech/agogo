@@ -1,8 +1,8 @@
 package productos
 
 import (
-	"jehosogo/internal/app"
-	"jehosogo/internal/productos/db"
+	"agogo/internal/app"
+	"agogo/internal/productos/db"
 )
 
 // Module acopla el dominio "productos" al servidor: registra sus rutas, su

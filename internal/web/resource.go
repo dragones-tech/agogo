@@ -12,9 +12,9 @@ import (
 	"html/template"
 	"net/http"
 
-	"jehosogo/internal/respond"
-	"jehosogo/internal/sitemap"
-	"jehosogo/internal/view"
+	"agogo/internal/respond"
+	"agogo/internal/sitemap"
+	"agogo/internal/view"
 )
 
 // Page e ItemPage son los datos que viajan a las plantillas.

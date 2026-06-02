@@ -1,6 +1,6 @@
 package openapi
 
-import "jehosogo/internal/app"
+import "agogo/internal/app"
 
 // Module acopla la documentación de la API: la spec y la UI de Swagger.
 func Module() app.Module { return mod{} }

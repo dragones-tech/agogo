@@ -15,25 +15,25 @@ type Config struct {
 	DevSecret bool   // true si se cayó a la clave de desarrollo (insegura)
 }
 
-// devSecret se usa si no se define JEHOSOGO_SECRET_KEY. Es estable entre
+// devSecret se usa si no se define AGOGO_SECRET_KEY. Es estable entre
 // reinicios (las sesiones de dev sobreviven), pero INSEGURA para producción.
-const devSecret = "jehosogo-dev-secret-insegura-cambiala-en-produccion"
+const devSecret = "agogo-dev-secret-insegura-cambiala-en-produccion"
 
 // Load arma la configuración desde el entorno. Devuelve error en validaciones
 // duras (p. ej. clave demasiado corta).
 func Load() (Config, error) {
 	c := Config{
-		DB:      env("JEHOSOGO_DB", "jehosogo.db"),
-		BaseURL: env("JEHOSOGO_BASE_URL", "http://localhost:8080"),
-		Addr:    env("JEHOSOGO_ADDR", ":8080"),
+		DB:      env("AGOGO_DB", "agogo.db"),
+		BaseURL: env("AGOGO_BASE_URL", "http://localhost:8080"),
+		Addr:    env("AGOGO_ADDR", ":8080"),
 	}
 
-	switch secret := os.Getenv("JEHOSOGO_SECRET_KEY"); {
+	switch secret := os.Getenv("AGOGO_SECRET_KEY"); {
 	case secret == "":
 		c.SecretKey = []byte(devSecret)
 		c.DevSecret = true
 	case len(secret) < 32:
-		return c, fmt.Errorf("JEHOSOGO_SECRET_KEY debe tener al menos 32 caracteres (tiene %d)", len(secret))
+		return c, fmt.Errorf("AGOGO_SECRET_KEY debe tener al menos 32 caracteres (tiene %d)", len(secret))
 	default:
 		c.SecretKey = []byte(secret)
 	}

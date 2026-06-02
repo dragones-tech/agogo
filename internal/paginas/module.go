@@ -1,8 +1,8 @@
 package paginas
 
 import (
-	"jehosogo/internal/app"
-	"jehosogo/internal/sitemap"
+	"agogo/internal/app"
+	"agogo/internal/sitemap"
 )
 
 // Module acopla las páginas estáticas (sin BD).

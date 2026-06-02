@@ -3,7 +3,7 @@ package productos
 import (
 	"context"
 
-	"jehosogo/internal/productos/db"
+	"agogo/internal/productos/db"
 )
 
 // Seed inserta datos de ejemplo solo si la tabla está vacía. NO es parte del

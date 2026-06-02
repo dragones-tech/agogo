@@ -6,8 +6,8 @@ package identity
 import (
 	"net/http"
 
-	"jehosogo/internal/router"
-	"jehosogo/internal/session"
+	"agogo/internal/router"
+	"agogo/internal/session"
 )
 
 const userKey = "user_id"

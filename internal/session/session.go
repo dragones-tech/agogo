@@ -16,7 +16,7 @@ import (
 	"strings"
 )
 
-const cookieName = "jehosogo_session"
+const cookieName = "agogo_session"
 
 // Manager firma y verifica sesiones con una clave secreta.
 type Manager struct {
@@ -33,9 +33,9 @@ type Session struct {
 	Values map[string]string
 }
 
-func (s *Session) Get(key string) string  { return s.Values[key] }
-func (s *Session) Set(key, val string)     { s.Values[key] = val }
-func (s *Session) Delete(key string)       { delete(s.Values, key) }
+func (s *Session) Get(key string) string { return s.Values[key] }
+func (s *Session) Set(key, val string)   { s.Values[key] = val }
+func (s *Session) Delete(key string)     { delete(s.Values, key) }
 
 // Get lee la sesión de la cookie (vacía si no hay o la firma no valida).
 func (m *Manager) Get(r *http.Request) *Session {

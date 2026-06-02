@@ -4,8 +4,10 @@
 // proveedor externo y luego llama a identity.Login para marcar la sesión.
 //
 // Se configura por SU PROPIO entorno (un plugin trae su config):
-//   OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET, OAUTH_AUTH_URL, OAUTH_TOKEN_URL,
-//   OAUTH_USERINFO_URL, OAUTH_SCOPE
+//
+//	OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET, OAUTH_AUTH_URL, OAUTH_TOKEN_URL,
+//	OAUTH_USERINFO_URL, OAUTH_SCOPE
+//
 // Si no está configurado, las rutas existen pero /oauth/login responde 503.
 package oauth
 
@@ -23,9 +25,9 @@ import (
 	"strings"
 	"time"
 
-	"jehosogo/internal/app"
-	"jehosogo/internal/identity"
-	"jehosogo/internal/session"
+	"agogo/internal/app"
+	"agogo/internal/identity"
+	"agogo/internal/session"
 )
 
 type provider struct {

@@ -3,10 +3,10 @@ package productos
 import (
 	"embed"
 
-	"jehosogo/internal/jsonld"
-	"jehosogo/internal/productos/db"
-	"jehosogo/internal/view"
-	"jehosogo/internal/web"
+	"agogo/internal/jsonld"
+	"agogo/internal/productos/db"
+	"agogo/internal/view"
+	"agogo/internal/web"
 )
 
 //go:embed templates/*.html
@@ -35,15 +35,15 @@ func New(q *db.Queries, baseURL string) web.Resource[db.Producto] {
 
 		ListMeta: func(url string) view.Meta {
 			return view.Meta{
-				Title:       "Jehosogo — Catálogo de productos",
-				Description: "Catálogo compacto de productos Jehosogo, servido con Go puro y sin dependencias de más.",
+				Title:       "Agogo — Catálogo de productos",
+				Description: "Catálogo compacto de productos Agogo, servido con Go puro y sin dependencias de más.",
 				Canonical:   url,
 				OGType:      "website",
 			}
 		},
 		ItemMeta: func(p db.Producto, url string) view.Meta {
 			return view.Meta{
-				Title:       p.Titulo + " — Jehosogo",
+				Title:       p.Titulo + " — Agogo",
 				Description: p.Descripcion,
 				Canonical:   url,
 				OGType:      "website",

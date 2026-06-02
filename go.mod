@@ -1,4 +1,4 @@
-module jehosogo
+module agogo
 
 go 1.26.3
 

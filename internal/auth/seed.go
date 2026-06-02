@@ -3,13 +3,13 @@ package auth
 import (
 	"context"
 
-	"jehosogo/internal/auth/db"
-	"jehosogo/internal/password"
+	"agogo/internal/auth/db"
+	"agogo/internal/password"
 )
 
 // Seed crea un usuario demo si la tabla está vacía (solo desarrollo).
 //
-//	email: admin@jehosogo.com   contraseña: demo1234
+//	email: admin@agogo.com   contraseña: demo1234
 func Seed(ctx context.Context, q *db.Queries) error {
 	n, err := q.CountUsuarios(ctx)
 	if err != nil {
@@ -23,7 +23,7 @@ func Seed(ctx context.Context, q *db.Queries) error {
 		return err
 	}
 	return q.CreateUsuario(ctx, db.CreateUsuarioParams{
-		Email:        "admin@jehosogo.com",
+		Email:        "admin@agogo.com",
 		PasswordHash: hash,
 	})
 }

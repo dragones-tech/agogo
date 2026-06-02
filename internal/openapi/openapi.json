@@ -1,8 +1,8 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "Jehosogo API",
-    "description": "API JSON de Jehosogo (productos y blog). Servida con Go puro.",
+    "title": "Agogo API",
+    "description": "API JSON de Agogo (productos y blog). Servida con Go puro.",
     "version": "1.0.0"
   },
   "servers": [{ "url": "/" }],

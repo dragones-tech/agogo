@@ -12,12 +12,12 @@ import (
 	"fmt"
 	"net/http"
 
-	"jehosogo/internal/config"
-	"jehosogo/internal/identity"
-	"jehosogo/internal/middleware"
-	"jehosogo/internal/router"
-	"jehosogo/internal/session"
-	"jehosogo/internal/sitemap"
+	"agogo/internal/config"
+	"agogo/internal/identity"
+	"agogo/internal/middleware"
+	"agogo/internal/router"
+	"agogo/internal/session"
+	"agogo/internal/sitemap"
 )
 
 // Middleware global: envuelve todo el servidor (a diferencia del por-ruta).

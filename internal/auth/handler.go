@@ -10,11 +10,11 @@ import (
 	"strconv"
 	"strings"
 
-	"jehosogo/internal/auth/db"
-	"jehosogo/internal/csrf"
-	"jehosogo/internal/identity"
-	"jehosogo/internal/password"
-	"jehosogo/internal/view"
+	"agogo/internal/auth/db"
+	"agogo/internal/csrf"
+	"agogo/internal/identity"
+	"agogo/internal/password"
+	"agogo/internal/view"
 )
 
 //go:embed templates/*.html
@@ -48,7 +48,7 @@ type loginPage struct {
 
 // GET /login
 func (h *Handler) LoginForm(w http.ResponseWriter, r *http.Request) {
-	view.Render(w, tplLogin, loginPage{Meta: h.meta(r, "Acceder — Jehosogo"), Token: csrf.Issue(w)})
+	view.Render(w, tplLogin, loginPage{Meta: h.meta(r, "Acceder — Agogo"), Token: csrf.Issue(w)})
 }
 
 // POST /login: valida CSRF, verifica credenciales, inicia sesión.
@@ -73,7 +73,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	if errors.Is(err, sql.ErrNoRows) || !password.Match(pass, u.PasswordHash) {
 		w.WriteHeader(http.StatusUnauthorized)
 		view.Render(w, tplLogin, loginPage{
-			Meta:  h.meta(r, "Acceder — Jehosogo"),
+			Meta:  h.meta(r, "Acceder — Agogo"),
 			Token: csrf.Issue(w),
 			Error: "Correo o contraseña incorrectos.",
 			Email: email,
@@ -113,5 +113,5 @@ func (h *Handler) Cuenta(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "error interno", http.StatusInternalServerError)
 		return
 	}
-	view.Render(w, tplCuenta, cuentaPage{Meta: h.meta(r, "Mi cuenta — Jehosogo"), Token: csrf.Issue(w), Email: u.Email})
+	view.Render(w, tplCuenta, cuentaPage{Meta: h.meta(r, "Mi cuenta — Agogo"), Token: csrf.Issue(w), Email: u.Email})
 }

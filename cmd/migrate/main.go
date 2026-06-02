@@ -9,11 +9,11 @@ import (
 	"database/sql"
 	"log"
 
-	"jehosogo/internal/auth"
-	"jehosogo/internal/blog"
-	"jehosogo/internal/config"
-	"jehosogo/internal/contacto"
-	"jehosogo/internal/productos"
+	"agogo/internal/auth"
+	"agogo/internal/blog"
+	"agogo/internal/config"
+	"agogo/internal/contacto"
+	"agogo/internal/productos"
 
 	_ "modernc.org/sqlite"
 )

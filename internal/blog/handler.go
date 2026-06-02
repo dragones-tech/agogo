@@ -3,10 +3,10 @@ package blog
 import (
 	"embed"
 
-	"jehosogo/internal/blog/db"
-	"jehosogo/internal/jsonld"
-	"jehosogo/internal/view"
-	"jehosogo/internal/web"
+	"agogo/internal/blog/db"
+	"agogo/internal/jsonld"
+	"agogo/internal/view"
+	"agogo/internal/web"
 )
 
 //go:embed templates/*.html
@@ -34,15 +34,15 @@ func New(q *db.Queries, baseURL string) web.Resource[db.Post] {
 
 		ListMeta: func(url string) view.Meta {
 			return view.Meta{
-				Title:       "Blog — Jehosogo",
-				Description: "Artículos y notas de Jehosogo.",
+				Title:       "Blog — Agogo",
+				Description: "Artículos y notas de Agogo.",
 				Canonical:   url,
 				OGType:      "website",
 			}
 		},
 		ItemMeta: func(p db.Post, url string) view.Meta {
 			return view.Meta{
-				Title:       p.Titulo + " — Blog Jehosogo",
+				Title:       p.Titulo + " — Blog Agogo",
 				Description: p.Resumen,
 				Canonical:   url,
 				OGType:      "article",

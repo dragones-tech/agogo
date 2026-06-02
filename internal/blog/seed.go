@@ -3,7 +3,7 @@ package blog
 import (
 	"context"
 
-	"jehosogo/internal/blog/db"
+	"agogo/internal/blog/db"
 )
 
 // Seed inserta artículos de ejemplo solo si la tabla está vacía. NO es parte

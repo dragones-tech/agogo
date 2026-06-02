@@ -1,4 +1,4 @@
-# Jehosogo
+# Agogo
 
 Servidor web compacto en **Go puro**: HTML renderizado en servidor (para SEO) y
 API JSON, desde una sola fuente de verdad. Sin frameworks ni librerías "todo en
@@ -129,25 +129,25 @@ después `go run .`.
 ### En contenedor
 
 ```bash
-docker build -t jehosogo .
-docker run -p 8080:8080 jehosogo
+docker build -t agogo .
+docker run -p 8080:8080 agogo
 # → http://localhost:8080
 ```
 
 La BD vive en `/data` dentro del contenedor. Para persistirla, monta un volumen:
 
 ```bash
-docker run -p 8080:8080 -v jehosogo-data:/data jehosogo
+docker run -p 8080:8080 -v agogo-data:/data agogo
 ```
 
 ## Variables de entorno
 
 | Variable             | Por defecto                | Descripción                  |
 |----------------------|----------------------------|------------------------------|
-| `JEHOSOGO_ADDR`      | `:8080`                    | Dirección de escucha         |
-| `JEHOSOGO_DB`        | `jehosogo.db`              | Ruta del archivo SQLite      |
-| `JEHOSOGO_BASE_URL`  | `http://localhost:8080`    | URL base (canonical, sitemap)|
-| `JEHOSOGO_SECRET_KEY`| (clave de dev insegura)    | Firma de sesiones (HMAC). En producción, ≥32 chars. |
+| `AGOGO_ADDR`      | `:8080`                    | Dirección de escucha         |
+| `AGOGO_DB`        | `agogo.db`              | Ruta del archivo SQLite      |
+| `AGOGO_BASE_URL`  | `http://localhost:8080`    | URL base (canonical, sitemap)|
+| `AGOGO_SECRET_KEY`| (clave de dev insegura)    | Firma de sesiones (HMAC). En producción, ≥32 chars. |
 | `OAUTH_CLIENT_ID` … | (vacío)                    | Config del módulo `oauth` (CLIENT_ID/SECRET, AUTH/TOKEN/USERINFO_URL, SCOPE). Sin esto, `/oauth/login` da 503. |
 
 ## Protocolos HTTP (HTTP/1.1, HTTP/2, HTTP/3)
@@ -190,9 +190,9 @@ sin dependencias y sin gestionar certificados. Ejemplo mínimo con Caddy
 
 ```caddyfile
 # Caddyfile (ejemplo de despliegue, no se incluye en la imagen)
-jehosogo.com {
+agogo.com {
 	encode gzip zstd
-	reverse_proxy localhost:8080   # o unix//run/jehosogo.sock
+	reverse_proxy localhost:8080   # o unix//run/agogo.sock
 }
 ```
 
@@ -215,7 +215,7 @@ Caddy sirve HTTP/3 por defecto; no hace falta tocar el código Go.
 
 ## Decisiones pendientes (para decidir después)
 
-> **Nota:** Jehosogo se construye como **framework**, no como un sitio. Las
+> **Nota:** Agogo se construye como **framework**, no como un sitio. Las
 > decisiones se evalúan para el caso abierto ("qué se construirá encima"), no
 > para esta app de ejemplo. Ver [ARCHITECTURE.md](ARCHITECTURE.md).
 

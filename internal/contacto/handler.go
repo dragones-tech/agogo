@@ -7,10 +7,10 @@ import (
 	"net/http"
 	"strings"
 
-	"jehosogo/internal/contacto/db"
-	"jehosogo/internal/csrf"
-	"jehosogo/internal/session"
-	"jehosogo/internal/view"
+	"agogo/internal/contacto/db"
+	"agogo/internal/csrf"
+	"agogo/internal/session"
+	"agogo/internal/view"
 )
 
 //go:embed templates/*.html
@@ -38,7 +38,7 @@ type formPage struct {
 
 func (h *Handler) meta(r *http.Request) view.Meta {
 	return view.Meta{
-		Title:       "Contacto — Jehosogo",
+		Title:       "Contacto — Agogo",
 		Description: "Escríbenos un mensaje.",
 		Canonical:   h.baseURL + r.URL.Path,
 		OGType:      "website",

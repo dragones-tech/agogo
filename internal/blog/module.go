@@ -1,8 +1,8 @@
 package blog
 
 import (
-	"jehosogo/internal/app"
-	"jehosogo/internal/blog/db"
+	"agogo/internal/app"
+	"agogo/internal/blog/db"
 )
 
 // Module acopla el dominio "blog": rutas, sitemap y migración.

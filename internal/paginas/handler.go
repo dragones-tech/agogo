@@ -6,7 +6,7 @@ import (
 	"embed"
 	"net/http"
 
-	"jehosogo/internal/view"
+	"agogo/internal/view"
 )
 
 //go:embed templates/*.html
@@ -17,8 +17,8 @@ func QuienesSomos(baseURL string) http.HandlerFunc {
 	tpl := view.Layout(tplFS, "templates/quienes-somos.html")
 	return func(w http.ResponseWriter, r *http.Request) {
 		view.Render(w, tpl, struct{ Meta view.Meta }{view.Meta{
-			Title:       "Quiénes somos — Jehosogo",
-			Description: "Qué es Jehosogo y por qué lo construimos con Go puro, sin dependencias de más.",
+			Title:       "Quiénes somos — Agogo",
+			Description: "Qué es Agogo y por qué lo construimos con Go puro, sin dependencias de más.",
 			Canonical:   baseURL + r.URL.Path,
 			OGType:      "website",
 		}})

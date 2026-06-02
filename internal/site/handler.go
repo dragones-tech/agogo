@@ -12,8 +12,8 @@ import (
 	"io/fs"
 	"net/http"
 
-	"jehosogo/internal/app"
-	"jehosogo/internal/sitemap"
+	"agogo/internal/app"
+	"agogo/internal/sitemap"
 )
 
 func Module() app.Module { return mod{} }

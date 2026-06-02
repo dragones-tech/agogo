@@ -1,5 +1,5 @@
 # binario del servidor (se compila con `go build`)
-/jehosogo
+/agogo
 
 # base de datos SQLite (local / desarrollo)
 *.db

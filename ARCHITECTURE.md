@@ -1,6 +1,6 @@
-# Arquitectura de Jehosogo
+# Arquitectura de Agogo
 
-Este documento explica **cómo está pensado** Jehosogo y **por qué**. Para
+Este documento explica **cómo está pensado** Agogo y **por qué**. Para
 instrucciones de uso (correr, rutas, env vars) ver el [README](README.md).
 
 > En una frase: **Go minimalista, orientado a dominios y dueños del código.**
@@ -92,7 +92,6 @@ instrucciones de uso (correr, rutas, env vars) ver el [README](README.md).
     ├── blog/            # recurso de BD
     ├── paginas/         # páginas estáticas (sin BD)
     ├── contacto/        # formulario (GET muestra, POST procesa)
-    ├── auth/           # módulo auth: login/logout/cuenta + tabla usuarios
     ├── openapi/         # openapi.json + Swagger UI en /docs
     └── site/            # robots.txt, sitemap.xml, /static
 ```

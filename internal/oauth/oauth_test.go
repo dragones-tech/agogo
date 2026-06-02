@@ -6,8 +6,8 @@ import (
 	"net/url"
 	"testing"
 
-	"jehosogo/internal/identity"
-	"jehosogo/internal/session"
+	"agogo/internal/identity"
+	"agogo/internal/session"
 )
 
 // Prueba el flujo completo con un proveedor OAuth FALSO (httptest) y verifica

@@ -1,9 +1,9 @@
 package contacto
 
 import (
-	"jehosogo/internal/app"
-	"jehosogo/internal/contacto/db"
-	"jehosogo/internal/sitemap"
+	"agogo/internal/app"
+	"agogo/internal/contacto/db"
+	"agogo/internal/sitemap"
 )
 
 // Module acopla el formulario de contacto: rutas, migración y sitemap. Usa el

@@ -9,14 +9,14 @@ import (
 	"database/sql"
 	"log"
 
-	"jehosogo/internal/auth"
-	authdb "jehosogo/internal/auth/db"
-	"jehosogo/internal/blog"
-	blogdb "jehosogo/internal/blog/db"
-	"jehosogo/internal/config"
-	"jehosogo/internal/contacto"
-	"jehosogo/internal/productos"
-	productosdb "jehosogo/internal/productos/db"
+	"agogo/internal/auth"
+	authdb "agogo/internal/auth/db"
+	"agogo/internal/blog"
+	blogdb "agogo/internal/blog/db"
+	"agogo/internal/config"
+	"agogo/internal/contacto"
+	"agogo/internal/productos"
+	productosdb "agogo/internal/productos/db"
 
 	_ "modernc.org/sqlite"
 )
@@ -41,7 +41,7 @@ func main() {
 	must(productos.Seed(ctx, productosdb.New(sqldb)), "sembrar productos")
 	must(blog.Seed(ctx, blogdb.New(sqldb)), "sembrar blog")
 	must(auth.Seed(ctx, authdb.New(sqldb)), "sembrar auth")
-	log.Printf("datos de ejemplo sembrados en %s (usuario demo: admin@jehosogo.com / demo1234)", cfg.DB)
+	log.Printf("datos de ejemplo sembrados en %s (usuario demo: admin@agogo.com / demo1234)", cfg.DB)
 }
 
 func must(err error, what string) {

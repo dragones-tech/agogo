@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"time"
 
-	"jehosogo/internal/app"
+	"agogo/internal/app"
 )
 
 func Module() app.Module { return mod{} }

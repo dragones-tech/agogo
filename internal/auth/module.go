@@ -1,8 +1,8 @@
 package auth
 
 import (
-	"jehosogo/internal/app"
-	"jehosogo/internal/auth/db"
+	"agogo/internal/app"
+	"agogo/internal/auth/db"
 )
 
 // Module acopla la autenticación: login/logout y la página protegida /cuenta.

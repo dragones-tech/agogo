@@ -6,17 +6,17 @@ import (
 	"net/http"
 	"time"
 
-	"jehosogo/internal/app"
-	"jehosogo/internal/auth"
-	"jehosogo/internal/blog"
-	"jehosogo/internal/config"
-	"jehosogo/internal/contacto"
-	"jehosogo/internal/logs"
-	"jehosogo/internal/oauth"
-	"jehosogo/internal/openapi"
-	"jehosogo/internal/paginas"
-	"jehosogo/internal/productos"
-	"jehosogo/internal/site"
+	"agogo/internal/app"
+	"agogo/internal/auth"
+	"agogo/internal/blog"
+	"agogo/internal/config"
+	"agogo/internal/contacto"
+	"agogo/internal/logs"
+	"agogo/internal/oauth"
+	"agogo/internal/openapi"
+	"agogo/internal/paginas"
+	"agogo/internal/productos"
+	"agogo/internal/site"
 
 	_ "modernc.org/sqlite"
 )
@@ -27,7 +27,7 @@ func main() {
 		log.Fatalf("config: %v", err)
 	}
 	if cfg.DevSecret {
-		log.Printf("AVISO: usando clave de sesión de desarrollo (define JEHOSOGO_SECRET_KEY en producción)")
+		log.Printf("AVISO: usando clave de sesión de desarrollo (define AGOGO_SECRET_KEY en producción)")
 	}
 
 	sqldb, err := sql.Open("sqlite", cfg.DB)
@@ -65,6 +65,6 @@ func main() {
 		WriteTimeout:      15 * time.Second,
 		IdleTimeout:       60 * time.Second,
 	}
-	log.Printf("jehosogo escuchando en %s (db=%s)", cfg.Addr, cfg.DB)
+	log.Printf("agogo escuchando en %s (db=%s)", cfg.Addr, cfg.DB)
 	log.Fatal(srv.ListenAndServe())
 }

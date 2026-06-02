@@ -35,7 +35,7 @@ const docsHTML = `<!DOCTYPE html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>API — Jehosogo</title>
+<title>API — Agogo</title>
 <link rel="stylesheet" href="/docs-assets/swagger-ui.css">
 </head>
 <body>
