@@ -18,6 +18,7 @@ import (
 	"agogo/internal/logs"
 	"agogo/internal/oauth"
 	"agogo/internal/openapi"
+	"agogo/internal/otw"
 	"agogo/internal/paginas"
 	"agogo/internal/productos"
 	"agogo/internal/site"
@@ -55,6 +56,7 @@ func main() {
 		contacto.Module(), // form
 		auth.Module(),     // username/password authentication (login/account)
 		oauth.Module(),    // OAuth 2.0 authentication (reuses identity)
+		otw.Module(),      // BFF: HTML over the wire from a token-gated external API
 		openapi.Module(),  // API docs
 		site.Module(),     // robots.txt, sitemap.xml, /static
 	); err != nil {
