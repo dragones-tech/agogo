@@ -246,8 +246,26 @@ Ambos se **vendorizan** en `internal/site/static/` (servidos desde `'self'`, sin
 CDN, CSP estricta intacta — mismo trato que Swagger UI). Se usan como **mejora
 progresiva**: el servidor renderiza y valida igual sin JS, y lumen solo añade
 comodidad (filtro de catálogo, validación de formulario espejo del servidor).
-El layout de página vive en `static/style.css`; el sistema de diseño, en scc;
-la marca, en `static/scc/theme.css` (la única "perilla" que editamos de scc).
+
+### Política de vendorizado
+
+scc y lumen **se trabajan en sus repos** (`dragones-tech/scc`, `dragones-tech/lumen`),
+no aquí. En agogo son una **copia pristina** y **no se versionan** (`.gitignore`):
+se re-bajan con `./scripts/vendor-frontend.sh`, como un `npm install`. Por eso el
+vendor se mantiene **sin editar** — cualquier mejora va a su repo, no a esta copia.
+
+Lo específico de agogo NO vive en el vendor, sino en `internal/site/static/style.css`:
+
+- **La marca** (verde): sobrescribe las "perillas" de scc (`--accent`, `--neutral-hue`,
+  `--radius`) desde `:root`. Al estar sin `@layer`, gana a `scc/theme.css` sin tocarlo.
+- **El marco de página** (centrado, footer abajo, rejilla de tarjetas).
+- **`[hidden] { display: none }`**: scc no re-asegura `[hidden]` y un componente con
+  `display` propio (p. ej. `.card`) lo anularía. *(Candidato a aportar al reset de scc.)*
+- **`@view-transition { navigation: auto }`**: crossfade nativo entre páginas (quita
+  el parpadeo del recargo MPA), con fondo opaco en `<html>`.
+
+Para clonar y correr: tras `git clone`, ejecutar `./scripts/vendor-frontend.sh`
+una vez (trae scc/lumen); luego `go run .` como siempre.
 
 ## Configuración y sesiones
 

@@ -56,9 +56,11 @@ cada parte de la web:
 | Estilo (CSS) | **[scc](https://github.com/dragones-tech/scc)** | CSS semántico: las clases dicen *qué es*, no *cómo se ve* |
 | UI (JS) | **[lumen](https://github.com/dragones-tech/lumen)** | UI vanilla-JS, sin build, `<template>` nativo |
 
-Ambos vienen **vendorizados** en `internal/site/static/` (servidos desde
-`'self'`, sin CDN, con la CSP estricta intacta — igual que Swagger UI). La
-"perilla" de marca de scc vive en `static/scc/theme.css`.
+scc y lumen **se trabajan en sus repos**, no aquí: en agogo son una copia
+**vendorizada** en `internal/site/static/` (servida desde `'self'`, sin CDN, CSP
+estricta — igual que Swagger UI) que **no se versiona** y se re-baja con
+`./scripts/vendor-frontend.sh`. La marca de agogo y los ajustes de página viven
+en `static/style.css` (no se edita el vendor). Ver [ARCHITECTURE.md](ARCHITECTURE.md#frontend-misma-filosofía-otra-capa).
 
 Los ejemplos ya los usan como **mejora progresiva** (el servidor renderiza y
 valida igual sin JS):
@@ -107,12 +109,12 @@ si los usas, los tres encajan sin fricción.
     ├── openapi/                  # openapi.json + Swagger UI vendorizado
     └── site/                     # robots.txt, sitemap.xml, /static
         └── static/
-            ├── scc/              # vendorizado: CSS semántico (theme.css = tu marca)
-            ├── lumen/            # vendorizado: UI vanilla-JS (mejora progresiva)
+            ├── scc/              # vendor (gitignored): CSS semántico — re-baja con scripts/vendor-frontend.sh
+            ├── lumen/            # vendor (gitignored): UI vanilla-JS — idem
             ├── js/               # nuestro JS, package-by-feature (como el Go)
             │   ├── catalog/      #   product.js (Model) · product-item.js, catalog-view.js (View) · index.js (entry)
             │   └── contact/      #   index.js (validación del form)
-            └── style.css         # solo el marco de página (layout); el diseño lo pone scc
+            └── style.css         # marco de página (layout) + marca de agogo; el diseño lo pone scc
 ```
 
 El servidor es un **núcleo (`app`) + módulos acoplables**. Cada módulo tiene un
@@ -171,6 +173,7 @@ código que corre es el que lees y editas).
 ```bash
 git clone https://github.com/dragones-tech/agogo
 cd agogo
+./scripts/vendor-frontend.sh   # baja scc + lumen (no se versionan aquí; viven en sus repos)
 ```
 
 Y lo corres como se explica abajo en **Cómo correrlo**.
