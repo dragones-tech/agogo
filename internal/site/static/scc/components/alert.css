@@ -1,0 +1,31 @@
+/* alert — block callout. ONE marker: class="alert".
+   Tone by intent (data-variant); default is informational (accent).
+   Pair with role="alert"/"status" in the HTML for the right a11y semantics.
+
+   <div class="alert" data-variant="warning" role="alert">
+     <strong>Heads up</strong>
+     <p>Your trial ends in 3 days.</p>
+   </div> */
+
+@layer components {
+  @scope (.alert) {
+    :scope {
+      --tone: var(--accent);   /* the variants only swap this */
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-1);
+      padding: var(--space-3) var(--space-4);
+      border-radius: var(--radius);
+      border-inline-start: 4px solid var(--tone);
+      background: color-mix(in oklab, var(--tone), transparent 88%);
+      color: var(--text);
+    }
+
+    :scope[data-variant="success"] { --tone: var(--success); }
+    :scope[data-variant="warning"] { --tone: var(--warning); }
+    :scope[data-variant="danger"]  { --tone: var(--danger);  }
+
+    strong { font-weight: 600; }
+    p { margin: 0; color: var(--text-muted); }
+  }
+}

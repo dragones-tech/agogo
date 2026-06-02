@@ -1,0 +1,28 @@
+/* progress — the native <progress> element. Marker: the element itself.
+   Cross-browser styling needs vendor pseudo-elements (the track/value live in a
+   shadow tree). Each vendor pseudo MUST be in its own rule: if one is unknown to
+   a browser it drops the whole selector list, so they're kept separate.
+
+   <progress value="0.6"></progress>   (or value/max)
+   <progress></progress>               (indeterminate) */
+
+@layer components {
+  @scope (progress) {
+    :scope {
+      appearance: none;
+      inline-size: 100%;
+      block-size: 0.5rem;
+      border: 0;
+      border-radius: 999px;
+      background: var(--border);   /* Firefox track + fallback */
+      overflow: hidden;
+    }
+
+    /* WebKit/Blink: track + value as separate rules */
+    :scope::-webkit-progress-bar   { background: var(--border); border-radius: 999px; }
+    :scope::-webkit-progress-value { background: var(--accent); border-radius: 999px; }
+
+    /* Firefox: the value */
+    :scope::-moz-progress-bar { background: var(--accent); }
+  }
+}

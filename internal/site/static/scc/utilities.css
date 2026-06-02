@@ -1,0 +1,41 @@
+/* utilities — the HIGHEST layer, and the smallest on purpose.
+   scc golden rule: a utility is only valid if it describes STRUCTURE or INTENT,
+   never appearance. That's why there are layout and a11y primitives here, and
+   NO `.bg-blue` or `.p-4`. If you're missing an appearance utility, the right
+   place is almost always a component. */
+
+@layer utilities {
+  /* Stack vertically with a consistent gap */
+  .stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--stack-gap, var(--space-4));
+  }
+
+  /* Group inline, with wrap (buttons, tags, etc.) */
+  .cluster {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--cluster-gap, var(--space-2));
+  }
+
+  /* Center content and cap the reading width */
+  .center {
+    margin-inline: auto;
+    max-inline-size: var(--measure);
+    padding-inline: var(--space-4);
+  }
+
+  /* Available to screen readers, hidden visually */
+  .visually-hidden:not(:focus):not(:focus-within) {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}

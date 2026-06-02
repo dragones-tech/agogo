@@ -1,0 +1,71 @@
+/* menu — disclosure dropdown built on the native <details> element. Zero JS.
+   Marker: details.menu. The panel is the first element after <summary>.
+
+   <details class="menu">
+     <summary>Options</summary>
+     <div>
+       <a href="#">Edit</a>
+       <button>Duplicate</button>
+       <button>Delete</button>
+     </div>
+   </details>
+
+   Honest limit: <details> doesn't close on outside click (only by toggling the
+   summary). For light-dismiss (outside click / Esc), use the Popover API plus a
+   few lines, or your view layer. */
+
+@layer components {
+  @scope (details.menu) {
+    :scope { position: relative; display: inline-block; }
+
+    /* the trigger: looks and acts like a button, native marker removed */
+    summary {
+      list-style: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-4);
+      border: var(--border-width) solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      font-size: var(--text-sm);
+      font-weight: 600;
+    }
+    summary::-webkit-details-marker { display: none; }
+    summary::after { content: "▾"; color: var(--text-muted); }
+
+    /* the panel: floats below the trigger */
+    summary + * {
+      position: absolute;
+      inset-block-start: calc(100% + var(--space-1));
+      inset-inline-start: 0;
+      z-index: 20;
+      min-inline-size: 10rem;
+      display: flex;
+      flex-direction: column;
+      padding: var(--space-1);
+      background: var(--surface);
+      border: var(--border-width) solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    /* items — :scope-prefixed to override the global <button> base in-layer */
+    :scope summary + * :is(a, button) {
+      appearance: none;
+      border: 0;
+      background: none;
+      cursor: pointer;
+      font: inherit;
+      text-align: start;
+      text-decoration: none;
+      color: var(--text);
+      padding: var(--space-2) var(--space-3);
+      border-radius: var(--radius-sm);
+    }
+    :scope summary + * :is(a, button):hover {
+      background: color-mix(in oklab, transparent, var(--text) 8%);
+    }
+  }
+}

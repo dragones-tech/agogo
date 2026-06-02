@@ -1,0 +1,25 @@
+/* divider — a horizontal rule with an optional centered label. Marker: class="divider".
+   With no text it's a plain line (the two halves meet); with text the line splits
+   around it. For a plain rule with no label, the native <hr> (see base.css) is fine.
+
+   <div class="divider"></div>        line only
+   <div class="divider">or</div>      line with a label */
+
+@layer components {
+  @scope (.divider) {
+    :scope {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      color: var(--text-muted);
+      font-size: var(--text-sm);
+    }
+
+    :scope::before,
+    :scope::after {
+      content: "";
+      flex: 1;
+      border-block-start: var(--border-width) solid var(--border);
+    }
+  }
+}

@@ -1,0 +1,91 @@
+/* ════════════════════════════════════════════════════════════════
+   theme — THE STARTING POINT.  This is YOUR file.
+
+   scc motto: no two sites should look alike. That's why a theme is not a
+   finished look but a panel of knobs. Change these few values and the WHOLE
+   system reconfigures (the type scale, the spacing rhythm and even the gray
+   ramp are derived from here in tokens.css).
+
+   To create your own site: edit these values, or copy this file.
+   No need to touch tokens.css or the components.
+   ════════════════════════════════════════════════════════════════ */
+
+@layer theme {
+  :root {
+    /* color-scheme lives HERE (not in tokens) so the [data-mode] overrides
+       below, in this same layer, can win by specificity. If it lived in a
+       higher layer, the manual mode toggle would have no effect. */
+    color-scheme: light dark;
+
+    /* ═══ COLOR · brand identity ════════════════════════════════════
+       Perillas de AGOGO (verde). Único archivo de scc que editamos: el resto
+       (tokens, componentes) deriva de aquí solo. */
+    --accent:    #2f6f4e;   /* verde agogo */
+    --accent-fg: #ffffff;   /* texto sobre el acento */
+    --success:   #16a34a;   /* estado: ok / positivo */
+    --warning:   #d97706;   /* estado: precaución */
+    --danger:    #d92d20;   /* estado: error / destructivo */
+
+    /* Los grises no son neutros puros: toman la temperatura de la marca. */
+    --neutral-hue:    150;  /* 0 rojo · 140 verde · 220 azul · 300 violeta */
+    --neutral-chroma: 6%;   /* 0% gris puro · 10% claramente teñido */
+
+    /* ═══ TYPOGRAPHY · identity ═════════════════════════════════════ */
+    --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "Cascadia Code", monospace;
+    --text-base: 1rem;      /* root size. Fluid: clamp(1rem, .9rem + .4vw, 1.15rem) */
+    --ratio:     1.25;      /* modular scale ratio:
+                               1.2 calm · 1.25 balanced · 1.333 dramatic */
+
+    /* ═══ SPACE · rhythm ════════════════════════════════════════════ */
+    --space-base: 0.25rem;  /* atomic unit; the whole scale is a multiple of this */
+
+    /* ═══ SHAPE · personality ═══════════════════════════════════════ */
+    --radius:       0.625rem; /* 0 brutalist · .5rem soft · 999px pill */
+    --border-width: 1px;    /* 2px+ = bolder/editorial look */
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.06), 0 4px 12px rgb(0 0 0 / 0.08);
+
+    /* ═══ MOTION ════════════════════════════════════════════════════
+       Motion is part of the identity too: swap --ease and the whole UI's
+       movement changes character. All of it is neutralized under
+       prefers-reduced-motion by the reset. */
+    --dur-fast: 100ms;
+    --dur:      150ms;   /* default */
+    --dur-slow: 300ms;
+    --ease:        cubic-bezier(0.2, 0, 0, 1);      /* standard */
+    --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1); /* playful overshoot */
+
+    /* ═══ READING ═══════════════════════════════════════════════════ */
+    --measure: 65ch;        /* comfortable column width */
+  }
+
+  /* ════════════════════════════════════════════════════════════════════
+     TWO ORTHOGONAL AXES, DON'T MIX THEM:
+
+       data-mode   = MODE (lighting condition): light · dark · absent=auto(OS)
+       data-theme  = THEME (brand identity):    sunset · … · absent=default
+
+     They compose: <html data-mode="dark"> + <section data-theme="sunset">
+                   = sunset in its dark variant.
+     ════════════════════════════════════════════════════════════════════ */
+
+  /* ── AXIS 1 · MODE ──────────────────────────────────────────────────
+     Only touches color-scheme; light-dark() reads the COMPUTED color-scheme,
+     so NO tokens need to be redefined. Without data-mode it follows the OS.
+     One-line JS toggle:
+         document.documentElement.dataset.mode = "dark"; // or "light", or remove */
+  :root[data-mode="light"] { color-scheme: light; }
+  :root[data-mode="dark"]  { color-scheme: dark;  }
+
+  /* ── AXIS 2 · THEME ─────────────────────────────────────────────────
+     Each theme redefines the contract (accent, font, shape) and uses light-dark()
+     internally, so it works in any mode. A themed scope RE-DECLARES the INHERITED
+     properties so the theme actually cascades inward: color and font-family
+     resolve at the ancestor (body) if not re-declared, so without this a
+     <section data-theme="sunset"> would not change the font. */
+  [data-theme] {
+    color: var(--text);
+    background-color: var(--bg);
+    font-family: var(--font-sans);
+  }
+}

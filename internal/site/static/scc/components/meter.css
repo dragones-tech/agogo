@@ -1,0 +1,29 @@
+/* meter — the native <meter> element (a measurement in a known range, e.g. disk
+   usage, score). Marker: the element itself. The browser picks optimum/sub-optimum/
+   poor based on low/high/optimum attributes; we color each band from status tokens.
+   As with <progress>, each vendor pseudo gets its own rule.
+
+   <meter value="0.7"></meter>
+   <meter value="85" min="0" max="100" low="50" high="80" optimum="30"></meter> */
+
+@layer components {
+  @scope (meter) {
+    :scope {
+      appearance: none;
+      inline-size: 100%;
+      block-size: 0.5rem;
+      border-radius: 999px;
+      background: var(--border);
+      overflow: hidden;
+    }
+
+    /* WebKit/Blink */
+    :scope::-webkit-meter-bar                  { background: var(--border); border: 0; border-radius: 999px; }
+    :scope::-webkit-meter-optimum-value        { background: var(--success); }
+    :scope::-webkit-meter-suboptimum-value     { background: var(--warning); }
+    :scope::-webkit-meter-even-less-good-value { background: var(--danger); }
+
+    /* Firefox */
+    :scope::-moz-meter-bar { background: var(--success); }
+  }
+}

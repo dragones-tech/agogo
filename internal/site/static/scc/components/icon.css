@@ -1,0 +1,43 @@
+/* icon — a monochrome icon. There's no icon element, and an icon font would put
+   appearance (a class) in the markup plus a dependency — so the marker is an INTENT
+   attribute: [data-icon]. The glyph is a CSS mask painted with currentColor, so it
+   inherits the text color (themes for free) and scales with --icon-size (default 1em).
+
+   <button data-variant="danger">
+     <span data-icon="trash" aria-hidden="true"></span> Delete
+   </button>
+
+   Decorative icons get aria-hidden; an icon-only control needs its own aria-label.
+   SVGs are inlined as data URIs (no build, no requests). An unknown name falls back
+   to a circle placeholder. */
+
+@layer components {
+  @scope ([data-icon]) {
+    :scope {
+      /* fallback glyph for an unknown [data-icon] value */
+      --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3C/svg%3E");
+
+      display: inline-block;
+      inline-size: var(--icon-size, 1em);
+      block-size: var(--icon-size, 1em);
+      flex-shrink: 0;
+      vertical-align: -0.125em;            /* sit on the text baseline */
+      background-color: currentColor;       /* the paint — follows color, themes for free */
+      -webkit-mask: var(--icon) center / contain no-repeat;
+              mask: var(--icon) center / contain no-repeat;
+    }
+
+    /* The set. Each glyph is a stroked 24×24 SVG; the stroke color is irrelevant
+       (only the mask's alpha is used), so it's a literal to keep the URI clean. */
+    :scope[data-icon="check"]         { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E"); }
+    :scope[data-icon="x"]             { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 6 6 18M6 6l12 12'/%3E%3C/svg%3E"); }
+    :scope[data-icon="chevron-down"]  { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); }
+    :scope[data-icon="arrow-right"]   { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12h14M12 5l7 7-7 7'/%3E%3C/svg%3E"); }
+    :scope[data-icon="plus"]          { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 5v14M5 12h14'/%3E%3C/svg%3E"); }
+    :scope[data-icon="search"]        { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E"); }
+    :scope[data-icon="trash"]         { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 6h18M8 6V4h8v2M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6'/%3E%3C/svg%3E"); }
+    :scope[data-icon="heart"]         { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z'/%3E%3C/svg%3E"); }
+    :scope[data-icon="star"]          { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.9L12 17.8 5.8 21l1.2-6.9-5-4.9 6.9-1z'/%3E%3C/svg%3E"); }
+    :scope[data-icon="external-link"] { --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6'/%3E%3C/svg%3E"); }
+  }
+}

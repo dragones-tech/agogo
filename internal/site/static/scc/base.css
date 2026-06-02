@@ -1,0 +1,40 @@
+/* base — UNCLASSED elements. Semantic HTML already looks good untouched.
+   Default page styling lives here; components live in /components. */
+
+@layer base {
+  body {
+    font-family: var(--font-sans);
+    font-size: var(--text-md);
+    color: var(--text);
+    background: var(--bg);
+  }
+
+  h1 { font-size: var(--text-xl);  line-height: 1.15; }
+  h2 { font-size: var(--text-lg);  line-height: 1.25; }
+  h3 { font-size: var(--text-md);  line-height: 1.3;  }
+
+  p, ul, ol { line-height: var(--leading); }
+
+  a {
+    color: var(--accent);
+    text-underline-offset: 0.15em;
+  }
+  a:hover { text-decoration-thickness: 2px; }
+
+  code, pre, kbd, samp { font-family: var(--font-mono); font-size: 0.9em; }
+  pre {
+    padding: var(--space-4);
+    background: var(--surface);
+    border-radius: var(--radius);
+    overflow: auto;
+  }
+
+  hr { border: 0; border-block-start: var(--border-width) solid var(--border); }
+
+  /* Consistent visible focus across the page */
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+}

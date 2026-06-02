@@ -1,0 +1,18 @@
+/* checkbox & radio — native controls themed with accent-color. The element+type
+   IS the marker; no class needed. The platform draws and themes them — we only
+   set the tint and size. Pair with a <label> for the clickable text.
+
+   <label class="cluster"><input type="checkbox"> Subscribe</label>
+   <label class="cluster"><input type="radio" name="plan"> Free</label> */
+
+@layer components {
+  @scope (input:is([type="checkbox"], [type="radio"])) {
+    :scope {
+      accent-color: var(--accent);   /* native theming, zero custom drawing */
+      inline-size: 1.1em;
+      block-size: 1.1em;
+      cursor: pointer;
+    }
+    :scope:disabled { opacity: 0.5; cursor: not-allowed; }
+  }
+}

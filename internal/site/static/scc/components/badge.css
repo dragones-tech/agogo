@@ -1,0 +1,30 @@
+/* badge — small inline status pill. ONE marker: class="badge".
+   Tone by intent (data-variant); default is a neutral tint.
+
+   <span class="badge">New</span>
+   <span class="badge" data-variant="success">Paid</span>
+   <span class="badge" data-variant="warning">Pending</span>
+   <span class="badge" data-variant="danger">Failed</span> */
+
+@layer components {
+  @scope (.badge) {
+    :scope {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-1);
+      padding: 0 var(--space-2);
+      border-radius: 999px;
+      font-size: var(--text-sm);
+      font-weight: 600;
+      line-height: 1.6;
+      background: color-mix(in oklab, transparent, var(--text) 12%);
+      color: var(--text);
+    }
+
+    /* Each tone: tinted background + matching text, derived from one token */
+    :scope[data-variant="success"] { background: color-mix(in oklab, var(--success), transparent 82%); color: var(--success); }
+    :scope[data-variant="warning"] { background: color-mix(in oklab, var(--warning), transparent 82%); color: var(--warning); }
+    :scope[data-variant="danger"]  { background: color-mix(in oklab, var(--danger),  transparent 82%); color: var(--danger);  }
+    :scope[data-variant="accent"]  { background: color-mix(in oklab, var(--accent),  transparent 82%); color: var(--accent);  }
+  }
+}

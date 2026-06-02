@@ -1,0 +1,24 @@
+/* skeleton — loading placeholder. Marker: class="skeleton". Give it a size
+   (inline style, .field layout, or width/height utilities). The shimmer is paused
+   automatically under prefers-reduced-motion via the reset.
+
+   <div class="skeleton" style="block-size: 1.5rem; max-inline-size: 12rem"></div>
+   <div class="skeleton" style="block-size: 8rem"></div> */
+
+@layer components {
+  @scope (.skeleton) {
+    :scope {
+      display: block;
+      block-size: 1em;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(
+        90deg,
+        var(--border) 25%,
+        color-mix(in oklab, var(--border), var(--text) 8%) 37%,
+        var(--border) 63%
+      );
+      background-size: 400% 100%;
+      animation: scc-skeleton 1.4s ease infinite;   /* @keyframes in animations.css */
+    }
+  }
+}

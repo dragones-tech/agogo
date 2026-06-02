@@ -1,0 +1,39 @@
+/* switch — a checkbox semantically, a toggle visually. Add role="switch" (intent,
+   and the correct a11y role). Overrides the native checkbox via appearance:none.
+
+   <label class="cluster"><input type="checkbox" role="switch"> Notifications</label>
+
+   Geometry note: track 2.25rem × 1.25rem, padding 0.1875rem → thumb 0.875rem,
+   travel exactly 1rem. */
+
+@layer components {
+  @scope (input[role="switch"]) {
+    :scope {
+      appearance: none;
+      cursor: pointer;
+      flex: none;
+      display: inline-flex;
+      align-items: center;
+      inline-size: 2.25rem;
+      block-size: 1.25rem;
+      padding: 0.1875rem;
+      border-radius: 999px;
+      background: var(--border);
+      transition: background var(--dur) var(--ease);
+    }
+
+    :scope::before {
+      content: "";
+      block-size: 0.875rem;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: var(--bg);
+      transition: translate var(--dur) var(--ease-bounce);   /* playful toggle */
+    }
+
+    :scope:checked { background: var(--accent); }
+    :scope:checked::before { translate: 1rem 0; }
+
+    :scope:disabled { opacity: 0.5; cursor: not-allowed; }
+  }
+}

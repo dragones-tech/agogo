@@ -1,0 +1,44 @@
+/* tabs — ARIA-first. The role markers say what each part is; CSS only styles them.
+   Switching aria-selected and the panels' [hidden] is BEHAVIOR (a few lines of JS,
+   or your view layer). The markup stays semantic and accessible.
+
+   <div role="tablist" aria-label="Section">
+     <button role="tab" id="t1" aria-controls="p1" aria-selected="true">One</button>
+     <button role="tab" id="t2" aria-controls="p2" aria-selected="false">Two</button>
+   </div>
+   <div role="tabpanel" id="p1" aria-labelledby="t1">…</div>
+   <div role="tabpanel" id="p2" aria-labelledby="t2" hidden>…</div> */
+
+@layer components {
+  @scope ([role="tablist"]) {
+    :scope {
+      display: flex;
+      gap: var(--space-1);
+      border-block-end: var(--border-width) solid var(--border);
+    }
+
+    /* :scope-prefixed on purpose: the tabs are <button>s, which carry the global
+       button base. The extra specificity lets this restyle win within the layer. */
+    :scope [role="tab"] {
+      appearance: none;
+      border: 0;
+      background: none;
+      cursor: pointer;
+      font: inherit;
+      font-weight: 600;
+      color: var(--text-muted);
+      padding: var(--space-2) var(--space-3);
+      border-block-end: 2px solid transparent;
+      margin-block-end: calc(-1 * var(--border-width));
+      transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease);
+    }
+    :scope [role="tab"]:hover { color: var(--text); }
+    :scope [role="tab"][aria-selected="true"] {
+      color: var(--accent);
+      border-block-end-color: var(--accent);
+    }
+  }
+
+  /* Panels live OUTSIDE the tablist, so they get their own role-based rule. */
+  [role="tabpanel"] { padding-block-start: var(--space-4); }
+}

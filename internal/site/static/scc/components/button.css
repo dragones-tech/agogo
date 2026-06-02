@@ -1,0 +1,57 @@
+/* button — the <button> element IS the marker; no class needed.
+   To make an <a> look like a button: data-button.
+   VARIANTS are requested by intent (data-variant), never by appearance.
+
+   <button>Default</button>
+   <button data-variant="primary">Save</button>
+   <button data-variant="ghost">Cancel</button>
+   <a href="/x" data-button data-variant="primary">Go</a> */
+
+@layer components {
+  @scope (button, [data-button]) {
+    :scope {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-4);
+      border: var(--border-width) solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      line-height: 1;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background var(--dur) var(--ease),
+                  border-color var(--dur) var(--ease);
+    }
+
+    :scope:hover {
+      background: color-mix(in oklab, var(--surface), var(--text) 8%);
+    }
+
+    :scope[data-variant="primary"] {
+      background: var(--accent);
+      color: var(--accent-fg);
+      border-color: transparent;
+    }
+    :scope[data-variant="primary"]:hover {
+      background: color-mix(in oklab, var(--accent), black 12%);
+    }
+
+    :scope[data-variant="ghost"] {
+      background: transparent;
+      border-color: transparent;
+    }
+    :scope[data-variant="ghost"]:hover {
+      background: color-mix(in oklab, transparent, var(--text) 8%);
+    }
+
+    :scope:disabled,
+    :scope[aria-disabled="true"] {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+}

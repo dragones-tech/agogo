@@ -1,0 +1,55 @@
+/* nav — site navigation bar. Marker: class="navbar".
+   Unlike <button>, the <nav> element is ambiguous (a site bar, a breadcrumb, a
+   pagination, a TOC are all <nav>), so per the golden rule it needs a marker.
+   The current page is marked with the native aria-current (intent, not appearance).
+   [data-nav-end] pushes a trailing group to the far side (e.g. actions).
+
+   <nav class="navbar">
+     <a href="/" data-brand>Acme</a>
+     <a href="/docs" aria-current="page">Docs</a>
+     <a href="/about">About</a>
+     <span data-nav-end><button data-variant="primary">Sign in</button></span>
+   </nav> */
+
+@layer components {
+  @scope (.navbar) {
+    :scope {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-3) var(--space-4);
+      background: var(--surface);
+      border-block-end: var(--border-width) solid var(--border);
+    }
+
+    a {
+      color: var(--text);
+      text-decoration: none;
+      padding: var(--space-1) var(--space-2);
+      border-radius: var(--radius-sm);
+    }
+    a:hover { background: color-mix(in oklab, transparent, var(--text) 8%); }
+
+    a[data-brand] { font-weight: 700; font-size: var(--text-lg); }
+    a[aria-current] { color: var(--accent); font-weight: 600; }
+
+    /* List-based navs: strip the list chrome, keep them inline */
+    ul {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--space-1);
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    [data-nav-end] {
+      margin-inline-start: auto;   /* everything after this hugs the end */
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+  }
+}
