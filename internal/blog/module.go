@@ -5,7 +5,7 @@ import (
 	"agogo/internal/blog/db"
 )
 
-// Module acopla el dominio "blog": rutas, sitemap y migración.
+// Module wires the "blog" domain: routes, sitemap and migration.
 func Module() app.Module { return mod{} }
 
 type mod struct{}

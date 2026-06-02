@@ -19,7 +19,7 @@ func TestIssueYValid(t *testing.T) {
 		t.Fatalf("cookie CSRF mal emitida: %+v", cookies)
 	}
 
-	// POST con la cookie y el campo coincidentes → válido.
+	// POST with matching cookie and field → valid.
 	form := url.Values{FieldName: {token}}
 	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(form.Encode()))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")

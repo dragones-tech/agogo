@@ -1,7 +1,7 @@
-// Package openapi sirve la especificación OpenAPI (escrita a mano, sin deps) de
-// la cara JSON, y una UI de Swagger en /docs. Swagger UI está VENDORIZADO
-// (embebido en internal/openapi/static), así /docs es self-contained: no carga
-// nada de un CDN y la CSP se mantiene estricta ('self').
+// Package openapi serves the OpenAPI spec (hand-written, no deps) of the JSON
+// face, and a Swagger UI at /docs. Swagger UI is VENDORED (embedded in
+// internal/openapi/static), so /docs is self-contained: it loads nothing from a
+// CDN and the CSP stays strict ('self').
 package openapi
 
 import (
@@ -16,20 +16,20 @@ var spec []byte
 //go:embed static
 var staticFS embed.FS
 
-// Spec sirve openapi.json. Importable en Postman, Bruno, editor.swagger.io, etc.
+// Spec serves openapi.json. Importable into Postman, Bruno, editor.swagger.io, etc.
 func Spec(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	_, _ = w.Write(spec)
 }
 
-// Assets sirve los archivos vendorizados de Swagger UI (css/js). Móntalo en
-// su module.go: r.Handle("GET /docs-assets/", openapi.Assets()).
+// Assets serves the vendored Swagger UI files (css/js). Mount it in its
+// module.go: r.Handle("GET /docs-assets/", openapi.Assets()).
 func Assets() http.Handler {
 	sub, _ := fs.Sub(staticFS, "static")
 	return http.StripPrefix("/docs-assets/", http.FileServerFS(sub))
 }
 
-// docsHTML carga Swagger UI desde NUESTRAS rutas locales (no un CDN).
+// docsHTML loads Swagger UI from OUR local routes (not a CDN).
 const docsHTML = `<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -45,9 +45,9 @@ const docsHTML = `<!DOCTYPE html>
 </body>
 </html>`
 
-// Docs sirve la UI de Swagger. Todo es local (self-contained), así la CSP queda
-// en 'self'; Swagger UI inyecta estilos en runtime, por eso style-src permite
-// 'unsafe-inline' (solo en esta ruta).
+// Docs serves the Swagger UI. Everything is local (self-contained), so the CSP
+// stays at 'self'; Swagger UI injects styles at runtime, which is why style-src
+// allows 'unsafe-inline' (only on this route).
 func Docs(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Security-Policy",
 		"default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:")

@@ -5,7 +5,7 @@ import (
 	"agogo/internal/sitemap"
 )
 
-// Module acopla las páginas estáticas (sin BD).
+// Module wires up the static pages (no DB).
 func Module() app.Module { return mod{} }
 
 type mod struct{}

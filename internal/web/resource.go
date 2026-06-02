@@ -1,8 +1,8 @@
-// Package web contiene Resource[T], el recurso de BD genérico (lista/detalle ×
-// HTML/JSON), escrito una sola vez. NO conoce su URL: sus handlers se cablean en
-// el module.go del dominio (r.Get(path, recurso.ListHTML), ...). El canonical y
-// el JSON-LD se calculan desde la URL de la petición, así el mismo handler sirve
-// en cualquier ruta donde lo montes.
+// Package web contains Resource[T], the generic DB resource (list/detail ×
+// HTML/JSON), written once. It does NOT know its URL: its handlers are wired up
+// in the domain's module.go (r.Get(path, recurso.ListHTML), ...). The canonical
+// and the JSON-LD are computed from the request URL, so the same handler serves
+// at any route where you mount it.
 package web
 
 import (
@@ -17,7 +17,7 @@ import (
 	"agogo/internal/view"
 )
 
-// Page e ItemPage son los datos que viajan a las plantillas.
+// Page and ItemPage are the data that travel to the templates.
 type Page[T any] struct {
 	Meta  view.Meta
 	Items []T
@@ -27,7 +27,7 @@ type ItemPage[T any] struct {
 	Item T
 }
 
-// Resource describe el COMPORTAMIENTO de un recurso (queries, plantillas, SEO).
+// Resource describes the BEHAVIOR of a resource (queries, templates, SEO).
 type Resource[T any] struct {
 	BaseURL string
 
@@ -87,8 +87,8 @@ func (r Resource[T]) DetailJSON(w http.ResponseWriter, req *http.Request) {
 	respond.JSON(w, http.StatusOK, it)
 }
 
-// SitemapSource crea la fuente de sitemap del recurso: la entrada de la lista
-// (listPath) más una por ítem bajo itemBase. Las rutas se las pasas en module.go.
+// SitemapSource creates the resource's sitemap source: the list entry
+// (listPath) plus one per item under itemBase. You pass the paths in module.go.
 func (r Resource[T]) SitemapSource(listPath, itemBase string) sitemap.Source {
 	return resourceSitemap[T]{res: r, listPath: listPath, itemBase: itemBase}
 }

@@ -21,9 +21,9 @@ var (
 	tplItem = view.Layout(tplFS, "templates/detail.html")
 )
 
-// SearchJSON sirve /api/productos: devuelve todo, o filtra por ?q= (LIKE en
-// título y descripción). Es el endpoint que el filtro del catálogo consulta en
-// cada tecla. La búsqueda es SQL parametrizado (sqlc), no en memoria.
+// SearchJSON serves /api/productos: returns everything, or filters by ?q= (LIKE
+// on title and description). It's the endpoint the catalog filter queries on
+// every keystroke. The search is parameterized SQL (sqlc), not in memory.
 func SearchJSON(q *db.Queries) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		query := strings.TrimSpace(r.URL.Query().Get("q"))
@@ -44,8 +44,8 @@ func SearchJSON(q *db.Queries) http.HandlerFunc {
 	}
 }
 
-// New configura el COMPORTAMIENTO del recurso "productos". No conoce su URL:
-// sus handlers se cablean en su module.go.
+// New configures the BEHAVIOR of the "productos" resource. It doesn't know its
+// URL: its handlers are wired up in its module.go.
 func New(q *db.Queries, baseURL string) web.Resource[db.Producto] {
 	return web.Resource[db.Producto]{
 		BaseURL: baseURL,

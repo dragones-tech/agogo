@@ -1,5 +1,5 @@
-// Package config lee la configuración del entorno una sola vez, tipada y
-// validada. Lo usan tanto el servidor como los comandos (cmd/*).
+// Package config reads the configuration from the environment once, typed and
+// validated. Both the server and the commands (cmd/*) use it.
 package config
 
 import (
@@ -9,20 +9,20 @@ import (
 )
 
 type Config struct {
-	DB        string // ruta del archivo SQLite
-	BaseURL   string // URL base (canonical, sitemap)
-	Addr      string // dirección de escucha del servidor
-	SecretKey []byte // clave para firmar sesiones (HMAC)
-	DevSecret bool   // true si se cayó a la clave de desarrollo (insegura)
-	Secure    bool   // marca las cookies como Secure (solo viajan por HTTPS)
+	DB        string // path to the SQLite file
+	BaseURL   string // base URL (canonical, sitemap)
+	Addr      string // server listen address
+	SecretKey []byte // key for signing sessions (HMAC)
+	DevSecret bool   // true if it fell back to the (insecure) development key
+	Secure    bool   // marks cookies as Secure (only sent over HTTPS)
 }
 
-// devSecret se usa si no se define AGOGO_SECRET_KEY. Es estable entre
-// reinicios (las sesiones de dev sobreviven), pero INSEGURA para producción.
+// devSecret is used if AGOGO_SECRET_KEY isn't defined. It's stable across
+// restarts (dev sessions survive), but INSECURE for production.
 const devSecret = "agogo-dev-secret-insegura-cambiala-en-produccion"
 
-// Load arma la configuración desde el entorno. Devuelve error en validaciones
-// duras (p. ej. clave demasiado corta).
+// Load builds the configuration from the environment. It returns an error on
+// hard validations (e.g. a key that's too short).
 func Load() (Config, error) {
 	c := Config{
 		DB:      env("AGOGO_DB", "agogo.db"),
@@ -30,9 +30,9 @@ func Load() (Config, error) {
 		Addr:    env("AGOGO_ADDR", ":8888"),
 	}
 
-	// Cookies Secure: por defecto se deduce del esquema de la URL base (https →
-	// true); AGOGO_SECURE_COOKIES lo fuerza explícitamente (útil tras un proxy
-	// TLS que termina en http://).
+	// Secure cookies: by default deduced from the base URL's scheme (https →
+	// true); AGOGO_SECURE_COOKIES forces it explicitly (useful behind a TLS
+	// proxy that terminates to http://).
 	c.Secure = strings.HasPrefix(c.BaseURL, "https://")
 	switch strings.ToLower(os.Getenv("AGOGO_SECURE_COOKIES")) {
 	case "1", "true", "yes":
@@ -54,10 +54,10 @@ func Load() (Config, error) {
 	return c, nil
 }
 
-// DSN es la cadena de conexión SQLite: la ruta + PRAGMAs que aplica el driver
-// modernc al abrir cada conexión. WAL permite lecturas concurrentes con una
-// escritura; busy_timeout hace que una escritura espere (hasta 5s) en vez de
-// fallar al instante con "database is locked"; foreign_keys activa las FK.
+// DSN is the SQLite connection string: the path + PRAGMAs that the modernc
+// driver applies when opening each connection. WAL allows concurrent reads with
+// one write; busy_timeout makes a write wait (up to 5s) instead of failing
+// instantly with "database is locked"; foreign_keys enables FKs.
 func (c Config) DSN() string {
 	return c.DB + "?_pragma=journal_mode(WAL)&_pragma=busy_timeout(5000)&_pragma=foreign_keys(on)"
 }

@@ -1,5 +1,5 @@
-// Package contacto sirve un formulario: Mostrar (GET) y Recibir (POST). Usa
-// sesión para el mensaje flash de éxito (Post-Redirect-Get).
+// Package contacto serves a form: Mostrar (GET) and Recibir (POST). Uses the
+// session for the success flash message (Post-Redirect-Get).
 package contacto
 
 import (
@@ -22,7 +22,7 @@ type Handler struct {
 	q       *db.Queries
 	baseURL string
 	sess    *session.Manager
-	secure  bool // marca la cookie CSRF como Secure
+	secure  bool // marks the CSRF cookie as Secure
 }
 
 func New(q *db.Queries, baseURL string, sess *session.Manager, secure bool) *Handler {
@@ -46,8 +46,8 @@ func (h *Handler) meta(r *http.Request) view.Meta {
 	}
 }
 
-// Mostrar (GET): muestra el formulario. Si hay un flash en la sesión, lo lee y
-// lo consume (get-and-clear).
+// Mostrar (GET): shows the form. If there's a flash in the session, it reads
+// and consumes it (get-and-clear).
 func (h *Handler) Mostrar(w http.ResponseWriter, r *http.Request) {
 	s := h.sess.Get(r)
 	flash := s.Get("flash")
@@ -64,8 +64,8 @@ func (h *Handler) Mostrar(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// Recibir (POST): valida CSRF, valida campos, guarda, deja un flash en la sesión
-// y redirige (PRG).
+// Recibir (POST): validates CSRF, validates fields, saves, leaves a flash in
+// the session and redirects (PRG).
 func (h *Handler) Recibir(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "formulario inválido", http.StatusBadRequest)

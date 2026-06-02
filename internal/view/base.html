@@ -31,10 +31,10 @@
 </body>
 </html>{{end}}
 
-{{/* fragment: la respuesta de una navegación PARCIAL (X-Fragment). Solo lo que
-     cambia entre secciones — título, el contenido de <main> y los scripts de la
-     página — sin re-renderizar header/footer/marco. El cliente (nav.js) lo pide,
-     reemplaza <main> y reejecuta los scripts. */}}
+{{/* fragment: the response to a PARTIAL navigation (X-Fragment). Only what
+     changes between sections — title, the <main> content and the page's
+     scripts — without re-rendering the header/footer/frame. The client (nav.js)
+     requests it, replaces <main> and re-executes the scripts. */}}
 {{define "fragment" -}}
 <title>{{.Meta.Title}}</title>
 {{block "content" .}}{{end}}

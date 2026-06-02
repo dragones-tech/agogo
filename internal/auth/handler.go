@@ -1,5 +1,5 @@
-// Package auth maneja autenticación: login, logout y una página protegida.
-// Usa internal/auth (identidad sobre sesión) y internal/password (PBKDF2).
+// Package auth handles authentication: login, logout and a protected page.
+// Uses internal/auth (identity over session) and internal/password (PBKDF2).
 package auth
 
 import (
@@ -29,7 +29,7 @@ type Handler struct {
 	q        *db.Queries
 	baseURL  string
 	identity *identity.Service
-	secure   bool // marca las cookies (CSRF) como Secure
+	secure   bool // marks the (CSRF) cookies as Secure
 }
 
 func New(q *db.Queries, baseURL string, a *identity.Service, secure bool) *Handler {
@@ -52,7 +52,7 @@ func (h *Handler) LoginForm(w http.ResponseWriter, r *http.Request) {
 	view.Render(w, r, tplLogin, loginPage{Meta: h.meta(r, "Acceder — Agogo"), Token: csrf.Issue(w, h.secure)})
 }
 
-// POST /login: valida CSRF, verifica credenciales, inicia sesión.
+// POST /login: validates CSRF, verifies credentials, starts the session.
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "formulario inválido", http.StatusBadRequest)
@@ -70,7 +70,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		view.ServerError(w, r, err)
 		return
 	}
-	// No revelamos si el correo existe: mismo mensaje para "no existe" y "mala contraseña".
+	// Don't reveal whether the email exists: same message for "not found" and "bad password".
 	if errors.Is(err, sql.ErrNoRows) || !password.Match(pass, u.PasswordHash) {
 		w.WriteHeader(http.StatusUnauthorized)
 		view.Render(w, r, tplLogin, loginPage{
@@ -106,7 +106,7 @@ type cuentaPage struct {
 	Email string
 }
 
-// GET /cuenta (protegida por auth.Require): muestra el usuario actual.
+// GET /cuenta (protected by auth.Require): shows the current user.
 func (h *Handler) Cuenta(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.ParseInt(h.identity.UserID(r), 10, 64)
 	u, err := h.q.GetUsuario(r.Context(), id)
@@ -114,7 +114,7 @@ func (h *Handler) Cuenta(w http.ResponseWriter, r *http.Request) {
 		view.ServerError(w, r, err)
 		return
 	}
-	// Página autenticada: que ningún intermediario ni el navegador la cacheen.
+	// Authenticated page: don't let any proxy or the browser cache it.
 	w.Header().Set("Cache-Control", "no-store")
 	view.Render(w, r, tplCuenta, cuentaPage{Meta: h.meta(r, "Mi cuenta — Agogo"), Token: csrf.Issue(w, h.secure), Email: u.Email})
 }

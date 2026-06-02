@@ -9,8 +9,8 @@ import (
 //go:embed sql/schema.sql
 var schemaSQL string
 
-// Migrate crea el esquema si no existe (idempotente). NO lo llama el servidor:
-// se ejecuta con `go run ./cmd/migrate` (esquema) o `go run ./cmd/seed` (dev).
+// Migrate creates the schema if it doesn't exist (idempotent). The server does
+// NOT call it: run it with `go run ./cmd/migrate` (schema) or `go run ./cmd/seed` (dev).
 func Migrate(ctx context.Context, sqldb *sql.DB) error {
 	_, err := sqldb.ExecContext(ctx, schemaSQL)
 	return err

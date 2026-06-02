@@ -6,8 +6,8 @@ import (
 	"agogo/internal/productos/db"
 )
 
-// Seed inserta datos de ejemplo solo si la tabla está vacía. NO es parte del
-// sitio: es para DESARROLLO. Se ejecuta a mano con `go run ./cmd/seed`.
+// Seed inserts sample data only if the table is empty. It's NOT part of the
+// site: it's for DEVELOPMENT. Run it by hand with `go run ./cmd/seed`.
 func Seed(ctx context.Context, q *db.Queries) error {
 	n, err := q.CountProductos(ctx)
 	if err != nil {

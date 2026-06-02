@@ -1,10 +1,10 @@
-// Package password hashea y verifica contraseñas con PBKDF2-HMAC-SHA256, todo
-// con la stdlib (crypto/pbkdf2, disponible desde Go 1.24). Sin dependencias.
+// Package password hashes and verifies passwords with PBKDF2-HMAC-SHA256, all
+// with the stdlib (crypto/pbkdf2, available since Go 1.24). No dependencies.
 //
-// Nota honesta: bcrypt/argon2 (golang.org/x/crypto) son preferidos por su dureza
-// de memoria; PBKDF2 con muchas iteraciones es aprobado por NIST/OWASP y nos
-// mantiene en stdlib. El formato guardado lleva los parámetros, así se puede
-// migrar el algoritmo sin romper hashes viejos.
+// Honest note: bcrypt/argon2 (golang.org/x/crypto) are preferred for their
+// memory hardness; PBKDF2 with many iterations is approved by NIST/OWASP and
+// keeps us in the stdlib. The stored format carries the parameters, so the
+// algorithm can be migrated without breaking old hashes.
 package password
 
 import (
@@ -19,12 +19,12 @@ import (
 )
 
 const (
-	iterations = 600_000 // OWASP 2023 para PBKDF2-HMAC-SHA256
+	iterations = 600_000 // OWASP 2023 for PBKDF2-HMAC-SHA256
 	keyLen     = 32
 	saltLen    = 16
 )
 
-// Hash devuelve "pbkdf2-sha256$iter$salt$hash" (salt y hash en base64).
+// Hash returns "pbkdf2-sha256$iter$salt$hash" (salt and hash in base64).
 func Hash(plain string) (string, error) {
 	salt := make([]byte, saltLen)
 	if _, err := rand.Read(salt); err != nil {
@@ -41,7 +41,7 @@ func Hash(plain string) (string, error) {
 	), nil
 }
 
-// Match verifica una contraseña contra un hash codificado, en tiempo constante.
+// Match verifies a password against an encoded hash, in constant time.
 func Match(plain, encoded string) bool {
 	parts := strings.Split(encoded, "$")
 	if len(parts) != 4 || parts[0] != "pbkdf2-sha256" {

@@ -1,23 +1,24 @@
-// Package sitemap es el CONTRATO (hoja, sin dependencias internas) para que
-// cualquier módulo aporte URLs al sitemap. El módulo site las sirve; el host app
-// las recolecta. Vive aparte para que app y site no formen un ciclo de imports.
+// Package sitemap is the CONTRACT (a leaf, with no internal dependencies) for
+// any module to contribute URLs to the sitemap. The site module serves them; the
+// app host collects them. It lives apart so app and site don't form an import
+// cycle.
 package sitemap
 
 import "context"
 
-// URL es una entrada de sitemap (Path relativo; el baseURL lo antepone site).
+// URL is a sitemap entry (relative Path; site prepends the baseURL).
 type URL struct {
 	Path       string
 	ChangeFreq string
 	Priority   string
 }
 
-// Source lo implementa cualquier cosa que quiera aparecer en el sitemap.
+// Source is implemented by anything that wants to appear in the sitemap.
 type Source interface {
 	SitemapURLs(ctx context.Context) ([]URL, error)
 }
 
-// Entries construye entradas por ítem bajo un prefijo (genérico, una sola vez).
+// Entries builds per-item entries under a prefix (generic, written once).
 func Entries[T any](items []T, prefix, changeFreq, priority string, slug func(T) string) []URL {
 	urls := make([]URL, 0, len(items))
 	for _, it := range items {
@@ -26,7 +27,7 @@ func Entries[T any](items []T, prefix, changeFreq, priority string, slug func(T)
 	return urls
 }
 
-// StaticURLs crea una fuente para rutas fijas (páginas, formularios).
+// StaticURLs creates a source for fixed routes (pages, forms).
 func StaticURLs(paths ...string) Source { return staticURLs(paths) }
 
 type staticURLs []string

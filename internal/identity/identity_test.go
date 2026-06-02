@@ -46,7 +46,7 @@ func TestRequireRedirige(t *testing.T) {
 	llamado := false
 	h := s.Require(func(http.ResponseWriter, *http.Request) { llamado = true })
 
-	// Sin sesión: redirige a /login y NO ejecuta el handler.
+	// No session: it redirects to /login and does NOT run the handler.
 	w := httptest.NewRecorder()
 	h(w, httptest.NewRequest(http.MethodGet, "/cuenta", nil))
 	if w.Code != http.StatusSeeOther || w.Header().Get("Location") != "/login" {
@@ -56,7 +56,7 @@ func TestRequireRedirige(t *testing.T) {
 		t.Error("el handler protegido no debería ejecutarse sin sesión")
 	}
 
-	// Con sesión: ejecuta el handler.
+	// With a session: it runs the handler.
 	login := httptest.NewRecorder()
 	s.Login(login, httptest.NewRequest(http.MethodGet, "/", nil), "7")
 	h(httptest.NewRecorder(), conCookies(login))

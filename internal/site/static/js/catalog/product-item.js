@@ -1,5 +1,5 @@
-// ProductItem: una tarjeta del catálogo. Una vista por modelo; solo toca los
-// nodos que le importan (this.ui), sin re-render del subárbol.
+// ProductItem: a catalog card. One view per model; it only touches the nodes
+// it cares about (this.ui), without re-rendering the subtree.
 import { View } from '/static/lumen/src/view.js';
 
 export class ProductItem extends View {

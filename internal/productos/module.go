@@ -5,8 +5,8 @@ import (
 	"agogo/internal/productos/db"
 )
 
-// Module acopla el dominio "productos" al servidor: registra sus rutas, su
-// fuente de sitemap y su migración. Es la cara de "plugin" del dominio.
+// Module wires the "productos" domain into the server: registers its routes,
+// its sitemap source and its migration. It's the domain's "plugin" face.
 func Module() app.Module { return mod{} }
 
 type mod struct{}
@@ -18,9 +18,9 @@ func (mod) Register(a *app.App) error {
 	res := New(q, a.Config.BaseURL)
 
 	r := a.Router
-	r.Get("/{$}", res.ListHTML) // home (match exacto de "/")
+	r.Get("/{$}", res.ListHTML) // home (exact match of "/")
 	r.Get("/productos/{slug}", res.DetailHTML)
-	r.Get("/api/productos", SearchJSON(q)) // lista + búsqueda por ?q=
+	r.Get("/api/productos", SearchJSON(q)) // list + search by ?q=
 	r.Get("/api/productos/{slug}", res.DetailJSON)
 
 	a.AddSitemap(res.SitemapSource("/", "/productos"))

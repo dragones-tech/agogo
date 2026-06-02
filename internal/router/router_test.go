@@ -7,8 +7,8 @@ import (
 	"testing"
 )
 
-// Verifica que se pueden pasar VARIOS middlewares por ruta y que corren en el
-// orden listado (el primero es la capa más externa), antes del handler.
+// Verifies that you can pass MULTIPLE middlewares per route and that they run in
+// the listed order (the first being the outermost layer), before the handler.
 func TestVariosMiddlewaresEnOrden(t *testing.T) {
 	var orden []string
 	marca := func(nombre string) Middleware {
@@ -24,7 +24,7 @@ func TestVariosMiddlewaresEnOrden(t *testing.T) {
 	r.Get("/x", func(w http.ResponseWriter, r *http.Request) {
 		orden = append(orden, "handler")
 		w.WriteHeader(http.StatusOK)
-	}, marca("A"), marca("B"), marca("C")) // ← tres middlewares
+	}, marca("A"), marca("B"), marca("C")) // ← three middlewares
 
 	rec := httptest.NewRecorder()
 	r.Handler().ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/x", nil))
@@ -37,13 +37,13 @@ func TestVariosMiddlewaresEnOrden(t *testing.T) {
 	}
 }
 
-// Un middleware que corta (no llama a next) detiene la cadena: los siguientes y
-// el handler no corren.
+// A middleware that short-circuits (doesn't call next) stops the chain: the rest
+// and the handler don't run.
 func TestMiddlewareQueCorta(t *testing.T) {
 	var corrioHandler bool
 	corta := func(next http.HandlerFunc) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(http.StatusForbidden) // no llama a next
+			w.WriteHeader(http.StatusForbidden) // doesn't call next
 		}
 	}
 

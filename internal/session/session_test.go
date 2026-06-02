@@ -7,8 +7,8 @@ import (
 	"time"
 )
 
-// cookieDeRespuesta extrae la cookie de sesión escrita en w y arma un request
-// que la lleva, simulando el viaje de ida y vuelta navegador↔servidor.
+// cookieDeRespuesta extracts the session cookie written to w and builds a request
+// that carries it, simulating the browser↔server round trip.
 func cookieDeRespuesta(t *testing.T, w *httptest.ResponseRecorder) *http.Request {
 	t.Helper()
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
@@ -30,7 +30,7 @@ func TestSaveGetRoundTrip(t *testing.T) {
 	if got.Get("user_id") != "42" {
 		t.Errorf("user_id = %q, quería 42", got.Get("user_id"))
 	}
-	// El sello interno de expiración no debe filtrarse a los handlers.
+	// The internal expiration stamp must not leak to handlers.
 	if _, ok := got.Values[expKey]; ok {
 		t.Errorf("la sesión leída no debería exponer %q", expKey)
 	}
@@ -42,7 +42,7 @@ func TestFirmaInvalida(t *testing.T) {
 	w := httptest.NewRecorder()
 	m.Save(w, s)
 
-	// Otra clave → la firma no valida → sesión vacía (no se confía en ella).
+	// Different key → signature fails to validate → empty session (not trusted).
 	otro := NewManager([]byte("ffffffffffffffffffffffffffffffff"))
 	got := otro.Get(cookieDeRespuesta(t, w))
 	if got.Get("user_id") != "" {
@@ -62,12 +62,12 @@ func TestManipulacionDelPayload(t *testing.T) {
 func TestSesionExpirada(t *testing.T) {
 	m := NewManager([]byte("0123456789abcdef0123456789abcdef"))
 
-	// Guardamos "en el pasado".
+	// Save "in the past".
 	now = func() time.Time { return time.Unix(1_000_000, 0) }
 	w := httptest.NewRecorder()
 	m.Save(w, &Session{Values: map[string]string{"user_id": "42"}})
 
-	// Leemos pasado el maxAge: debe tratarse como vacía.
+	// Read past maxAge: it must be treated as empty.
 	now = func() time.Time { return time.Unix(1_000_000, 0).Add(maxAge + time.Second) }
 	defer func() { now = time.Now }()
 	if got := m.Get(cookieDeRespuesta(t, w)).Get("user_id"); got != "" {

@@ -16,7 +16,7 @@ func TestHashMatch(t *testing.T) {
 }
 
 func TestHashEsAleatorio(t *testing.T) {
-	// Salt aleatorio: el mismo texto produce hashes distintos, ambos válidos.
+	// Random salt: the same text produces different hashes, both valid.
 	a, _ := Hash("misma")
 	b, _ := Hash("misma")
 	if a == b {
@@ -31,9 +31,9 @@ func TestMatchFormatoInvalido(t *testing.T) {
 	casos := []string{
 		"",
 		"texto-plano",
-		"bcrypt$10$x$y",                // algoritmo desconocido
-		"pbkdf2-sha256$abc$c2FsdA$aGFzaA", // iteraciones no numéricas
-		"pbkdf2-sha256$1000$@@@$aGFzaA",   // salt base64 inválido
+		"bcrypt$10$x$y",                   // unknown algorithm
+		"pbkdf2-sha256$abc$c2FsdA$aGFzaA", // non-numeric iterations
+		"pbkdf2-sha256$1000$@@@$aGFzaA",   // invalid base64 salt
 	}
 	for _, c := range casos {
 		if Match("lo-que-sea", c) {

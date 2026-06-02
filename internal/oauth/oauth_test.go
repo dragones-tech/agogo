@@ -10,10 +10,10 @@ import (
 	"agogo/internal/session"
 )
 
-// Prueba el flujo completo con un proveedor OAuth FALSO (httptest) y verifica
-// que al final la sesión queda iniciada vía el servicio identity del núcleo.
+// Tests the full flow with a FAKE OAuth provider (httptest) and verifies that
+// in the end the session is started via the core identity service.
 func TestFlujoReusaIdentity(t *testing.T) {
-	// --- proveedor falso ---
+	// --- fake provider ---
 	mux := http.NewServeMux()
 	mux.HandleFunc("/token", func(w http.ResponseWriter, r *http.Request) {
 		_ = r.ParseForm()
@@ -47,7 +47,7 @@ func TestFlujoReusaIdentity(t *testing.T) {
 		scope:        "email",
 	}, sess, id)
 
-	// 1) login → redirige al proveedor con state, y guarda el state en sesión.
+	// 1) login → redirects to the provider with state, and saves the state in the session.
 	rec := httptest.NewRecorder()
 	h.login(rec, httptest.NewRequest(http.MethodGet, "/oauth/login", nil))
 	if rec.Code != http.StatusSeeOther {
@@ -63,7 +63,7 @@ func TestFlujoReusaIdentity(t *testing.T) {
 		t.Fatal("no se guardó la sesión con el state")
 	}
 
-	// 2) callback con state + code → intercambia token, obtiene usuario, login.
+	// 2) callback with state + code → exchanges token, fetches user, login.
 	req := httptest.NewRequest(http.MethodGet, "/oauth/callback?code=abc&state="+url.QueryEscape(state), nil)
 	for _, c := range cookies {
 		req.AddCookie(c)
@@ -77,7 +77,7 @@ func TestFlujoReusaIdentity(t *testing.T) {
 		t.Fatalf("redirect = %q, quería /oauth/me", loc)
 	}
 
-	// 3) la sesión resultante tiene la identidad del proveedor (vía identity).
+	// 3) the resulting session carries the provider's identity (via identity).
 	req3 := httptest.NewRequest(http.MethodGet, "/oauth/me", nil)
 	for _, c := range rec2.Result().Cookies() {
 		req3.AddCookie(c)
@@ -87,7 +87,7 @@ func TestFlujoReusaIdentity(t *testing.T) {
 	}
 }
 
-// Sin configurar, /oauth/login responde 503 (módulo acoplado pero inerte).
+// Unconfigured, /oauth/login responds 503 (module wired up but inert).
 func TestLoginSinConfigurar(t *testing.T) {
 	sess := session.NewManager([]byte("0123456789abcdef0123456789abcdef"))
 	h := newHandler(provider{}, sess, identity.New(sess))

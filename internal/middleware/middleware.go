@@ -1,6 +1,6 @@
-// Package middleware reúne el baseline de seguridad del NÚCLEO (siempre activo):
-// recuperación de panics y cabeceras de seguridad. (El logging de acceso vive en
-// el módulo opt-in internal/logs.)
+// Package middleware gathers the CORE security baseline (always active): panic
+// recovery and security headers. (Access logging lives in the opt-in module
+// internal/logs.)
 package middleware
 
 import (
@@ -12,8 +12,8 @@ import (
 	"sync"
 )
 
-// Recover atrapa cualquier panic en un handler y responde 500 sin tumbar
-// el servidor completo.
+// Recover catches any panic in a handler and responds with a 500 without
+// bringing down the whole server.
 func Recover(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
@@ -26,12 +26,12 @@ func Recover(next http.Handler) http.Handler {
 	})
 }
 
-// maxBodyBytes es el tope de cuerpo aceptado en una petición (1 MiB). Los
-// formularios del sitio son pequeños; un cuerpo mayor es error o abuso.
+// maxBodyBytes is the body cap accepted on a request (1 MiB). The site's forms
+// are small; a larger body is an error or abuse.
 const maxBodyBytes = 1 << 20
 
-// LimitBody acota el cuerpo de cada petición antes de que cualquier handler lo
-// lea (ParseForm, json.Decode...), evitando agotar memoria con un POST enorme.
+// LimitBody caps the body of each request before any handler reads it
+// (ParseForm, json.Decode...), avoiding exhausting memory with a huge POST.
 func LimitBody(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Body != nil {
@@ -41,12 +41,12 @@ func LimitBody(next http.Handler) http.Handler {
 	})
 }
 
-// gzipPool reutiliza los *gzip.Writer entre peticiones (evita realocar el buffer
-// interno en cada respuesta).
+// gzipPool reuses the *gzip.Writer across requests (avoids reallocating the
+// internal buffer on each response).
 var gzipPool = sync.Pool{New: func() any { return gzip.NewWriter(io.Discard) }}
 
-// compressible indica si vale la pena comprimir un content-type (texto). Las
-// imágenes, fuentes y zips ya vienen comprimidos: gzip-earlos solo gasta CPU.
+// compressible reports whether a content-type is worth compressing (text).
+// Images, fonts and zips already come compressed: gzipping them only wastes CPU.
 func compressible(ct string) bool {
 	ct = strings.ToLower(ct)
 	switch {
@@ -60,15 +60,16 @@ func compressible(ct string) bool {
 	return false
 }
 
-// Gzip comprime la respuesta con gzip cuando el cliente lo acepta y el contenido
-// es de texto (HTML/CSS/JS/JSON/XML). Decide al fijarse las cabeceras según el
-// Content-Type que puso el handler, así no recomprime imágenes. Código nuestro
-// sobre la stdlib (compress/gzip). En producción esto suele terminarse en el
-// borde (Caddy: encode gzip zstd); este middleware sirve al binario pelón.
+// Gzip compresses the response with gzip when the client accepts it and the
+// content is text (HTML/CSS/JS/JSON/XML). It decides when headers are set, based
+// on the Content-Type the handler put, so it doesn't recompress images. Our own
+// code on top of the stdlib (compress/gzip). In production this is usually
+// terminated at the edge (Caddy: encode gzip zstd); this middleware serves the
+// bare binary.
 func Gzip(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Sin soporte del cliente, o petición Range (gzip rompería los rangos):
-		// se sirve sin comprimir.
+		// Without client support, or a Range request (gzip would break the
+		// ranges): served uncompressed.
 		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") || r.Header.Get("Range") != "" {
 			next.ServeHTTP(w, r)
 			return
@@ -84,7 +85,7 @@ type gzipResponseWriter struct {
 	http.ResponseWriter
 	gz          *gzip.Writer
 	wroteHeader bool
-	plain       bool // true → escribir sin comprimir (tipo no comprimible)
+	plain       bool // true → write uncompressed (non-compressible type)
 }
 
 func (w *gzipResponseWriter) WriteHeader(code int) {
@@ -92,13 +93,13 @@ func (w *gzipResponseWriter) WriteHeader(code int) {
 		return
 	}
 	w.wroteHeader = true
-	// Si ya viene codificado o no es texto, pasa tal cual.
+	// If it's already encoded or not text, pass it through as is.
 	if w.Header().Get("Content-Encoding") != "" || !compressible(w.Header().Get("Content-Type")) {
 		w.plain = true
 		w.ResponseWriter.WriteHeader(code)
 		return
 	}
-	w.Header().Del("Content-Length") // dejará de ser válido al comprimir
+	w.Header().Del("Content-Length") // will no longer be valid once compressed
 	w.Header().Set("Content-Encoding", "gzip")
 	gz := gzipPool.Get().(*gzip.Writer)
 	gz.Reset(w.ResponseWriter)
@@ -108,8 +109,8 @@ func (w *gzipResponseWriter) WriteHeader(code int) {
 
 func (w *gzipResponseWriter) Write(b []byte) (int, error) {
 	if !w.wroteHeader {
-		// La mayoría de handlers fijan el Content-Type antes del primer Write;
-		// si no, lo deducimos como hace net/http.
+		// Most handlers set the Content-Type before the first Write; if not,
+		// we deduce it the way net/http does.
 		if w.Header().Get("Content-Type") == "" {
 			w.Header().Set("Content-Type", http.DetectContentType(b))
 		}
@@ -121,7 +122,7 @@ func (w *gzipResponseWriter) Write(b []byte) (int, error) {
 	return w.gz.Write(b)
 }
 
-// Flush preserva http.Flusher (vacía gzip y luego el writer envuelto).
+// Flush preserves http.Flusher (flushes gzip and then the wrapped writer).
 func (w *gzipResponseWriter) Flush() {
 	if w.gz != nil {
 		_ = w.gz.Flush()
@@ -139,14 +140,14 @@ func (w *gzipResponseWriter) close() {
 	}
 }
 
-// SecurityHeaders añade cabeceras de endurecimiento a todas las respuestas.
+// SecurityHeaders adds hardening headers to all responses.
 func SecurityHeaders(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		h := w.Header()
 		h.Set("X-Content-Type-Options", "nosniff")
 		h.Set("X-Frame-Options", "DENY")
 		h.Set("Referrer-Policy", "strict-origin-when-cross-origin")
-		// Todo es del mismo origen, así que default-src 'self' no rompe nada.
+		// Everything is same-origin, so default-src 'self' breaks nothing.
 		h.Set("Content-Security-Policy", "default-src 'self'")
 		next.ServeHTTP(w, r)
 	})

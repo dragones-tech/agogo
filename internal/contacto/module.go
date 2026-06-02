@@ -6,8 +6,8 @@ import (
 	"agogo/internal/sitemap"
 )
 
-// Module acopla el formulario de contacto: rutas, migración y sitemap. Usa el
-// servicio de sesión compartido del host (a.Session) para el flash.
+// Module wires up the contact form: routes, migration and sitemap. Uses the
+// host's shared session service (a.Session) for the flash.
 func Module() app.Module { return mod{} }
 
 type mod struct{}

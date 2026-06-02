@@ -2,7 +2,7 @@ package openapi
 
 import "agogo/internal/app"
 
-// Module acopla la documentación de la API: la spec y la UI de Swagger.
+// Module wires up the API documentation: the spec and the Swagger UI.
 func Module() app.Module { return mod{} }
 
 type mod struct{}

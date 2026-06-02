@@ -1,5 +1,5 @@
-// Package paginas define handlers de páginas estáticas (sin BD). No conocen su
-// URL: el canonical se calcula desde la ruta en que las montes (su module.go).
+// Package paginas defines static page handlers (no DB). They don't know their
+// URL: the canonical is computed from the route you mount them on (its module.go).
 package paginas
 
 import (
@@ -12,7 +12,7 @@ import (
 //go:embed templates/*.html
 var tplFS embed.FS
 
-// QuienesSomos devuelve el handler de la página "quiénes somos".
+// QuienesSomos returns the handler for the "about us" page.
 func QuienesSomos(baseURL string) http.HandlerFunc {
 	tpl := view.Layout(tplFS, "templates/quienes-somos.html")
 	return func(w http.ResponseWriter, r *http.Request) {

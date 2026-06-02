@@ -1,14 +1,14 @@
-// Package oauth es un MÓDULO opcional: login vía OAuth 2.0 (flujo authorization
-// code), en stdlib pura. Demuestra que un mecanismo de login distinto al de
-// usuario/contraseña REUSA el servicio identity del núcleo: verifica con un
-// proveedor externo y luego llama a identity.Login para marcar la sesión.
+// Package oauth is an optional MODULE: login via OAuth 2.0 (authorization code
+// flow), in pure stdlib. It shows how a login mechanism other than
+// username/password REUSES the core identity service: it verifies with an
+// external provider and then calls identity.Login to mark the session.
 //
-// Se configura por SU PROPIO entorno (un plugin trae su config):
+// It's configured by ITS OWN environment (a plugin brings its own config):
 //
 //	OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET, OAUTH_AUTH_URL, OAUTH_TOKEN_URL,
 //	OAUTH_USERINFO_URL, OAUTH_SCOPE
 //
-// Si no está configurado, las rutas existen pero /oauth/login responde 503.
+// If not configured, the routes exist but /oauth/login responds 503.
 package oauth
 
 import (
@@ -71,13 +71,13 @@ func (mod) Register(a *app.App) error {
 	r := a.Router
 	r.Get("/oauth/login", h.login)
 	r.Get("/oauth/callback", h.callback)
-	r.Get("/oauth/me", h.me, a.Identity.Require) // protegida: reusa identity.Require
+	r.Get("/oauth/me", h.me, a.Identity.Require) // protected: reuses identity.Require
 	return nil
 }
 
 const stateKey = "oauth_state"
 
-// login: genera un state anti-CSRF, lo guarda en la sesión y redirige al proveedor.
+// login: generates an anti-CSRF state, stores it in the session and redirects to the provider.
 func (h *handler) login(w http.ResponseWriter, r *http.Request) {
 	if !h.p.configured() {
 		http.Error(w, "OAuth no configurado (define OAUTH_CLIENT_ID, OAUTH_AUTH_URL, ...)", http.StatusServiceUnavailable)
@@ -98,8 +98,8 @@ func (h *handler) login(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, h.p.authURL+"?"+q.Encode(), http.StatusSeeOther)
 }
 
-// callback: verifica el state, intercambia el code por un token, obtiene el
-// usuario y REUSA identity.Login para iniciar la sesión.
+// callback: verifies the state, exchanges the code for a token, fetches the
+// user and REUSES identity.Login to start the session.
 func (h *handler) callback(w http.ResponseWriter, r *http.Request) {
 	s := h.sess.Get(r)
 	want, got := s.Get(stateKey), r.URL.Query().Get("state")
@@ -107,8 +107,8 @@ func (h *handler) callback(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "state inválido", http.StatusForbidden)
 		return
 	}
-	// El state es de un solo uso: consúmelo para que no se pueda reusar. Se
-	// persiste en el mismo Save que el login (LoginInto), no aparte.
+	// The state is single-use: consume it so it can't be reused. It's
+	// persisted in the same Save as the login (LoginInto), not separately.
 	s.Delete(stateKey)
 	code := r.URL.Query().Get("code")
 	if code == "" {
@@ -127,12 +127,12 @@ func (h *handler) callback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.identity.LoginInto(w, s, user) // ← REUSA el servicio identity del núcleo
+	h.identity.LoginInto(w, s, user) // ← REUSES the core identity service
 	http.Redirect(w, r, "/oauth/me", http.StatusSeeOther)
 }
 
 func (h *handler) me(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Cache-Control", "no-store") // respuesta autenticada
+	w.Header().Set("Cache-Control", "no-store") // authenticated response
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	fmt.Fprintf(w, "<h1>Conectado vía OAuth</h1><p>Eres <strong>%s</strong>.</p>", html.EscapeString(h.identity.UserID(r)))
 }

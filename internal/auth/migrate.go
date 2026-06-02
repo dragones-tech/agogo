@@ -9,7 +9,7 @@ import (
 //go:embed sql/schema.sql
 var schemaSQL string
 
-// Migrate crea la tabla de usuarios si no existe (idempotente).
+// Migrate creates the users table if it doesn't exist (idempotent).
 func Migrate(ctx context.Context, sqldb *sql.DB) error {
 	_, err := sqldb.ExecContext(ctx, schemaSQL)
 	return err

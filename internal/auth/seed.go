@@ -7,9 +7,9 @@ import (
 	"agogo/internal/password"
 )
 
-// Seed crea un usuario demo si la tabla está vacía (solo desarrollo).
+// Seed creates a demo user if the table is empty (development only).
 //
-//	email: admin@agogo.com   contraseña: demo1234
+//	email: admin@agogo.com   password: demo1234
 func Seed(ctx context.Context, q *db.Queries) error {
 	n, err := q.CountUsuarios(ctx)
 	if err != nil {

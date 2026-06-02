@@ -1,6 +1,6 @@
-// Command seed puebla la base de datos con datos de ejemplo para DESARROLLO.
-// No es parte del servidor. Asegura el esquema (vía app.Migrate, idempotente) y
-// luego siembra cada dominio.
+// Command seed populates the database with sample data for DEVELOPMENT.
+// It's not part of the server. It ensures the schema (via app.Migrate,
+// idempotent) and then seeds each domain.
 //
 //	go run ./cmd/seed
 package main
@@ -36,8 +36,8 @@ func main() {
 
 	ctx := context.Background()
 
-	// Aseguramos el esquema antes de sembrar (idempotente), reusando el hook de
-	// migraciones del host.
+	// Ensure the schema before seeding (idempotent), reusing the host's
+	// migration hook.
 	application := app.New(cfg, sqldb)
 	if err := application.Use(
 		productos.Module(),

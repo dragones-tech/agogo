@@ -1,6 +1,7 @@
-// Package logs es un MÓDULO opt-in: registra un middleware global que loguea
-// cada petición (método, ruta, status, duración). Si no lo acoplas con
-// app.Use(logs.Module()), no hay logs de acceso y el código ni entra al binario.
+// Package logs is an opt-in MODULE: it registers a global middleware that logs
+// each request (method, path, status, duration). If you don't plug it in with
+// app.Use(logs.Module()), there are no access logs and the code doesn't even
+// enter the binary.
 package logs
 
 import (
@@ -31,7 +32,7 @@ func logging(next http.Handler) http.Handler {
 	})
 }
 
-// statusRecorder recuerda el código de estado para poder registrarlo.
+// statusRecorder remembers the status code so it can be logged.
 type statusRecorder struct {
 	http.ResponseWriter
 	status int
@@ -42,8 +43,8 @@ func (r *statusRecorder) WriteHeader(code int) {
 	r.ResponseWriter.WriteHeader(code)
 }
 
-// Flush preserva la interfaz http.Flusher del ResponseWriter envuelto (streaming,
-// SSE); sin esto, envolverlo la ocultaría.
+// Flush preserves the wrapped ResponseWriter's http.Flusher interface
+// (streaming, SSE); without this, wrapping it would hide the interface.
 func (r *statusRecorder) Flush() {
 	if f, ok := r.ResponseWriter.(http.Flusher); ok {
 		f.Flush()

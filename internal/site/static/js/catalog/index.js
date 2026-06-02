@@ -1,9 +1,9 @@
-// Entrada del catálogo: cablea el DOM con la Collection y la búsqueda en servidor.
+// Catalog entry point: wires the DOM up with the Collection and server-side search.
 //
-// El servidor renderiza la lista (SEO, sin-JS) y emite los datos como JSON island
-// para el primer pintado sin round-trip. Al teclear, cada tecla pega a
-// GET /api/productos?q=...; el JSON resetea la Collection y el CatalogView
-// reconcilia. La petición anterior en vuelo se cancela para no llegar desordenada.
+// The server renders the list (SEO, no-JS) and emits the data as a JSON island
+// for the first paint without a round-trip. While typing, each keystroke hits
+// GET /api/productos?q=...; the JSON resets the Collection and the CatalogView
+// reconciles. The previous in-flight request is aborted so results can't arrive out of order.
 import { $ } from '/static/lumen/src/dom.js';
 import { Collection } from '/static/lumen/src/collection.js';
 import { Http } from '/static/lumen/src/http.js';
@@ -16,20 +16,20 @@ const filter = $('[data-ref="filter"]');
 const empty = $('[data-ref="empty"]');
 
 if (data && serverList && filter) {
-  // Primer pintado desde el JSON island (sin pedir nada al servidor).
+  // First paint from the JSON island (without asking the server for anything).
   const collection = new Collection(JSON.parse(data.textContent), Product);
   const catalog = new CatalogView({ collection });
 
-  // lumen reemplaza la lista del servidor por la suya, en el mismo lugar.
+  // lumen replaces the server's list with its own, in the same place.
   const parent = serverList.parentNode;
   const anchor = serverList.nextSibling;
   serverList.remove();
   await catalog.mount(parent);
   if (anchor) parent.insertBefore(catalog.el, anchor);
 
-  // Búsqueda en servidor: una petición JSON por tecla.
+  // Server-side search: one JSON request per keystroke.
   const api = new Http();
-  let inFlight; // AbortController de la petición anterior
+  let inFlight; // AbortController of the previous request
   filter.addEventListener('input', async () => {
     inFlight?.abort();
     inFlight = new AbortController();
@@ -38,7 +38,7 @@ if (data && serverList && filter) {
         query: { q: filter.value.trim() },
         signal: inFlight.signal,
       });
-      collection.reset(results); // → el CatalogView re-renderiza
+      collection.reset(results); // → the CatalogView re-renders
       if (empty) empty.hidden = results.length > 0;
     } catch (err) {
       if (err.name !== 'AbortError') console.error('search failed', err);

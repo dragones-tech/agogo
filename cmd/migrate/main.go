@@ -1,11 +1,11 @@
-// Command migrate aplica el esquema de todos los dominios a la base de datos.
-// Es un paso de bootstrap (sirve en dev y en despliegue), separado del servidor.
+// Command migrate applies the schema of every domain to the database.
+// It's a bootstrap step (used in dev and deploy), separate from the server.
 //
 //	go run ./cmd/migrate
 //
-// Arma el mismo App que el servidor y corre app.Migrate: cada módulo acoplado
-// registró su migración con a.AddMigration, así que añadir un dominio con BD a
-// la lista de abajo basta para que su esquema se aplique (sin tocar nada más).
+// It wires up the same App as the server and runs app.Migrate: each wired-in
+// module registered its migration via a.AddMigration, so adding a domain with a
+// DB to the list below is enough for its schema to be applied (nothing else).
 package main
 
 import (

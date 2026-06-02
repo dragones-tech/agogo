@@ -1,18 +1,18 @@
-/* Marco de la página (SOLO layout) + la MARCA de agogo. El sistema de diseño lo
-   pone scc (scc/scc.css); scc se mantiene PRISTINO (no editamos el vendor, se
-   trabaja en su repo). Las "perillas" de scc las sobrescribimos aquí: al estar
-   sin @layer, estos valores ganan a los por defecto de scc/theme.css. */
+/* Page frame (layout ONLY) + agogo's BRANDING. The design system is provided
+   by scc (scc/scc.css); scc is kept PRISTINE (we don't edit the vendor, that's
+   worked on in its own repo). We override scc's "knobs" here: being outside any
+   @layer, these values win over scc/theme.css's defaults. */
 :root {
-  --accent:         #2f6f4e;   /* verde agogo */
+  --accent:         #2f6f4e;   /* agogo green */
   --accent-fg:      #ffffff;
-  --neutral-hue:    150;       /* grises teñidos de verde */
+  --neutral-hue:    150;       /* green-tinted grays */
   --neutral-chroma: 6%;
   --radius:         0.625rem;
 }
 
-/* Fondo del tema en la RAÍZ (no solo en body): así no se ve el lienzo del
-   navegador (negro en modo oscuro) ni en el hueco de la navegación ni durante
-   el crossfade de las View Transitions. */
+/* Theme background on the ROOT (not just on body): this way the browser canvas
+   (black in dark mode) isn't seen, neither in the navigation gap nor during the
+   crossfade of the View Transitions. */
 html { background: var(--bg); }
 
 body {
@@ -21,24 +21,24 @@ body {
   flex-direction: column;
 }
 
-/* El atributo [hidden] debe ocultar SIEMPRE. Un componente de scc como .card
-   fija display:flex y, al estar en una @layer, perdería contra el display:none
-   del user-agent; esta regla (sin capa, así gana a cualquier @layer) lo asegura.
-   Lo usa el catálogo (static/js/catalog/). */
+/* The [hidden] attribute must ALWAYS hide. An scc component like .card sets
+   display:flex and, being inside an @layer, would lose against the user-agent's
+   display:none; this rule (layerless, so it beats any @layer) guarantees it.
+   The catalog uses it (static/js/catalog/). */
 [hidden] { display: none; }
 
-/* Transición entre páginas: el navegador hace un crossfade NATIVO en cada
-   navegación same-origin, tapando el "parpadeo" en blanco/negro del recargo
-   clásico de MPA. CSS puro, sin JS ni build. Los navegadores sin soporte
-   navegan normal (degrada limpio). */
+/* Page-to-page transition: the browser does a NATIVE crossfade on every
+   same-origin navigation, hiding the white/black "flash" of the classic MPA
+   reload. Pure CSS, no JS or build. Browsers without support navigate normally
+   (degrades cleanly). */
 @view-transition { navigation: auto; }
 
-/* Respeta a quien pidió menos movimiento: sin crossfade. */
+/* Respect anyone who asked for less motion: no crossfade. */
 @media (prefers-reduced-motion: reduce) {
   @view-transition { navigation: none; }
 }
 
-/* contenedor centrado y de ancho cómodo para leer */
+/* centered container with a comfortable width for reading */
 .shell {
   width: 100%;
   max-width: 48rem;
@@ -60,11 +60,11 @@ footer.shell {
   color: var(--text-muted);
 }
 
-/* la barra de navegación (componente .navbar de scc) ocupa todo el ancho,
-   pero su contenido se alinea al mismo ancho que el resto */
+/* the navigation bar (scc's .navbar component) spans the full width,
+   but its content aligns to the same width as the rest */
 .navbar { padding-inline: max(var(--space-4), (100% - 48rem) / 2); }
 
-/* rejilla de tarjetas (listados de productos/blog): solo disposición */
+/* card grid (product/blog listings): layout only */
 .cards {
   list-style: none;
   margin: 0;
@@ -76,6 +76,6 @@ footer.shell {
   .cards { grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); }
 }
 
-/* mensaje de error de un campo (intención); se oculta si está vacío */
+/* a field's error message (intent); hidden when empty */
 .field small.err { color: var(--danger); }
 .field small.err:empty { display: none; }

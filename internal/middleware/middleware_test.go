@@ -13,7 +13,7 @@ func TestRecoverDevuelve500(t *testing.T) {
 		panic("boom")
 	})
 	rec := httptest.NewRecorder()
-	// No debe propagar el panic (si lo hiciera, el test entra en pánico).
+	// It must not propagate the panic (if it did, the test would panic).
 	Recover(panicky).ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/", nil))
 
 	if rec.Code != http.StatusInternalServerError {
@@ -41,7 +41,7 @@ func htmlHandler(body string) http.Handler {
 }
 
 func TestGzipComprimeTexto(t *testing.T) {
-	body := "<h1>hola</h1>" + string(make([]byte, 1000)) // compresible
+	body := "<h1>hola</h1>" + string(make([]byte, 1000)) // compressible
 	rec := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	req.Header.Set("Accept-Encoding", "gzip")
@@ -65,7 +65,7 @@ func TestGzipComprimeTexto(t *testing.T) {
 
 func TestGzipSinAcceptEncoding(t *testing.T) {
 	rec := httptest.NewRecorder()
-	// Sin cabecera Accept-Encoding: no debe comprimir.
+	// Without an Accept-Encoding header: it must not compress.
 	Gzip(htmlHandler("hola")).ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/", nil))
 	if rec.Header().Get("Content-Encoding") != "" {
 		t.Fatalf("no debería comprimir sin Accept-Encoding")

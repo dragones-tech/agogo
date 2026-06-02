@@ -6,8 +6,8 @@ import (
 	"agogo/internal/blog/db"
 )
 
-// Seed inserta artículos de ejemplo solo si la tabla está vacía. NO es parte
-// del sitio: es para DESARROLLO. Se ejecuta a mano con `go run ./cmd/seed`.
+// Seed inserts sample articles only if the table is empty. It's NOT part of the
+// site: it's for DEVELOPMENT. Run it by hand with `go run ./cmd/seed`.
 func Seed(ctx context.Context, q *db.Queries) error {
 	n, err := q.CountPosts(ctx)
 	if err != nil {

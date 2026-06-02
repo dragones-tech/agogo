@@ -45,17 +45,17 @@ func main() {
 		w.Write([]byte("ok"))
 	})
 
-	// El "Gemfile" del servidor: qué es esta app = qué módulos acopla.
-	// Comenta una línea para quitar esa funcionalidad (y sacarla del binario).
+	// The server's "Gemfile": what this app is = which modules it wires in.
+	// Comment out a line to drop that feature (and strip it from the binary).
 	if err := application.Use(
-		logs.Module(),      // observabilidad
-		productos.Module(), // contenido
+		logs.Module(),      // observability
+		productos.Module(), // content
 		blog.Module(),
 		paginas.Module(),
-		contacto.Module(), // formulario
-		auth.Module(),     // autenticación usuario/contraseña (login/cuenta)
-		oauth.Module(),    // autenticación vía OAuth 2.0 (reusa identity)
-		openapi.Module(),  // docs de la API
+		contacto.Module(), // form
+		auth.Module(),     // username/password authentication (login/account)
+		oauth.Module(),    // OAuth 2.0 authentication (reuses identity)
+		openapi.Module(),  // API docs
 		site.Module(),     // robots.txt, sitemap.xml, /static
 	); err != nil {
 		log.Fatalf("módulos: %v", err)
@@ -70,10 +70,10 @@ func main() {
 		IdleTimeout:       60 * time.Second,
 	}
 
-	// Apagado ordenado: al recibir Ctrl+C o SIGTERM dejamos de aceptar, damos
-	// hasta 10s a que terminen las peticiones en curso y SOLO entonces volvemos
-	// (los defer —incluido sqldb.Close()— corren; con log.Fatal/os.Exit no lo
-	// harían). Stdlib pura.
+	// Graceful shutdown: on Ctrl+C or SIGTERM we stop accepting, give in-flight
+	// requests up to 10s to finish, and ONLY then return (so the defers —
+	// including sqldb.Close() — run; with log.Fatal/os.Exit they wouldn't).
+	// Pure stdlib.
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 

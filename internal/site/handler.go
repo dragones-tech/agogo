@@ -1,7 +1,7 @@
-// Package site es un MÓDULO: sirve robots.txt, sitemap.xml y los archivos
-// estáticos embebidos. El sitemap se arma con TODAS las fuentes que los demás
-// módulos registraron en el App; se leen en CADA petición, así no importa el
-// orden en que se acoplaron.
+// Package site is a MODULE: it serves robots.txt, sitemap.xml and the embedded
+// static files. The sitemap is built from ALL the sources the other modules
+// registered in the App; they're read on EVERY request, so the order they were
+// wired up in doesn't matter.
 package site
 
 import (
@@ -44,9 +44,9 @@ func (mod) Register(a *app.App) error {
 		_, _ = w.Write(b)
 	})
 
-	// Catch-all: cualquier ruta no registrada cae aquí → 404 con el layout del
-	// sitio. "/{$}" (home) y las rutas específicas son más concretas y ganan;
-	// "/" (subárbol) solo atrapa lo no emparejado.
+	// Catch-all: any unregistered route lands here → 404 with the site layout.
+	// "/{$}" (home) and the specific routes are more concrete and win;
+	// "/" (subtree) only catches what's unmatched.
 	r.Handle("/", http.HandlerFunc(view.NotFound))
 	return nil
 }
@@ -54,7 +54,7 @@ func (mod) Register(a *app.App) error {
 //go:embed static
 var staticFS embed.FS
 
-// Static devuelve el handler de archivos estáticos embebidos (con caché).
+// Static returns the handler for the embedded static files (with caching).
 func Static() http.Handler {
 	static, _ := fs.Sub(staticFS, "static")
 	return http.StripPrefix("/static/", cacheControl(http.FileServerFS(static)))

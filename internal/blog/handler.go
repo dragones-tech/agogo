@@ -17,7 +17,7 @@ var (
 	tplItem = view.Layout(tplFS, "templates/detail.html")
 )
 
-// New configura el COMPORTAMIENTO del recurso "blog". No conoce su URL.
+// New configures the BEHAVIOR of the "blog" resource. It doesn't know its URL.
 func New(q *db.Queries, baseURL string) web.Resource[db.Post] {
 	return web.Resource[db.Post]{
 		BaseURL: baseURL,

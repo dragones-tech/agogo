@@ -1,7 +1,7 @@
-// Package csrf implementa protección CSRF por "doble envío de cookie": el
-// servidor emite un token, lo guarda en una cookie y lo incrusta en un campo
-// oculto del formulario; al recibir el POST compara ambos. Código nuestro,
-// stdlib, sin dependencias.
+// Package csrf implements CSRF protection via the "double submit cookie"
+// pattern: the server issues a token, stores it in a cookie and embeds it in a
+// hidden form field; on receiving the POST it compares the two. Our own code,
+// stdlib, no dependencies.
 package csrf
 
 import (
@@ -13,16 +13,16 @@ import (
 
 const cookieName = "csrf_token"
 
-// FieldName es el nombre del campo oculto que debe llevar el formulario.
+// FieldName is the name of the hidden field the form must carry.
 const FieldName = "csrf_token"
 
-// Issue genera un token, lo guarda en cookie y lo devuelve para el <input hidden>.
-// secure marca la cookie como Secure (solo viaja por HTTPS); pásalo desde la
-// configuración (Config.Secure).
+// Issue generates a token, stores it in a cookie and returns it for the <input
+// hidden>. secure marks the cookie as Secure (only sent over HTTPS); pass it
+// from the configuration (Config.Secure).
 func Issue(w http.ResponseWriter, secure bool) string {
 	b := make([]byte, 32)
 	if _, err := rand.Read(b); err != nil {
-		// crypto/rand no debería fallar; si lo hace, no emitimos token usable.
+		// crypto/rand shouldn't fail; if it does, we don't issue a usable token.
 		http.Error(w, "error interno", http.StatusInternalServerError)
 		return ""
 	}
@@ -38,8 +38,8 @@ func Issue(w http.ResponseWriter, secure bool) string {
 	return token
 }
 
-// Valid compara el token de la cookie con el del formulario (comparación
-// en tiempo constante). Falla si falta cualquiera o no coinciden.
+// Valid compares the cookie's token with the form's (constant-time comparison).
+// It fails if either is missing or they don't match.
 func Valid(r *http.Request) bool {
 	c, err := r.Cookie(cookieName)
 	if err != nil || c.Value == "" {

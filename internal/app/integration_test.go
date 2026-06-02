@@ -22,8 +22,8 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-// newServer arma el mismo App que main (los módulos con datos + páginas + site),
-// migra un SQLite temporal y devuelve un servidor de prueba y su BD.
+// newServer wires up the same App as main (the data modules + pages + site),
+// migrates a temporary SQLite and returns a test server and its DB.
 func newServer(t *testing.T) (*httptest.Server, *sql.DB) {
 	t.Helper()
 	cfg := config.Config{
@@ -66,7 +66,7 @@ func TestRutasResponden(t *testing.T) {
 		{"/quienes-somos", http.StatusOK},
 		{"/api/productos", http.StatusOK},
 		{"/robots.txt", http.StatusOK},
-		{"/productos/inexistente", http.StatusNotFound}, // slug que no existe
+		{"/productos/inexistente", http.StatusNotFound}, // slug that doesn't exist
 		{"/ruta-que-no-existe", http.StatusNotFound},    // catch-all
 	}
 	for _, c := range casos {
@@ -108,10 +108,10 @@ func TestFragmentoVsPaginaCompleta(t *testing.T) {
 	}
 }
 
-// Un fallo del servidor responde 500 genérico SIN filtrar el error real al cliente.
+// A server failure responds with a generic 500 WITHOUT leaking the real error to the client.
 func TestErrorInternoNoFiltraDetalles(t *testing.T) {
 	srv, db := newServer(t)
-	db.Close() // ahora cualquier query falla → fuerza el camino de error
+	db.Close() // now any query fails → forces the error path
 
 	res, err := http.Get(srv.URL + "/api/productos")
 	if err != nil {

@@ -5,8 +5,8 @@ import (
 	"agogo/internal/auth/db"
 )
 
-// Module acopla la autenticación: login/logout y la página protegida /cuenta.
-// Usa el servicio de identidad compartido del host (a.Identity).
+// Module wires up authentication: login/logout and the protected /cuenta page.
+// Uses the host's shared identity service (a.Identity).
 func Module() app.Module { return mod{} }
 
 type mod struct{}
@@ -20,7 +20,7 @@ func (mod) Register(a *app.App) error {
 	r.Get("/login", h.LoginForm)
 	r.Post("/login", h.Login)
 	r.Post("/logout", h.Logout)
-	r.Get("/cuenta", h.Cuenta, a.Identity.Require) // identidad como middleware por ruta
+	r.Get("/cuenta", h.Cuenta, a.Identity.Require) // identity as per-route middleware
 
 	a.AddMigration(Migrate)
 	return nil

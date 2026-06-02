@@ -1,12 +1,12 @@
-// Package jsonld construye datos estructurados schema.org como template.JS,
-// listos para incrustar en <script type="application/ld+json"> (SEO).
+// Package jsonld builds schema.org structured data as template.JS, ready to
+// embed in <script type="application/ld+json"> (SEO).
 //
-// Dos niveles:
-//   - Script(typ, props): el primitivo. Sirve para CUALQUIER tipo schema.org,
-//     incluso los que aún no tienen builder tipado. Añade @context y @type.
-//   - Builders tipados (Product, BlogPosting, ...): azúcar con campos
-//     verificados por el compilador para los tipos comunes. Agregar uno nuevo
-//     es declarar un struct y un método Script() que delega en el primitivo.
+// Two levels:
+//   - Script(typ, props): the primitive. Works for ANY schema.org type, even
+//     those that don't yet have a typed builder. It adds @context and @type.
+//   - Typed builders (Product, BlogPosting, ...): sugar with compiler-checked
+//     fields for the common types. Adding a new one is declaring a struct and a
+//     Script() method that delegates to the primitive.
 package jsonld
 
 import (
@@ -14,8 +14,8 @@ import (
 	"html/template"
 )
 
-// Script serializa un nodo schema.org del @type dado con sus propiedades.
-// Es el primitivo extensible del framework.
+// Script serializes a schema.org node of the given @type with its properties.
+// It's the framework's extensible primitive.
 func Script(typ string, props map[string]any) template.JS {
 	node := map[string]any{
 		"@context": "https://schema.org",
@@ -28,9 +28,9 @@ func Script(typ string, props map[string]any) template.JS {
 	return template.JS(b)
 }
 
-// --- builders tipados para tipos comunes (batteries included) ---
+// --- typed builders for common types (batteries included) ---
 
-// Product → schema.org/Product (con Offer si hay precio).
+// Product → schema.org/Product (with an Offer if there's a price).
 type Product struct {
 	Name        string
 	Description string

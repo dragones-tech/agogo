@@ -1,5 +1,5 @@
-// CatalogView: la rejilla. Monta un ProductItem por modelo de la colección y
-// reconcilia al recibir add/remove/reset (no reconstruye todo).
+// CatalogView: the grid. It mounts one ProductItem per model in the collection
+// and reconciles on add/remove/reset (it doesn't rebuild everything).
 import { CollectionView } from '/static/lumen/src/collection-view.js';
 import { ProductItem } from './product-item.js';
 

@@ -1,9 +1,9 @@
-// Package app es el NÚCLEO del framework: el host que compone módulos. Un
-// servidor se arma creando un App y acoplándole módulos con Use(). Lo que no
-// acoplas no se importa, así que no existe en el binario.
+// Package app is the framework CORE: the host that composes modules. A server
+// is assembled by creating an App and plugging modules into it with Use().
+// Whatever you don't plug in isn't imported, so it doesn't exist in the binary.
 //
-// El host ofrece servicios compartidos baratos (Session, Auth) que cualquier
-// módulo puede usar; las funcionalidades visibles (login, contenido) son módulos.
+// The host offers cheap shared services (Session, Auth) that any module can
+// use; the visible features (login, content) are modules.
 package app
 
 import (
@@ -20,16 +20,16 @@ import (
 	"agogo/internal/sitemap"
 )
 
-// Middleware global: envuelve todo el servidor (a diferencia del por-ruta).
+// Middleware is global: it wraps the whole server (unlike the per-route kind).
 type Middleware = func(http.Handler) http.Handler
 
-// Module es lo que un dominio o plugin implementa para acoplarse al servidor.
+// Module is what a domain or plugin implements to plug into the server.
 type Module interface {
 	Name() string
 	Register(*App) error
 }
 
-// App es el host: servicios compartidos + puntos de enganche para módulos.
+// App is the host: shared services + hook points for modules.
 type App struct {
 	Config   config.Config
 	DB       *sql.DB
@@ -54,7 +54,7 @@ func New(cfg config.Config, db *sql.DB) *App {
 	}
 }
 
-// Use acopla módulos en orden. Si uno falla al registrarse, corta con su nombre.
+// Use plugs in modules in order. If one fails to register, it stops with its name.
 func (a *App) Use(mods ...Module) error {
 	for _, m := range mods {
 		if err := m.Register(a); err != nil {
@@ -64,7 +64,7 @@ func (a *App) Use(mods ...Module) error {
 	return nil
 }
 
-// --- puntos de enganche para módulos ---
+// --- hook points for modules ---
 
 func (a *App) UseMiddleware(mw Middleware) { a.middleware = append(a.middleware, mw) }
 func (a *App) AddMigration(fn func(context.Context, *sql.DB) error) {
@@ -73,7 +73,7 @@ func (a *App) AddMigration(fn func(context.Context, *sql.DB) error) {
 func (a *App) AddSitemap(src sitemap.Source)    { a.sitemaps = append(a.sitemaps, src) }
 func (a *App) SitemapSources() []sitemap.Source { return a.sitemaps }
 
-// Migrate corre las migraciones de todos los módulos acoplados.
+// Migrate runs the migrations of all plugged-in modules.
 func (a *App) Migrate(ctx context.Context) error {
 	for _, fn := range a.migrations {
 		if err := fn(ctx, a.DB); err != nil {
@@ -83,8 +83,8 @@ func (a *App) Migrate(ctx context.Context) error {
 	return nil
 }
 
-// Handler arma el http.Handler final: rutas + baseline de seguridad (núcleo,
-// siempre) + middleware global de los módulos (p. ej. logs) como capa externa.
+// Handler assembles the final http.Handler: routes + security baseline (core,
+// always) + the modules' global middleware (e.g. logs) as the outer layer.
 func (a *App) Handler() http.Handler {
 	var h http.Handler = a.Router.Handler()
 	h = middleware.Gzip(h)
