@@ -10,6 +10,7 @@ import (
 	"agogo/internal/contacto/db"
 	"agogo/internal/csrf"
 	"agogo/internal/session"
+	"agogo/internal/validate"
 	"agogo/internal/view"
 )
 
@@ -80,18 +81,15 @@ func (h *Handler) Recibir(w http.ResponseWriter, r *http.Request) {
 	email := strings.TrimSpace(r.PostFormValue("email"))
 	mensaje := strings.TrimSpace(r.PostFormValue("mensaje"))
 
-	errs := map[string]string{}
-	if nombre == "" {
-		errs["nombre"] = "El nombre es obligatorio."
-	}
-	if !strings.Contains(email, "@") {
-		errs["email"] = "Email inválido."
-	}
-	if len(mensaje) < 10 {
-		errs["mensaje"] = "El mensaje es muy corto (mínimo 10 caracteres)."
-	}
+	// Same rules mirrored by the client in static/js/contact/index.js (UX only;
+	// this is the authority).
+	errs := validate.New()
+	errs.Required("nombre", nombre, "El nombre es obligatorio.")
+	errs.Required("email", email, "El email es obligatorio.")
+	errs.Email("email", email, "Email inválido.")
+	errs.MinLen("mensaje", mensaje, 10, "El mensaje es muy corto (mínimo 10 caracteres).")
 
-	if len(errs) > 0 {
+	if !errs.OK() {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		view.Render(w, r, tplForm, formPage{
 			Meta:   h.meta(r),
