@@ -14,12 +14,13 @@ type mod struct{}
 func (mod) Name() string { return "productos" }
 
 func (mod) Register(a *app.App) error {
-	res := New(db.New(a.DB), a.Config.BaseURL)
+	q := db.New(a.DB)
+	res := New(q, a.Config.BaseURL)
 
 	r := a.Router
 	r.Get("/{$}", res.ListHTML) // home (match exacto de "/")
 	r.Get("/productos/{slug}", res.DetailHTML)
-	r.Get("/api/productos", res.ListJSON)
+	r.Get("/api/productos", SearchJSON(q)) // lista + búsqueda por ?q=
 	r.Get("/api/productos/{slug}", res.DetailJSON)
 
 	a.AddSitemap(res.SitemapSource("/", "/productos"))

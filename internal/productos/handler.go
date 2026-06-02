@@ -1,10 +1,14 @@
 package productos
 
 import (
+	"database/sql"
 	"embed"
+	"net/http"
+	"strings"
 
 	"agogo/internal/jsonld"
 	"agogo/internal/productos/db"
+	"agogo/internal/respond"
 	"agogo/internal/view"
 	"agogo/internal/web"
 )
@@ -16,6 +20,29 @@ var (
 	tplList = view.Layout(tplFS, "templates/list.html")
 	tplItem = view.Layout(tplFS, "templates/detail.html")
 )
+
+// SearchJSON sirve /api/productos: devuelve todo, o filtra por ?q= (LIKE en
+// título y descripción). Es el endpoint que el filtro del catálogo consulta en
+// cada tecla. La búsqueda es SQL parametrizado (sqlc), no en memoria.
+func SearchJSON(q *db.Queries) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		query := strings.TrimSpace(r.URL.Query().Get("q"))
+		var (
+			items []db.Producto
+			err   error
+		)
+		if query == "" {
+			items, err = q.ListProductos(r.Context())
+		} else {
+			items, err = q.SearchProductos(r.Context(), sql.NullString{String: query, Valid: true})
+		}
+		if err != nil {
+			respond.Error(w, http.StatusInternalServerError, "error interno")
+			return
+		}
+		respond.JSON(w, http.StatusOK, items)
+	}
+}
 
 // New configura el COMPORTAMIENTO del recurso "productos". No conoce su URL:
 // sus handlers se cablean en su module.go.

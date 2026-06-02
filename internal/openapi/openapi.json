@@ -14,7 +14,11 @@
     "/api/productos": {
       "get": {
         "summary": "Lista de productos",
+        "description": "Devuelve todos los productos, o filtra por el parámetro 'q' (coincidencia en título o descripción).",
         "tags": ["productos"],
+        "parameters": [
+          { "name": "q", "in": "query", "required": false, "schema": { "type": "string" }, "example": "miel" }
+        ],
         "responses": {
           "200": {
             "description": "OK",

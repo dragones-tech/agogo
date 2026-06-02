@@ -7,6 +7,7 @@ package db
 
 import (
 	"context"
+	"database/sql"
 )
 
 const countProductos = `-- name: CountProductos :one
@@ -68,6 +69,42 @@ ORDER BY titulo
 
 func (q *Queries) ListProductos(ctx context.Context) ([]Producto, error) {
 	rows, err := q.db.QueryContext(ctx, listProductos)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Producto{}
+	for rows.Next() {
+		var i Producto
+		if err := rows.Scan(
+			&i.Slug,
+			&i.Titulo,
+			&i.Descripcion,
+			&i.Precio,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchProductos = `-- name: SearchProductos :many
+SELECT slug, titulo, descripcion, precio
+FROM productos
+WHERE titulo LIKE '%' || ?1 || '%'
+   OR descripcion LIKE '%' || ?1 || '%'
+ORDER BY titulo
+`
+
+func (q *Queries) SearchProductos(ctx context.Context, q_ sql.NullString) ([]Producto, error) {
+	rows, err := q.db.QueryContext(ctx, searchProductos, q_)
 	if err != nil {
 		return nil, err
 	}
