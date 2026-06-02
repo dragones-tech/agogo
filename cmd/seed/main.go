@@ -1,5 +1,6 @@
 // Command seed puebla la base de datos con datos de ejemplo para DESARROLLO.
-// No es parte del servidor. Asegura el esquema (idempotente) y luego siembra.
+// No es parte del servidor. Asegura el esquema (vía app.Migrate, idempotente) y
+// luego siembra cada dominio.
 //
 //	go run ./cmd/seed
 package main
@@ -9,6 +10,7 @@ import (
 	"database/sql"
 	"log"
 
+	"agogo/internal/app"
 	"agogo/internal/auth"
 	authdb "agogo/internal/auth/db"
 	"agogo/internal/blog"
@@ -33,11 +35,20 @@ func main() {
 	defer sqldb.Close()
 
 	ctx := context.Background()
-	// Aseguramos el esquema antes de sembrar (idempotente).
-	must(productos.Migrate(ctx, sqldb), "migrar productos")
-	must(blog.Migrate(ctx, sqldb), "migrar blog")
-	must(contacto.Migrate(ctx, sqldb), "migrar contacto")
-	must(auth.Migrate(ctx, sqldb), "migrar auth")
+
+	// Aseguramos el esquema antes de sembrar (idempotente), reusando el hook de
+	// migraciones del host.
+	application := app.New(cfg, sqldb)
+	if err := application.Use(
+		productos.Module(),
+		blog.Module(),
+		contacto.Module(),
+		auth.Module(),
+	); err != nil {
+		log.Fatalf("módulos: %v", err)
+	}
+	must(application.Migrate(ctx), "migrar")
+
 	must(productos.Seed(ctx, productosdb.New(sqldb)), "sembrar productos")
 	must(blog.Seed(ctx, blogdb.New(sqldb)), "sembrar blog")
 	must(auth.Seed(ctx, authdb.New(sqldb)), "sembrar auth")

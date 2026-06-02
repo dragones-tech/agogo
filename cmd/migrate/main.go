@@ -2,6 +2,10 @@
 // Es un paso de bootstrap (sirve en dev y en despliegue), separado del servidor.
 //
 //	go run ./cmd/migrate
+//
+// Arma el mismo App que el servidor y corre app.Migrate: cada módulo acoplado
+// registró su migración con a.AddMigration, así que añadir un dominio con BD a
+// la lista de abajo basta para que su esquema se aplique (sin tocar nada más).
 package main
 
 import (
@@ -9,6 +13,7 @@ import (
 	"database/sql"
 	"log"
 
+	"agogo/internal/app"
 	"agogo/internal/auth"
 	"agogo/internal/blog"
 	"agogo/internal/config"
@@ -29,16 +34,17 @@ func main() {
 	}
 	defer sqldb.Close()
 
-	ctx := context.Background()
-	must(productos.Migrate(ctx, sqldb), "migrar productos")
-	must(blog.Migrate(ctx, sqldb), "migrar blog")
-	must(contacto.Migrate(ctx, sqldb), "migrar contacto")
-	must(auth.Migrate(ctx, sqldb), "migrar auth")
-	log.Printf("esquema aplicado en %s", cfg.DB)
-}
-
-func must(err error, what string) {
-	if err != nil {
-		log.Fatalf("%s: %v", what, err)
+	application := app.New(cfg, sqldb)
+	if err := application.Use(
+		productos.Module(),
+		blog.Module(),
+		contacto.Module(),
+		auth.Module(),
+	); err != nil {
+		log.Fatalf("módulos: %v", err)
 	}
+	if err := application.Migrate(context.Background()); err != nil {
+		log.Fatalf("migrar: %v", err)
+	}
+	log.Printf("esquema aplicado en %s", cfg.DB)
 }
