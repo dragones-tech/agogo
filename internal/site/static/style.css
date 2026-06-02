@@ -8,6 +8,12 @@ body {
   flex-direction: column;
 }
 
+/* El atributo [hidden] debe ocultar SIEMPRE. Un componente de scc como .card
+   fija display:flex y, al estar en una @layer, perdería contra el display:none
+   del user-agent; esta regla (sin capa, así gana a cualquier @layer) lo asegura.
+   Lo usa el filtro del catálogo (static/js/catalogo.js). */
+[hidden] { display: none; }
+
 /* contenedor centrado y de ancho cómodo para leer */
 .shell {
   width: 100%;
