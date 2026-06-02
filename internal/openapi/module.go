@@ -1,0 +1,18 @@
+package openapi
+
+import "jehosogo/internal/app"
+
+// Module acopla la documentación de la API: la spec y la UI de Swagger.
+func Module() app.Module { return mod{} }
+
+type mod struct{}
+
+func (mod) Name() string { return "openapi" }
+
+func (mod) Register(a *app.App) error {
+	r := a.Router
+	r.Get("/openapi.json", Spec)
+	r.Get("/docs", Docs)
+	r.Handle("GET /docs-assets/", Assets())
+	return nil
+}

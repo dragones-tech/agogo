@@ -1,0 +1,26 @@
+{{define "content"}}
+<h1>Contacto</h1>
+{{if .Flash}}<p class="ok">{{.Flash}}</p>{{end}}
+<form method="POST" action="/contacto">
+  <input type="hidden" name="csrf_token" value="{{.Token}}">
+  <p>
+    <label>Nombre<br>
+      <input name="nombre" value="{{.Values.nombre}}">
+    </label>
+    {{with .Errors.nombre}}<br><small class="err">{{.}}</small>{{end}}
+  </p>
+  <p>
+    <label>Email<br>
+      <input name="email" type="email" value="{{.Values.email}}">
+    </label>
+    {{with .Errors.email}}<br><small class="err">{{.}}</small>{{end}}
+  </p>
+  <p>
+    <label>Mensaje<br>
+      <textarea name="mensaje" rows="5">{{.Values.mensaje}}</textarea>
+    </label>
+    {{with .Errors.mensaje}}<br><small class="err">{{.}}</small>{{end}}
+  </p>
+  <button type="submit">Enviar</button>
+</form>
+{{end}}

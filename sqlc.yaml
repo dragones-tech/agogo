@@ -1,0 +1,38 @@
+version: "2"
+sql:
+  - engine: "sqlite"
+    schema: "internal/productos/sql/schema.sql"
+    queries: "internal/productos/sql/queries.sql"
+    gen:
+      go:
+        package: "db"
+        out: "internal/productos/db"
+        emit_json_tags: true
+        emit_empty_slices: true
+  - engine: "sqlite"
+    schema: "internal/blog/sql/schema.sql"
+    queries: "internal/blog/sql/queries.sql"
+    gen:
+      go:
+        package: "db"
+        out: "internal/blog/db"
+        emit_json_tags: true
+        emit_empty_slices: true
+  - engine: "sqlite"
+    schema: "internal/contacto/sql/schema.sql"
+    queries: "internal/contacto/sql/queries.sql"
+    gen:
+      go:
+        package: "db"
+        out: "internal/contacto/db"
+        emit_json_tags: true
+        emit_empty_slices: true
+  - engine: "sqlite"
+    schema: "internal/auth/sql/schema.sql"
+    queries: "internal/auth/sql/queries.sql"
+    gen:
+      go:
+        package: "db"
+        out: "internal/auth/db"
+        emit_json_tags: true
+        emit_empty_slices: true

@@ -1,0 +1,25 @@
+{{define "base"}}<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/static/style.css">
+<title>{{.Meta.Title}}</title>
+<meta name="description" content="{{.Meta.Description}}">
+<link rel="canonical" href="{{.Meta.Canonical}}">
+<meta property="og:type" content="{{.Meta.OGType}}">
+<meta property="og:title" content="{{.Meta.Title}}">
+<meta property="og:description" content="{{.Meta.Description}}">
+{{with .Meta.JSONLD}}<script type="application/ld+json">{{.}}</script>{{end}}
+</head>
+<body>
+<header>
+  <a href="/"><strong>Jehosogo</strong></a>
+  <nav><a href="/">Inicio</a> · <a href="/blog">Blog</a> · <a href="/quienes-somos">Quiénes somos</a> · <a href="/contacto">Contacto</a> · <a href="/cuenta">Cuenta</a></nav>
+</header>
+<main>
+{{block "content" .}}{{end}}
+</main>
+<footer><small>Jehosogo · Go stdlib + sqlc, sin dependencias de más</small></footer>
+</body>
+</html>{{end}}

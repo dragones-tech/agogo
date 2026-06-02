@@ -1,0 +1,9 @@
+{{define "content"}}
+<article>
+<h1>{{.Item.Titulo}}</h1>
+<p>{{.Item.Descripcion}}</p>
+<p><strong>${{.Item.Precio}} MXN</strong></p>
+<p><a href="/api/productos/{{.Item.Slug}}">Ver como JSON →</a></p>
+</article>
+<p><a href="/">← Volver al catálogo</a></p>
+{{end}}

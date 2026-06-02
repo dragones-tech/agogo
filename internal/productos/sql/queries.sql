@@ -1,0 +1,16 @@
+-- name: ListProductos :many
+SELECT slug, titulo, descripcion, precio
+FROM productos
+ORDER BY titulo;
+
+-- name: GetProducto :one
+SELECT slug, titulo, descripcion, precio
+FROM productos
+WHERE slug = ?;
+
+-- name: CountProductos :one
+SELECT count(*) FROM productos;
+
+-- name: CreateProducto :exec
+INSERT INTO productos (slug, titulo, descripcion, precio)
+VALUES (?, ?, ?, ?);

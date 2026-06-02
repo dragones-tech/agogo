@@ -1,0 +1,7 @@
+# binario del servidor (se compila con `go build`)
+/jehosogo
+
+# base de datos SQLite (local / desarrollo)
+*.db
+*.db-shm
+*.db-wal

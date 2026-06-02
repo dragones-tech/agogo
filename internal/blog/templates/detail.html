@@ -1,0 +1,9 @@
+{{define "content"}}
+<article>
+<h1>{{.Item.Titulo}}</h1>
+<p><small>Publicado el {{.Item.Publicado}}</small></p>
+<p>{{.Item.Contenido}}</p>
+<p><a href="/api/posts/{{.Item.Slug}}">Ver como JSON →</a></p>
+</article>
+<p><a href="/blog">← Volver al blog</a></p>
+{{end}}

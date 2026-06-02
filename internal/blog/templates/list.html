@@ -1,0 +1,13 @@
+{{define "content"}}
+<h1>Blog</h1>
+<ul>
+{{range .Items}}
+  <li>
+    <a href="/blog/{{.Slug}}">{{.Titulo}}</a>
+    <small>{{.Publicado}}</small>
+  </li>
+{{else}}
+  <li>Aún no hay artículos.</li>
+{{end}}
+</ul>
+{{end}}

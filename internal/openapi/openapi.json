@@ -1,0 +1,115 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Jehosogo API",
+    "description": "API JSON de Jehosogo (productos y blog). Servida con Go puro.",
+    "version": "1.0.0"
+  },
+  "servers": [{ "url": "/" }],
+  "tags": [
+    { "name": "productos" },
+    { "name": "blog" }
+  ],
+  "paths": {
+    "/api/productos": {
+      "get": {
+        "summary": "Lista de productos",
+        "tags": ["productos"],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Producto" } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/productos/{slug}": {
+      "get": {
+        "summary": "Detalle de un producto",
+        "tags": ["productos"],
+        "parameters": [
+          { "name": "slug", "in": "path", "required": true, "schema": { "type": "string" }, "example": "cafe-organico" }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Producto" } } }
+          },
+          "404": {
+            "description": "No encontrado",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+          }
+        }
+      }
+    },
+    "/api/posts": {
+      "get": {
+        "summary": "Lista de artículos",
+        "tags": ["blog"],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Post" } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/posts/{slug}": {
+      "get": {
+        "summary": "Detalle de un artículo",
+        "tags": ["blog"],
+        "parameters": [
+          { "name": "slug", "in": "path", "required": true, "schema": { "type": "string" }, "example": "sqlc-sin-orm" }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Post" } } }
+          },
+          "404": {
+            "description": "No encontrado",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Producto": {
+        "type": "object",
+        "properties": {
+          "slug": { "type": "string", "example": "cafe-organico" },
+          "titulo": { "type": "string", "example": "Café Orgánico" },
+          "descripcion": { "type": "string" },
+          "precio": { "type": "integer", "format": "int64", "example": 180 }
+        },
+        "required": ["slug", "titulo", "descripcion", "precio"]
+      },
+      "Post": {
+        "type": "object",
+        "properties": {
+          "slug": { "type": "string", "example": "sqlc-sin-orm" },
+          "titulo": { "type": "string" },
+          "resumen": { "type": "string" },
+          "contenido": { "type": "string" },
+          "publicado": { "type": "string", "example": "2026-05-27" }
+        },
+        "required": ["slug", "titulo", "resumen", "contenido", "publicado"]
+      },
+      "Error": {
+        "type": "object",
+        "properties": { "error": { "type": "string", "example": "no encontrado" } },
+        "required": ["error"]
+      }
+    }
+  }
+}

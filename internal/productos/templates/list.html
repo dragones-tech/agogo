@@ -1,0 +1,10 @@
+{{define "content"}}
+<h1>Catálogo</h1>
+<ul>
+{{range .Items}}
+  <li><a href="/productos/{{.Slug}}">{{.Titulo}}</a> — ${{.Precio}}</li>
+{{else}}
+  <li>No hay productos todavía.</li>
+{{end}}
+</ul>
+{{end}}
