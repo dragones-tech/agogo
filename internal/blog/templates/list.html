@@ -1,10 +1,10 @@
 {{define "content"}}
 <h1>Blog</h1>
-<ul>
+<ul class="cards">
 {{range .Items}}
-  <li>
-    <a href="/blog/{{.Slug}}">{{.Titulo}}</a>
-    <small>{{.Publicado}}</small>
+  <li class="card">
+    <h2><a href="/blog/{{.Slug}}">{{.Titulo}}</a></h2>
+    <p><small>{{.Publicado}}</small></p>
   </li>
 {{else}}
   <li>Aún no hay artículos.</li>

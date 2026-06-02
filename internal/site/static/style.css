@@ -1,94 +1,51 @@
-:root {
-  --bg: #fafaf8;
-  --fg: #1f2421;
-  --muted: #6b7770;
-  --accent: #2f6f4e;
-  --accent-fg: #fff;
-  --card: #fff;
-  --border: #e4e7e3;
-  --radius: 10px;
-  --maxw: 44rem;
-}
-
-* { box-sizing: border-box; }
-
-html { -webkit-text-size-adjust: 100%; }
+/* Marco de la página (SOLO layout). El sistema de diseño lo pone scc
+   (scc/scc.css): tipografía, color, componentes. Aquí solo centramos el
+   contenido y fijamos el footer abajo, usando los tokens de scc. */
 
 body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--fg);
-  font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
 }
 
-header, main, footer {
+/* contenedor centrado y de ancho cómodo para leer */
+.shell {
   width: 100%;
-  max-width: var(--maxw);
+  max-width: 48rem;
   margin-inline: auto;
-  padding-inline: 1.25rem;
+  padding-inline: var(--space-4);
 }
 
-header {
-  display: flex;
-  align-items: center;
-  padding-block: 1.25rem;
-  border-bottom: 1px solid var(--border);
-}
-header a { color: var(--fg); text-decoration: none; font-size: 1.25rem; }
-
-main { flex: 1; padding-block: 2rem; }
-
-footer {
-  padding-block: 1.5rem;
-  border-top: 1px solid var(--border);
-  color: var(--muted);
+main.shell {
+  flex: 1;
+  padding-block: var(--space-8);
+  display: grid;
+  gap: var(--space-4);
 }
 
-a { color: var(--accent); }
+footer.shell {
+  padding-block: var(--space-6);
+  margin-block-start: var(--space-8);
+  border-block-start: var(--border-width) solid var(--border);
+  color: var(--text-muted);
+}
 
-h1 { font-size: 1.6rem; line-height: 1.25; margin: 0 0 1.25rem; }
+/* la barra de navegación (componente .navbar de scc) ocupa todo el ancho,
+   pero su contenido se alinea al mismo ancho que el resto */
+.navbar { padding-inline: max(var(--space-4), (100% - 48rem) / 2); }
 
-/* catálogo */
-main > ul {
+/* rejilla de tarjetas (listados de productos/blog): solo disposición */
+.cards {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 0.75rem;
+  gap: var(--space-3);
 }
-main > ul > li {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 1rem;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 0.9rem 1.1rem;
-  transition: border-color .15s ease, transform .15s ease;
+@media (min-width: 40rem) {
+  .cards { grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); }
 }
-main > ul > li:hover { border-color: var(--accent); transform: translateY(-1px); }
-main > ul > li a { text-decoration: none; font-weight: 600; }
 
-/* detalle */
-article {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1.5rem;
-}
-article p { color: var(--muted); }
-article strong {
-  display: inline-block;
-  margin-top: .5rem;
-  font-size: 1.3rem;
-  color: var(--accent);
-}
-.json-link, article + p a {
-  display: inline-block;
-  margin-top: 1rem;
-  font-size: .9rem;
-}
+/* mensaje de error de un campo (intención); se oculta si está vacío */
+.field small.err { color: var(--danger); }
+.field small.err:empty { display: none; }

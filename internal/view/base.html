@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/static/scc/scc.css">
 <link rel="stylesheet" href="/static/style.css">
 <title>{{.Meta.Title}}</title>
 <meta name="description" content="{{.Meta.Description}}">
@@ -13,13 +14,17 @@
 {{with .Meta.JSONLD}}<script type="application/ld+json">{{.}}</script>{{end}}
 </head>
 <body>
-<header>
-  <a href="/"><strong>Agogo</strong></a>
-  <nav><a href="/">Inicio</a> · <a href="/blog">Blog</a> · <a href="/quienes-somos">Quiénes somos</a> · <a href="/contacto">Contacto</a> · <a href="/cuenta">Cuenta</a></nav>
+<header class="navbar">
+  <a href="/" data-brand>Agogo</a>
+  <a href="/blog">Blog</a>
+  <a href="/quienes-somos">Quiénes somos</a>
+  <a href="/contacto">Contacto</a>
+  <span data-nav-end><a href="/cuenta" data-button>Cuenta</a></span>
 </header>
-<main>
+<main class="shell">
 {{block "content" .}}{{end}}
 </main>
-<footer><small>Agogo · Go stdlib + sqlc, sin dependencias de más</small></footer>
+<footer class="shell"><small>Agogo · Go stdlib + sqlc · estilo con scc · UI con lumen — el mismo no-magia en las tres capas</small></footer>
+{{block "scripts" .}}{{end}}
 </body>
 </html>{{end}}

@@ -1,26 +1,24 @@
 {{define "content"}}
 <h1>Contacto</h1>
-{{if .Flash}}<p class="ok">{{.Flash}}</p>{{end}}
-<form method="POST" action="/contacto">
+{{if .Flash}}<div class="alert" data-variant="success" role="status">{{.Flash}}</div>{{end}}
+<form method="POST" action="/contacto" novalidate data-ref="form">
   <input type="hidden" name="csrf_token" value="{{.Token}}">
-  <p>
-    <label>Nombre<br>
-      <input name="nombre" value="{{.Values.nombre}}">
-    </label>
-    {{with .Errors.nombre}}<br><small class="err">{{.}}</small>{{end}}
+  <p class="field">
+    <label for="nombre">Nombre</label>
+    <input id="nombre" name="nombre" value="{{.Values.nombre}}" placeholder="Tu nombre" data-ref="nombre">
+    <small class="err" data-ref="error-nombre">{{.Errors.nombre}}</small>
   </p>
-  <p>
-    <label>Email<br>
-      <input name="email" type="email" value="{{.Values.email}}">
-    </label>
-    {{with .Errors.email}}<br><small class="err">{{.}}</small>{{end}}
+  <p class="field">
+    <label for="email">Email</label>
+    <input id="email" name="email" type="email" value="{{.Values.email}}" placeholder="tu@correo.com" data-ref="email">
+    <small class="err" data-ref="error-email">{{.Errors.email}}</small>
   </p>
-  <p>
-    <label>Mensaje<br>
-      <textarea name="mensaje" rows="5">{{.Values.mensaje}}</textarea>
-    </label>
-    {{with .Errors.mensaje}}<br><small class="err">{{.}}</small>{{end}}
+  <p class="field">
+    <label for="mensaje">Mensaje</label>
+    <textarea id="mensaje" name="mensaje" rows="5" placeholder="¿En qué te ayudamos?" data-ref="mensaje">{{.Values.mensaje}}</textarea>
+    <small class="err" data-ref="error-mensaje">{{.Errors.mensaje}}</small>
   </p>
-  <button type="submit">Enviar</button>
+  <button type="submit" data-variant="primary">Enviar</button>
 </form>
 {{end}}
+{{define "scripts"}}<script type="module" src="/static/js/contacto.js"></script>{{end}}

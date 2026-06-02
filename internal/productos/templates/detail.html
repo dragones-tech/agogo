@@ -1,9 +1,9 @@
 {{define "content"}}
-<article>
+<article class="card">
 <h1>{{.Item.Titulo}}</h1>
 <p>{{.Item.Descripcion}}</p>
 <p><strong>${{.Item.Precio}} MXN</strong></p>
-<p><a href="/api/productos/{{.Item.Slug}}">Ver como JSON →</a></p>
+<footer><a href="/api/productos/{{.Item.Slug}}" data-button>Ver como JSON →</a></footer>
 </article>
 <p><a href="/">← Volver al catálogo</a></p>
 {{end}}

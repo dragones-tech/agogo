@@ -1,10 +1,19 @@
 {{define "content"}}
 <h1>Catálogo</h1>
-<ul>
+<p class="field">
+  <label for="filtro">Filtrar</label>
+  <input id="filtro" type="search" placeholder="Escribe para filtrar…" autocomplete="off" data-ref="filtro">
+</p>
+<ul class="cards" data-ref="lista">
 {{range .Items}}
-  <li><a href="/productos/{{.Slug}}">{{.Titulo}}</a> — ${{.Precio}}</li>
+  <li class="card" data-nombre="{{.Titulo}}">
+    <h2><a href="/productos/{{.Slug}}">{{.Titulo}}</a></h2>
+    <p><strong>${{.Precio}} MXN</strong></p>
+  </li>
 {{else}}
   <li>No hay productos todavía.</li>
 {{end}}
 </ul>
+<p data-ref="vacio" hidden>Ningún producto coincide.</p>
 {{end}}
+{{define "scripts"}}<script type="module" src="/static/js/catalogo.js"></script>{{end}}
