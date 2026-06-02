@@ -10,10 +10,12 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io/fs"
+	"log"
 	"net/http"
 
 	"agogo/internal/app"
 	"agogo/internal/sitemap"
+	"agogo/internal/view"
 )
 
 func Module() app.Module { return mod{} }
@@ -34,6 +36,18 @@ func (mod) Register(a *app.App) error {
 		writeSitemap(req.Context(), w, base, a.SitemapSources())
 	})
 	r.Handle("GET /static/", Static())
+
+	r.Get("/favicon.ico", func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "image/svg+xml")
+		w.Header().Set("Cache-Control", "public, max-age=86400")
+		b, _ := staticFS.ReadFile("static/favicon.svg")
+		_, _ = w.Write(b)
+	})
+
+	// Catch-all: cualquier ruta no registrada cae aquí → 404 con el layout del
+	// sitio. "/{$}" (home) y las rutas específicas son más concretas y ganan;
+	// "/" (subárbol) solo atrapa lo no emparejado.
+	r.Handle("/", http.HandlerFunc(view.NotFound))
 	return nil
 }
 
@@ -70,6 +84,7 @@ func writeSitemap(ctx context.Context, w http.ResponseWriter, base string, sourc
 	for _, s := range sources {
 		urls, err := s.SitemapURLs(ctx)
 		if err != nil {
+			log.Printf("sitemap: %v", err)
 			http.Error(w, "error interno", http.StatusInternalServerError)
 			return
 		}
@@ -82,6 +97,7 @@ func writeSitemap(ctx context.Context, w http.ResponseWriter, base string, sourc
 	enc := xml.NewEncoder(w)
 	enc.Indent("", "  ")
 	if err := enc.Encode(doc); err != nil {
+		log.Printf("sitemap encode: %v", err)
 		http.Error(w, "error interno", http.StatusInternalServerError)
 	}
 }
