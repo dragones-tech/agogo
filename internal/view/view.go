@@ -7,12 +7,14 @@ import (
 	"bytes"
 	"embed"
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"io/fs"
+	"log"
 	"net/http"
 )
 
-//go:embed base.html
+//go:embed base.html error.html
 var baseFS embed.FS
 
 // Meta son los datos de cabecera (SEO) que cada página rellena.
@@ -69,4 +71,42 @@ func Render(w http.ResponseWriter, r *http.Request, t *template.Template, data a
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Add("Vary", FragmentHeader) // misma URL, dos respuestas según la cabecera
 	_, _ = buf.WriteTo(w)
+}
+
+// tplError es la página de error con el layout del sitio (header/footer/marca).
+var tplError = Layout(baseFS, "error.html")
+
+type errorPage struct {
+	Meta    Meta
+	Code    int
+	Heading string
+	Message string
+}
+
+// renderError escribe una página de error con el status dado y el layout del
+// sitio. A diferencia de http.Error (texto plano), conserva header/footer y marca.
+func renderError(w http.ResponseWriter, code int, heading, message string) {
+	data := errorPage{Meta: Meta{Title: fmt.Sprintf("%d — Agogo", code)}, Code: code, Heading: heading, Message: message}
+	var buf bytes.Buffer
+	if err := tplError.ExecuteTemplate(&buf, "base", data); err != nil {
+		http.Error(w, message, code) // último recurso si hasta el layout falla
+		return
+	}
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.WriteHeader(code)
+	_, _ = buf.WriteTo(w)
+}
+
+// NotFound responde un 404 con el layout del sitio. Para handlers HTML.
+func NotFound(w http.ResponseWriter, _ *http.Request) {
+	renderError(w, http.StatusNotFound, "No encontramos esa página",
+		"El enlace puede estar roto o la página ya no existe.")
+}
+
+// ServerError registra el error REAL (con método y ruta, para depurar) y responde
+// un 500 con el layout del sitio, sin filtrar detalles internos al cliente.
+func ServerError(w http.ResponseWriter, r *http.Request, err error) {
+	log.Printf("error en %s %s: %v", r.Method, r.URL.Path, err)
+	renderError(w, http.StatusInternalServerError, "Algo salió mal",
+		"Tuvimos un problema de nuestro lado. Inténtalo de nuevo en un momento.")
 }

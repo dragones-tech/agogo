@@ -107,7 +107,7 @@ func (h *Handler) Recibir(w http.ResponseWriter, r *http.Request) {
 		Email:   email,
 		Mensaje: mensaje,
 	}); err != nil {
-		http.Error(w, "error interno", http.StatusInternalServerError)
+		view.ServerError(w, r, err)
 		return
 	}
 

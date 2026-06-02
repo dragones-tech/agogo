@@ -48,7 +48,7 @@ func (r Resource[T]) url(req *http.Request) string { return r.BaseURL + req.URL.
 func (r Resource[T]) ListHTML(w http.ResponseWriter, req *http.Request) {
 	items, err := r.List(req.Context())
 	if err != nil {
-		http.Error(w, "error interno", http.StatusInternalServerError)
+		view.ServerError(w, req, err)
 		return
 	}
 	view.Render(w, req, r.TplList, Page[T]{Meta: r.ListMeta(r.url(req)), Items: items})
@@ -57,10 +57,10 @@ func (r Resource[T]) ListHTML(w http.ResponseWriter, req *http.Request) {
 func (r Resource[T]) DetailHTML(w http.ResponseWriter, req *http.Request) {
 	it, err := r.Get(req.Context(), req.PathValue("slug"))
 	if errors.Is(err, sql.ErrNoRows) {
-		http.NotFound(w, req)
+		view.NotFound(w, req)
 		return
 	} else if err != nil {
-		http.Error(w, "error interno", http.StatusInternalServerError)
+		view.ServerError(w, req, err)
 		return
 	}
 	view.Render(w, req, r.TplItem, ItemPage[T]{Meta: r.ItemMeta(it, r.url(req)), Item: it})
@@ -69,7 +69,7 @@ func (r Resource[T]) DetailHTML(w http.ResponseWriter, req *http.Request) {
 func (r Resource[T]) ListJSON(w http.ResponseWriter, req *http.Request) {
 	items, err := r.List(req.Context())
 	if err != nil {
-		respond.Error(w, http.StatusInternalServerError, "error interno")
+		respond.ServerError(w, req, err)
 		return
 	}
 	respond.JSON(w, http.StatusOK, items)
@@ -81,7 +81,7 @@ func (r Resource[T]) DetailJSON(w http.ResponseWriter, req *http.Request) {
 		respond.Error(w, http.StatusNotFound, "no encontrado")
 		return
 	} else if err != nil {
-		respond.Error(w, http.StatusInternalServerError, "error interno")
+		respond.ServerError(w, req, err)
 		return
 	}
 	respond.JSON(w, http.StatusOK, it)

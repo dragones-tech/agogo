@@ -67,7 +67,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 
 	u, err := h.q.GetUsuarioByEmail(r.Context(), email)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		http.Error(w, "error interno", http.StatusInternalServerError)
+		view.ServerError(w, r, err)
 		return
 	}
 	// No revelamos si el correo existe: mismo mensaje para "no existe" y "mala contraseña".
@@ -111,7 +111,7 @@ func (h *Handler) Cuenta(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.ParseInt(h.identity.UserID(r), 10, 64)
 	u, err := h.q.GetUsuario(r.Context(), id)
 	if err != nil {
-		http.Error(w, "error interno", http.StatusInternalServerError)
+		view.ServerError(w, r, err)
 		return
 	}
 	// Página autenticada: que ningún intermediario ni el navegador la cacheen.
