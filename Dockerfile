@@ -11,9 +11,9 @@ RUN mkdir -p /data
 FROM scratch
 COPY --from=build /agogo /agogo
 COPY --from=build --chown=65534:65534 /data /data
-ENV AGOGO_ADDR=:8080 \
+ENV AGOGO_ADDR=:8888 \
     AGOGO_DB=/data/agogo.db \
-    AGOGO_BASE_URL=http://localhost:8080
-EXPOSE 8080
+    AGOGO_BASE_URL=http://localhost:8888
+EXPOSE 8888
 USER 65534:65534
 ENTRYPOINT ["/agogo"]

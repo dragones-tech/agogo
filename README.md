@@ -183,7 +183,7 @@ del sitio, como comandos de desarrollo). En una BD nueva:
 ```bash
 go run ./cmd/migrate   # aplica el esquema (bootstrap; sirve también en deploy)
 go run ./cmd/seed      # datos de ejemplo (SOLO desarrollo; idempotente)
-go run .               # arranca el servidor → http://localhost:8080
+go run .               # arranca el servidor → http://localhost:8888
 ```
 
 En desarrollo basta `go run ./cmd/seed` (asegura el esquema y luego siembra) y
@@ -193,23 +193,23 @@ después `go run .`.
 
 ```bash
 docker build -t agogo .
-docker run -p 8080:8080 agogo
-# → http://localhost:8080
+docker run -p 8888:8888 agogo
+# → http://localhost:8888
 ```
 
 La BD vive en `/data` dentro del contenedor. Para persistirla, monta un volumen:
 
 ```bash
-docker run -p 8080:8080 -v agogo-data:/data agogo
+docker run -p 8888:8888 -v agogo-data:/data agogo
 ```
 
 ## Variables de entorno
 
 | Variable             | Por defecto                | Descripción                  |
 |----------------------|----------------------------|------------------------------|
-| `AGOGO_ADDR`      | `:8080`                    | Dirección de escucha         |
+| `AGOGO_ADDR`      | `:8888`                    | Dirección de escucha         |
 | `AGOGO_DB`        | `agogo.db`              | Ruta del archivo SQLite      |
-| `AGOGO_BASE_URL`  | `http://localhost:8080`    | URL base (canonical, sitemap)|
+| `AGOGO_BASE_URL`  | `http://localhost:8888`    | URL base (canonical, sitemap)|
 | `AGOGO_SECRET_KEY`| (clave de dev insegura)    | Firma de sesiones (HMAC). En producción, ≥32 chars. |
 | `OAUTH_CLIENT_ID` … | (vacío)                    | Config del módulo `oauth` (CLIENT_ID/SECRET, AUTH/TOKEN/USERINFO_URL, SCOPE). Sin esto, `/oauth/login` da 503. |
 
@@ -255,7 +255,7 @@ sin dependencias y sin gestionar certificados. Ejemplo mínimo con Caddy
 # Caddyfile (ejemplo de despliegue, no se incluye en la imagen)
 agogo.com {
 	encode gzip zstd
-	reverse_proxy localhost:8080   # o unix//run/agogo.sock
+	reverse_proxy localhost:8888   # o unix//run/agogo.sock
 }
 ```
 
