@@ -22,7 +22,14 @@ func New(sess *session.Manager) *Service {
 
 // Login marca al usuario como autenticado guardando su id en la sesión.
 func (s *Service) Login(w http.ResponseWriter, r *http.Request, userID string) {
-	sess := s.sess.Get(r)
+	s.LoginInto(w, s.sess.Get(r), userID)
+}
+
+// LoginInto marca al usuario sobre una sesión YA cargada y la guarda en un único
+// Set-Cookie. Úsalo cuando el caller hizo otras mutaciones que deben persistir en
+// el mismo guardado (p. ej. oauth, que consume su state anti-CSRF antes de entrar);
+// dos Save separados emitirían dos cookies homónimas y el cliente tomaría una sola.
+func (s *Service) LoginInto(w http.ResponseWriter, sess *session.Session, userID string) {
 	sess.Set(userKey, userID)
 	s.sess.Save(w, sess)
 }

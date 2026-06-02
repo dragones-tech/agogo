@@ -107,6 +107,9 @@ func (h *handler) callback(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "state inválido", http.StatusForbidden)
 		return
 	}
+	// El state es de un solo uso: consúmelo para que no se pueda reusar. Se
+	// persiste en el mismo Save que el login (LoginInto), no aparte.
+	s.Delete(stateKey)
 	code := r.URL.Query().Get("code")
 	if code == "" {
 		http.Error(w, "falta code", http.StatusBadRequest)
@@ -124,11 +127,12 @@ func (h *handler) callback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.identity.Login(w, r, user) // ← REUSA el servicio identity del núcleo
+	h.identity.LoginInto(w, s, user) // ← REUSA el servicio identity del núcleo
 	http.Redirect(w, r, "/oauth/me", http.StatusSeeOther)
 }
 
 func (h *handler) me(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Cache-Control", "no-store") // respuesta autenticada
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	fmt.Fprintf(w, "<h1>Conectado vía OAuth</h1><p>Eres <strong>%s</strong>.</p>", html.EscapeString(h.identity.UserID(r)))
 }
