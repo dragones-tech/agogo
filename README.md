@@ -43,6 +43,35 @@ uno" — solo la biblioteca estándar y herramientas de nicho.
 - **Despliegue trivial.** Un binario o una imagen mínima; nada que instalar en el
   servidor.
 
+## Frontend: la misma filosofía en las tres capas
+
+El frontend es **tu elección** — agogo sirve HTML y no te ata a nada. Pero de
+cajón usa una trinca hermana que comparte exactamente el mismo ADN (sin build,
+sin magia, primitivas nativas, "lo que escribes es lo que corre"), una capa por
+cada parte de la web:
+
+| Capa | Proyecto | Qué hace |
+|------|----------|----------|
+| Servidor (Go) | **[agogo](https://github.com/dragones-tech/agogo)** | HTML server-rendered + API JSON desde una fuente |
+| Estilo (CSS) | **[scc](https://github.com/dragones-tech/scc)** | CSS semántico: las clases dicen *qué es*, no *cómo se ve* |
+| UI (JS) | **[lumen](https://github.com/dragones-tech/lumen)** | UI vanilla-JS, sin build, `<template>` nativo |
+
+Ambos vienen **vendorizados** en `internal/site/static/` (servidos desde
+`'self'`, sin CDN, con la CSP estricta intacta — igual que Swagger UI). La
+"perilla" de marca de scc vive en `static/scc/theme.css`.
+
+Los ejemplos ya los usan como **mejora progresiva** (el servidor renderiza y
+valida igual sin JS):
+
+- **scc** estila el HTML semántico de todas las páginas (`class="card"`,
+  `class="field"`, `class="alert"`, `<button data-variant="primary">`…).
+- **lumen** añade comodidad en cliente: filtro instantáneo del catálogo
+  (`static/js/catalogo.js`) y validación del formulario de contacto espejo de
+  las reglas del servidor (`static/js/contacto.js`).
+
+Cámbialos por lo que quieras: la filosofía no te obliga a usarlos, solo a que,
+si los usas, los tres encajan sin fricción.
+
 ## Estructura (package-by-feature)
 
 ```
@@ -77,6 +106,11 @@ uno" — solo la biblioteca estándar y herramientas de nicho.
     ├── oauth/                    # autenticación OAuth 2.0 (reusa identity), stdlib
     ├── openapi/                  # openapi.json + Swagger UI vendorizado
     └── site/                     # robots.txt, sitemap.xml, /static
+        └── static/
+            ├── scc/              # vendorizado: CSS semántico (theme.css = tu marca)
+            ├── lumen/            # vendorizado: UI vanilla-JS (mejora progresiva)
+            ├── js/               # módulos de página (filtro de catálogo, validación)
+            └── style.css         # solo el marco de página (layout); el diseño lo pone scc
 ```
 
 El servidor es un **núcleo (`app`) + módulos acoplables**. Cada módulo tiene un

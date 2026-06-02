@@ -226,6 +226,27 @@ de seed del binario del servidor.
 
 ---
 
+## Frontend: misma filosofía, otra capa
+
+El frontend es libre (agogo solo sirve HTML), pero de cajón se apoya en dos
+proyectos hermanos con **el mismo principio** que agogo —sin build, sin magia,
+primitivas nativas, todo legible y auditable—, uno por cada capa de la web:
+
+- **[scc](https://github.com/dragones-tech/scc)** (CSS): estilo de HTML semántico
+  con primitivas nativas (`@layer`, `@scope`, custom properties). La regla de oro:
+  una clase dice *qué es* (`card`, `field`, `alert`), nunca *cómo se ve*. La
+  presentación vive en el CSS, el HTML queda legible.
+- **[lumen](https://github.com/dragones-tech/lumen)** (JS): UI vanilla-JS sin
+  build, con `<template>` nativo y ES modules (el navegador solo baja lo que
+  importas).
+
+Ambos se **vendorizan** en `internal/site/static/` (servidos desde `'self'`, sin
+CDN, CSP estricta intacta — mismo trato que Swagger UI). Se usan como **mejora
+progresiva**: el servidor renderiza y valida igual sin JS, y lumen solo añade
+comodidad (filtro de catálogo, validación de formulario espejo del servidor).
+El layout de página vive en `static/style.css`; el sistema de diseño, en scc;
+la marca, en `static/scc/theme.css` (la única "perilla" que editamos de scc).
+
 ## Configuración y sesiones
 
 - **`config`**: lee el entorno **una sola vez**, tipado y validado
@@ -278,6 +299,13 @@ El ciclo que seguimos: **Discutir → decidir → construir → verificar → do
 ---
 
 ## Referencias
+
+Proyectos hermanos (mismo ADN, una capa cada uno):
+
+- **[lumen](https://github.com/dragones-tech/lumen)** — UI vanilla-JS, sin build,
+  sin magia. La capa de cliente.
+- **[scc](https://github.com/dragones-tech/scc)** — Scoped Cascade CSS, semántico,
+  sin build. La capa de estilo.
 
 El diseño coincide, sin haberlo buscado, con las prácticas canónicas de Go:
 
