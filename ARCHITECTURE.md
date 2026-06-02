@@ -177,7 +177,10 @@ mw...)`, p. ej. `a.Identity.Require`).
 
 ## Capa de datos
 
-- **SQLite** vía `modernc.org/sqlite` (Go puro, sin cgo → binario estático).
+- **SQLite** vía `modernc.org/sqlite` (Go puro, sin cgo → binario estático). Se
+  abre en modo **WAL** con **`busy_timeout`** (`Config.DSN()`): lecturas
+  concurrentes con una escritura, y las escrituras esperan en vez de fallar con
+  `database is locked`.
 - **sqlc** genera, por dominio, una función tipada por consulta a partir de
   `internal/<dominio>/sql/queries.sql` y `schema.sql`. El código generado vive
   en `internal/<dominio>/db/` (no se edita).
@@ -225,6 +228,22 @@ de seed del binario del servidor.
   `internal/openapi/static`, servidos desde `/docs-assets/`): self-contained, sin
   CDN, CSP `'self'` (solo `style-src` permite `'unsafe-inline'` por los estilos
   que Swagger inyecta en runtime).
+
+---
+
+## Errores y operación
+
+- **Errores que se ven.** Un fallo del servidor se **registra con método y ruta**
+  (`respond.ServerError` para JSON, `view.ServerError` para HTML) pero al cliente
+  solo le llega un 500 genérico — nunca se filtran detalles internos. Antes el
+  error real se descartaba; ahora queda en el log.
+- **Páginas de error con el sitio.** 404 y 500 se renderizan con el layout
+  (`view.NotFound` / `view.ServerError`, plantilla `error.html`), no como texto
+  pelón. Un catch-all (`/`) en el módulo `site` da el 404 con estilo a cualquier
+  ruta no registrada.
+- **Apagado ordenado.** `main` escucha `SIGINT`/`SIGTERM`, deja de aceptar, da
+  hasta 10s a las peticiones en curso (`srv.Shutdown`) y recién entonces vuelve,
+  así corren los `defer` (incl. cerrar la BD). Stdlib (`os/signal`).
 
 ---
 
