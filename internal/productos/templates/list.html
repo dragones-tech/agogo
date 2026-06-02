@@ -1,27 +1,27 @@
 {{define "content"}}
 <h1>Catálogo</h1>
 <p class="field">
-  <label for="filtro">Filtrar</label>
-  <input id="filtro" type="search" placeholder="Escribe para filtrar…" autocomplete="off" data-ref="filtro">
+  <label for="filter">Filtrar</label>
+  <input id="filter" type="search" placeholder="Escribe para filtrar…" autocomplete="off" data-ref="filter">
 </p>
 
 <!-- Datos para lumen: el MISMO modelo del servidor, como JSON (una sola fuente). -->
-<script type="application/json" data-ref="datos">{{ .Items | tojson }}</script>
+<script type="application/json" data-ref="data">{{ .Items | tojson }}</script>
 
 <!-- Lista del servidor: SEO y funciona sin JS. lumen la reemplaza al cargar. -->
-<ul class="cards" data-ref="lista">
+<ul class="cards" data-ref="list">
 {{range .Items}}
   <li class="card"><h2><a href="/productos/{{.Slug}}">{{.Titulo}}</a></h2><p><strong>${{.Precio}} MXN</strong></p></li>
 {{else}}
   <li>No hay productos todavía.</li>
 {{end}}
 </ul>
-<p data-ref="vacio" hidden>Ningún producto coincide.</p>
+<p data-ref="empty" hidden>Ningún producto coincide.</p>
 
 <!-- Plantillas que clona lumen (no se renderizan solas). -->
-<template id="catalogo-tpl"><ul class="cards" data-ref="items"></ul></template>
-<template id="producto-tpl">
-  <li class="card"><h2><a data-ref="enlace"></a></h2><p><strong data-ref="precio"></strong></p></li>
+<template id="catalog-grid"><ul class="cards" data-ref="items"></ul></template>
+<template id="product-item">
+  <li class="card"><h2><a data-ref="link"></a></h2><p><strong data-ref="price"></strong></p></li>
 </template>
 {{end}}
-{{define "scripts"}}<script type="module" src="/static/js/catalogo.js"></script>{{end}}
+{{define "scripts"}}<script type="module" src="/static/js/catalog/index.js"></script>{{end}}

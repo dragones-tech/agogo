@@ -109,7 +109,9 @@ si los usas, los tres encajan sin fricción.
         └── static/
             ├── scc/              # vendorizado: CSS semántico (theme.css = tu marca)
             ├── lumen/            # vendorizado: UI vanilla-JS (mejora progresiva)
-            ├── js/               # módulos de página (filtro de catálogo, validación)
+            ├── js/               # nuestro JS, package-by-feature (como el Go)
+            │   ├── catalog/      #   product.js (Model) · product-item.js, catalog-view.js (View) · index.js (entry)
+            │   └── contact/      #   index.js (validación del form)
             └── style.css         # solo el marco de página (layout); el diseño lo pone scc
 ```
 
