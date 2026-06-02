@@ -24,6 +24,25 @@ uno" — solo la biblioteca estándar y herramientas de nicho.
 > arrastra unas pocas dependencias indirectas. Es el precio mínimo de tener
 > SQLite sin `cgo`.
 
+## Por qué Agogo
+
+- **Un solo binario, cero sorpresas.** Compila a un ejecutable estático que corre
+  en una imagen `scratch` (~20 MB), como usuario no-root, sin SO ni runtime.
+  Arranca en milisegundos.
+- **Sin framework, solo stdlib.** Menos superficie de ataque, nada de "magia" en
+  runtime, fácil de auditar. La única dependencia es el driver SQLite (Go puro).
+- **Modular: pagas solo lo que usas.** Acoplas `auth`, `oauth`, `logs`, `blog`…
+  con una línea; lo que no acoplas no entra al binario. Tu `main.go` es la lista
+  de lo que tu app *es*.
+- **SEO + API desde una sola fuente.** HTML renderizado en servidor (con JSON-LD
+  y sitemap) y API JSON con OpenAPI, del mismo modelo de datos.
+- **Seguro por defecto.** CSRF en formularios, cabeceras de seguridad, sesiones
+  firmadas (HMAC), SQL parametrizado (sqlc) y hashing PBKDF2 — todo stdlib.
+- **Type-safe y tuyo.** Sin ORM ni cajas negras: el código que corre es el que
+  lees. Extender el servidor = escribir un `module.go`.
+- **Despliegue trivial.** Un binario o una imagen mínima; nada que instalar en el
+  servidor.
+
 ## Estructura (package-by-feature)
 
 ```
@@ -104,11 +123,21 @@ heredan. Es código nuestro y type-safe (genéricos en compilación, sin reflexi
 | `GET /robots.txt`         | texto — apunta al sitemap                            |
 | `GET /salud`              | `ok` — healthcheck                                   |
 
-## Requisitos
+## Instalación
 
-- Go 1.26+
-- Docker (opcional, para la imagen de contenedor)
-- sqlc (opcional, **solo** para regenerar código tras tocar el SQL)
+Requisitos: **Go 1.26+**. (Docker es opcional, para la imagen de contenedor;
+`sqlc` es opcional, **solo** para regenerar código tras tocar el SQL.)
+
+Agogo no es una librería que se instale con `go get`: es una **base que clonas y
+haces tuya** (los paquetes del framework viven en `internal/`, a propósito — el
+código que corre es el que lees y editas).
+
+```bash
+git clone https://github.com/dragones-tech/agogo
+cd agogo
+```
+
+Y lo corres como se explica abajo en **Cómo correrlo**.
 
 ## Cómo correrlo
 
