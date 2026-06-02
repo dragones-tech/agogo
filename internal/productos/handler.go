@@ -18,7 +18,7 @@ var (
 )
 
 // New configura el COMPORTAMIENTO del recurso "productos". No conoce su URL:
-// sus handlers se cablean en routes.go.
+// sus handlers se cablean en su module.go.
 func New(q *db.Queries, baseURL string) web.Resource[db.Producto] {
 	return web.Resource[db.Producto]{
 		BaseURL: baseURL,

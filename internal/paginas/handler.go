@@ -1,5 +1,5 @@
 // Package paginas define handlers de páginas estáticas (sin BD). No conocen su
-// URL: el canonical se calcula desde la ruta en que las montes (routes.go).
+// URL: el canonical se calcula desde la ruta en que las montes (su module.go).
 package paginas
 
 import (

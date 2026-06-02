@@ -1,8 +1,8 @@
 // Package web contiene Resource[T], el recurso de BD genérico (lista/detalle ×
 // HTML/JSON), escrito una sola vez. NO conoce su URL: sus handlers se cablean en
-// routes.go (r.Get(path, recurso.ListHTML), ...). El canonical y el JSON-LD se
-// calculan desde la URL de la petición, así el mismo handler sirve en cualquier
-// ruta donde lo montes.
+// el module.go del dominio (r.Get(path, recurso.ListHTML), ...). El canonical y
+// el JSON-LD se calculan desde la URL de la petición, así el mismo handler sirve
+// en cualquier ruta donde lo montes.
 package web
 
 import (
@@ -88,7 +88,7 @@ func (r Resource[T]) DetailJSON(w http.ResponseWriter, req *http.Request) {
 }
 
 // SitemapSource crea la fuente de sitemap del recurso: la entrada de la lista
-// (listPath) más una por ítem bajo itemBase. Las rutas se las pasas en routes.go.
+// (listPath) más una por ítem bajo itemBase. Las rutas se las pasas en module.go.
 func (r Resource[T]) SitemapSource(listPath, itemBase string) sitemap.Source {
 	return resourceSitemap[T]{res: r, listPath: listPath, itemBase: itemBase}
 }

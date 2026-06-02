@@ -23,7 +23,7 @@ func Spec(w http.ResponseWriter, r *http.Request) {
 }
 
 // Assets sirve los archivos vendorizados de Swagger UI (css/js). Móntalo en
-// routes.go: r.Handle("GET /docs-assets/", openapi.Assets()).
+// su module.go: r.Handle("GET /docs-assets/", openapi.Assets()).
 func Assets() http.Handler {
 	sub, _ := fs.Sub(staticFS, "static")
 	return http.StripPrefix("/docs-assets/", http.FileServerFS(sub))
