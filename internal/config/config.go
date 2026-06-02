@@ -26,8 +26,8 @@ const devSecret = "agogo-dev-secret-insegura-cambiala-en-produccion"
 func Load() (Config, error) {
 	c := Config{
 		DB:      env("AGOGO_DB", "agogo.db"),
-		BaseURL: env("AGOGO_BASE_URL", "http://localhost:8888"),
-		Addr:    env("AGOGO_ADDR", ":8888"),
+		BaseURL: env("AGOGO_BASE_URL", "http://localhost:46060"),
+		Addr:    env("AGOGO_ADDR", ":46060"),
 	}
 
 	// Secure cookies: by default deduced from the base URL's scheme (https →
