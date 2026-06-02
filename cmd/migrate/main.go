@@ -28,7 +28,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("config: %v", err)
 	}
-	sqldb, err := sql.Open("sqlite", cfg.DB)
+	sqldb, err := sql.Open("sqlite", cfg.DSN())
 	if err != nil {
 		log.Fatalf("abrir db: %v", err)
 	}

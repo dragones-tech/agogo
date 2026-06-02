@@ -1,9 +1,13 @@
 package main
 
 import (
+	"context"
 	"database/sql"
+	"errors"
 	"log"
 	"net/http"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"agogo/internal/app"
@@ -30,7 +34,7 @@ func main() {
 		log.Printf("AVISO: usando clave de sesión de desarrollo (define AGOGO_SECRET_KEY en producción)")
 	}
 
-	sqldb, err := sql.Open("sqlite", cfg.DB)
+	sqldb, err := sql.Open("sqlite", cfg.DSN())
 	if err != nil {
 		log.Fatalf("abrir db: %v", err)
 	}
@@ -65,6 +69,26 @@ func main() {
 		WriteTimeout:      15 * time.Second,
 		IdleTimeout:       60 * time.Second,
 	}
-	log.Printf("agogo escuchando en %s (db=%s)", cfg.Addr, cfg.DB)
-	log.Fatal(srv.ListenAndServe())
+
+	// Apagado ordenado: al recibir Ctrl+C o SIGTERM dejamos de aceptar, damos
+	// hasta 10s a que terminen las peticiones en curso y SOLO entonces volvemos
+	// (los defer —incluido sqldb.Close()— corren; con log.Fatal/os.Exit no lo
+	// harían). Stdlib pura.
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+
+	go func() {
+		log.Printf("agogo escuchando en %s (db=%s)", cfg.Addr, cfg.DB)
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Fatalf("escuchar: %v", err)
+		}
+	}()
+
+	<-ctx.Done()
+	log.Printf("apagando…")
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err := srv.Shutdown(shutdownCtx); err != nil {
+		log.Printf("apagado forzado: %v", err)
+	}
 }

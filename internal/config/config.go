@@ -54,6 +54,14 @@ func Load() (Config, error) {
 	return c, nil
 }
 
+// DSN es la cadena de conexión SQLite: la ruta + PRAGMAs que aplica el driver
+// modernc al abrir cada conexión. WAL permite lecturas concurrentes con una
+// escritura; busy_timeout hace que una escritura espere (hasta 5s) en vez de
+// fallar al instante con "database is locked"; foreign_keys activa las FK.
+func (c Config) DSN() string {
+	return c.DB + "?_pragma=journal_mode(WAL)&_pragma=busy_timeout(5000)&_pragma=foreign_keys(on)"
+}
+
 func env(key, def string) string {
 	if v := os.Getenv(key); v != "" {
 		return v
