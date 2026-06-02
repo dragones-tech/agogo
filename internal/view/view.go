@@ -6,6 +6,7 @@ package view
 import (
 	"bytes"
 	"embed"
+	"encoding/json"
 	"html/template"
 	"io/fs"
 	"net/http"
@@ -23,11 +24,23 @@ type Meta struct {
 	JSONLD      template.JS
 }
 
+// funcs son los helpers disponibles en todas las plantillas.
+var funcs = template.FuncMap{
+	// tojson serializa un valor a JSON para incrustarlo en la página (p. ej. un
+	// data island que lee el frontend). json.Marshal escapa <, > y & por defecto,
+	// así que es seguro dentro de <script> (no se puede cerrar la etiqueta). Mismo
+	// patrón que el JSON-LD del <head>.
+	"tojson": func(v any) (template.JS, error) {
+		b, err := json.Marshal(v)
+		return template.JS(b), err
+	},
+}
+
 // Layout compone el layout base con las plantillas de contenido del dominio.
 // contentFS es el embed.FS del dominio; files son rutas dentro de él
 // (cada una debe definir el bloque "content").
 func Layout(contentFS fs.FS, files ...string) *template.Template {
-	t := template.Must(template.ParseFS(baseFS, "base.html"))
+	t := template.Must(template.New("layout").Funcs(funcs).ParseFS(baseFS, "base.html"))
 	return template.Must(t.ParseFS(contentFS, files...))
 }
 
