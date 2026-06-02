@@ -29,10 +29,11 @@ type Handler struct {
 	q        *db.Queries
 	baseURL  string
 	identity *identity.Service
+	secure   bool // marca las cookies (CSRF) como Secure
 }
 
-func New(q *db.Queries, baseURL string, a *identity.Service) *Handler {
-	return &Handler{q: q, baseURL: baseURL, identity: a}
+func New(q *db.Queries, baseURL string, a *identity.Service, secure bool) *Handler {
+	return &Handler{q: q, baseURL: baseURL, identity: a, secure: secure}
 }
 
 func (h *Handler) meta(r *http.Request, title string) view.Meta {
@@ -48,7 +49,7 @@ type loginPage struct {
 
 // GET /login
 func (h *Handler) LoginForm(w http.ResponseWriter, r *http.Request) {
-	view.Render(w, tplLogin, loginPage{Meta: h.meta(r, "Acceder — Agogo"), Token: csrf.Issue(w)})
+	view.Render(w, tplLogin, loginPage{Meta: h.meta(r, "Acceder — Agogo"), Token: csrf.Issue(w, h.secure)})
 }
 
 // POST /login: valida CSRF, verifica credenciales, inicia sesión.
@@ -74,7 +75,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusUnauthorized)
 		view.Render(w, tplLogin, loginPage{
 			Meta:  h.meta(r, "Acceder — Agogo"),
-			Token: csrf.Issue(w),
+			Token: csrf.Issue(w, h.secure),
 			Error: "Correo o contraseña incorrectos.",
 			Email: email,
 		})
@@ -113,5 +114,7 @@ func (h *Handler) Cuenta(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "error interno", http.StatusInternalServerError)
 		return
 	}
-	view.Render(w, tplCuenta, cuentaPage{Meta: h.meta(r, "Mi cuenta — Agogo"), Token: csrf.Issue(w), Email: u.Email})
+	// Página autenticada: que ningún intermediario ni el navegador la cacheen.
+	w.Header().Set("Cache-Control", "no-store")
+	view.Render(w, tplCuenta, cuentaPage{Meta: h.meta(r, "Mi cuenta — Agogo"), Token: csrf.Issue(w, h.secure), Email: u.Email})
 }

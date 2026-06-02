@@ -5,6 +5,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"strings"
 )
 
 type Config struct {
@@ -13,6 +14,7 @@ type Config struct {
 	Addr      string // dirección de escucha del servidor
 	SecretKey []byte // clave para firmar sesiones (HMAC)
 	DevSecret bool   // true si se cayó a la clave de desarrollo (insegura)
+	Secure    bool   // marca las cookies como Secure (solo viajan por HTTPS)
 }
 
 // devSecret se usa si no se define AGOGO_SECRET_KEY. Es estable entre
@@ -26,6 +28,17 @@ func Load() (Config, error) {
 		DB:      env("AGOGO_DB", "agogo.db"),
 		BaseURL: env("AGOGO_BASE_URL", "http://localhost:8080"),
 		Addr:    env("AGOGO_ADDR", ":8080"),
+	}
+
+	// Cookies Secure: por defecto se deduce del esquema de la URL base (https →
+	// true); AGOGO_SECURE_COOKIES lo fuerza explícitamente (útil tras un proxy
+	// TLS que termina en http://).
+	c.Secure = strings.HasPrefix(c.BaseURL, "https://")
+	switch strings.ToLower(os.Getenv("AGOGO_SECURE_COOKIES")) {
+	case "1", "true", "yes":
+		c.Secure = true
+	case "0", "false", "no":
+		c.Secure = false
 	}
 
 	switch secret := os.Getenv("AGOGO_SECRET_KEY"); {

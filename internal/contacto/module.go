@@ -15,7 +15,7 @@ type mod struct{}
 func (mod) Name() string { return "contacto" }
 
 func (mod) Register(a *app.App) error {
-	h := New(db.New(a.DB), a.Config.BaseURL, a.Session)
+	h := New(db.New(a.DB), a.Config.BaseURL, a.Session, a.Config.Secure)
 
 	r := a.Router
 	r.Get("/contacto", h.Mostrar)

@@ -44,6 +44,7 @@ type App struct {
 
 func New(cfg config.Config, db *sql.DB) *App {
 	sess := session.NewManager(cfg.SecretKey)
+	sess.Secure = cfg.Secure
 	return &App{
 		Config:   cfg,
 		DB:       db,
@@ -87,6 +88,7 @@ func (a *App) Migrate(ctx context.Context) error {
 func (a *App) Handler() http.Handler {
 	var h http.Handler = a.Router.Handler()
 	h = middleware.SecurityHeaders(h)
+	h = middleware.LimitBody(h)
 	h = middleware.Recover(h)
 	for i := len(a.middleware) - 1; i >= 0; i-- {
 		h = a.middleware[i](h)

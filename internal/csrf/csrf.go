@@ -17,17 +17,23 @@ const cookieName = "csrf_token"
 const FieldName = "csrf_token"
 
 // Issue genera un token, lo guarda en cookie y lo devuelve para el <input hidden>.
-func Issue(w http.ResponseWriter) string {
+// secure marca la cookie como Secure (solo viaja por HTTPS); pásalo desde la
+// configuración (Config.Secure).
+func Issue(w http.ResponseWriter, secure bool) string {
 	b := make([]byte, 32)
-	_, _ = rand.Read(b)
+	if _, err := rand.Read(b); err != nil {
+		// crypto/rand no debería fallar; si lo hace, no emitimos token usable.
+		http.Error(w, "error interno", http.StatusInternalServerError)
+		return ""
+	}
 	token := base64.RawURLEncoding.EncodeToString(b)
 	http.SetCookie(w, &http.Cookie{
 		Name:     cookieName,
 		Value:    token,
 		Path:     "/",
 		HttpOnly: true,
+		Secure:   secure,
 		SameSite: http.SameSiteLaxMode,
-		// Secure: true, // activar cuando se sirva tras TLS
 	})
 	return token
 }

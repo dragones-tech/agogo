@@ -22,6 +22,21 @@ func Recover(next http.Handler) http.Handler {
 	})
 }
 
+// maxBodyBytes es el tope de cuerpo aceptado en una petición (1 MiB). Los
+// formularios del sitio son pequeños; un cuerpo mayor es error o abuso.
+const maxBodyBytes = 1 << 20
+
+// LimitBody acota el cuerpo de cada petición antes de que cualquier handler lo
+// lea (ParseForm, json.Decode...), evitando agotar memoria con un POST enorme.
+func LimitBody(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Body != nil {
+			r.Body = http.MaxBytesReader(w, r.Body, maxBodyBytes)
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
 // SecurityHeaders añade cabeceras de endurecimiento a todas las respuestas.
 func SecurityHeaders(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

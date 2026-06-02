@@ -22,10 +22,11 @@ type Handler struct {
 	q       *db.Queries
 	baseURL string
 	sess    *session.Manager
+	secure  bool // marca la cookie CSRF como Secure
 }
 
-func New(q *db.Queries, baseURL string, sess *session.Manager) *Handler {
-	return &Handler{q: q, baseURL: baseURL, sess: sess}
+func New(q *db.Queries, baseURL string, sess *session.Manager, secure bool) *Handler {
+	return &Handler{q: q, baseURL: baseURL, sess: sess, secure: secure}
 }
 
 type formPage struct {
@@ -56,7 +57,7 @@ func (h *Handler) Mostrar(w http.ResponseWriter, r *http.Request) {
 	}
 	view.Render(w, tplForm, formPage{
 		Meta:   h.meta(r),
-		Token:  csrf.Issue(w),
+		Token:  csrf.Issue(w, h.secure),
 		Flash:  flash,
 		Errors: map[string]string{},
 		Values: map[string]string{},
@@ -94,7 +95,7 @@ func (h *Handler) Recibir(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		view.Render(w, tplForm, formPage{
 			Meta:   h.meta(r),
-			Token:  csrf.Issue(w),
+			Token:  csrf.Issue(w, h.secure),
 			Errors: errs,
 			Values: map[string]string{"nombre": nombre, "email": email, "mensaje": mensaje},
 		})
