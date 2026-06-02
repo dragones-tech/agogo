@@ -1,382 +1,389 @@
-# Arquitectura de Agogo
+# Agogo Architecture
 
-Este documento explica **cómo está pensado** Agogo y **por qué**. Para
-instrucciones de uso (correr, rutas, env vars) ver el [README](README.md).
+This document explains **how** Agogo is conceived and **why**. For usage
+instructions (running, routes, env vars) see the [README](README.md).
 
-> En una frase: **Go minimalista, orientado a dominios y dueños del código.**
-> Diseño iterativo guiado por trade-offs honestos, stdlib-first, afinado hasta
-> que la herramienta deja de estorbar.
-
----
-
-## Principios
-
-1. **Stdlib primero — "solo lo elemental".**
-   El servidor HTTP, las plantillas, el JSON, el CSRF, los middlewares y la spec
-   OpenAPI son **código nuestro sobre la biblioteca estándar de Go**. No hay
-   framework web. La única dependencia inevitable es el driver de SQLite
-   (`modernc.org/sqlite`, Go puro, para mantener el binario estático y la imagen
-   `scratch`).
-
-2. **"Sin magia" = sin cajas negras externas.**
-   El rechazo no es a la abstracción, sino a las dependencias opacas de terceros
-   que esconden comportamiento en runtime (p. ej. un ORM). Las abstracciones
-   **propias** —genéricos, helpers, `Resource[T]`— sí valen: viven en el repo,
-   las lees y las arreglas tú. `sqlc` genera *nuestro* código.
-
-3. **Por dominio (package-by-feature).**
-   Cada dominio se basta solo: su `handler.go`, su `sql/`, sus `templates/`, y
-   (si tiene BD) `migrate.go` y `seed.go`. Para entender "productos" abres una
-   carpeta, no saltas entre capas técnicas.
-
-4. **SQL a mano con sqlc, sin ORM (patrón Repository).**
-   Una función tipada por consulta, parametrizada (inyección imposible por
-   diseño). La "API" de datos es el vocabulario del dominio, no primitivas SQL.
-
-5. **YAGNI primero, DRY después.**
-   No se abstrae por adelantado. La duplicación se extrae cuando se **gana**
-   (p. ej. `web.Resource[T]` apareció al pensar en escala, no con 2 dominios).
-
-6. **Caja de herramientas, no un mega-framework.**
-   Piezas chicas y componibles. Cada dominio usa la que le toca; no todo es un
-   `Resource[T]`.
-
-7. **Núcleo mínimo + módulos acoplables.**
-   El servidor es un host (`app`) al que se le acoplan módulos opt-in
-   (`app.Use(...)`). Lo que no acoplas no entra al binario. Composición
-   explícita, sin auto-registro mágico; el comportamiento se escribe, no se
-   genera. Las URLs siguen desacopladas del dominio.
-
-8. **El servidor solo sirve.**
-   El esquema y los datos de ejemplo se gestionan **fuera del sitio**, como
-   comandos de desarrollo (`cmd/migrate`, `cmd/seed`).
-
-9. **Seguridad de primera clase.**
-   Contenedor `scratch`, usuario no-root, cabeceras de seguridad, CSRF en
-   formularios, SQL parametrizado, todo tipado.
-
-10. **SEO-first + API JSON desde una sola fuente de verdad.**
-    HTML renderizado en servidor (`html/template`, JSON-LD, sitemap) y JSON
-    salen del mismo modelo.
+> In one sentence: **minimalist Go, domain-oriented, and you own the code.**
+> Iterative design driven by honest trade-offs, stdlib-first, tuned until the
+> tool stops getting in your way.
 
 ---
 
-## Estructura
+## Principles
+
+1. **Stdlib first — "only the essentials".**
+   The HTTP server, the templates, the JSON, the CSRF, the middlewares and the
+   OpenAPI spec are **our own code on top of Go's standard library**. There is no
+   web framework. The only unavoidable dependency is the SQLite driver
+   (`modernc.org/sqlite`, pure Go, to keep the binary static and the `scratch`
+   image).
+
+2. **"No magic" = no external black boxes.**
+   The rejection is not of abstraction, but of opaque third-party dependencies
+   that hide behavior at runtime (e.g. an ORM). **Our own** abstractions
+   —generics, helpers, `Resource[T]`— are worth it: they live in the repo, you
+   read them and you fix them yourself. `sqlc` generates *our* code.
+
+3. **Package-by-feature.**
+   Each domain is self-sufficient: its `handler.go`, its `sql/`, its
+   `templates/`, and (if it has a DB) `migrate.go` and `seed.go`. To understand
+   "productos" you open one folder, you don't jump between technical layers.
+
+4. **Hand-written SQL with sqlc, no ORM (Repository pattern).**
+   One typed function per query, parameterized (injection impossible by design).
+   The data "API" is the domain's vocabulary, not SQL primitives.
+
+5. **YAGNI first, DRY later.**
+   Nothing is abstracted in advance. Duplication is extracted when it **pays off**
+   (e.g. `web.Resource[T]` showed up when thinking about scale, not with 2
+   domains).
+
+6. **A toolbox, not a mega-framework.**
+   Small, composable pieces. Each domain uses the one that fits; not everything is
+   a `Resource[T]`.
+
+7. **Minimal core + pluggable modules.**
+   The server is a host (`app`) onto which opt-in modules are plugged
+   (`app.Use(...)`). What you don't plug in doesn't enter the binary. Explicit
+   composition, no magic auto-registration; behavior is written, not generated.
+   URLs stay decoupled from the domain.
+
+8. **The server only serves.**
+   The schema and the sample data are managed **outside the site**, as
+   development commands (`cmd/migrate`, `cmd/seed`).
+
+9. **First-class security.**
+   `scratch` container, non-root user, security headers, CSRF on forms,
+   parameterized SQL, everything typed.
+
+10. **SEO-first + JSON API from a single source of truth.**
+    Server-rendered HTML (`html/template`, JSON-LD, sitemap) and JSON come out of
+    the same model.
+
+---
+
+## Structure
 
 ```
 .
-├── main.go              # el "Gemfile": crea el App y acopla módulos con Use()
+├── main.go              # the "Gemfile": creates the App and plugs modules with Use()
 ├── cmd/
-│   ├── migrate/         # aplica el esquema (bootstrap; sirve en deploy)
-│   └── seed/            # datos de ejemplo (solo desarrollo)
+│   ├── migrate/         # applies the schema (bootstrap; used on deploy)
+│   └── seed/            # sample data (development only)
 └── internal/
-    │  ── NÚCLEO + utilidades (base, no son módulos) ──
-    ├── app/             # HOST: App, interfaz Module, puntos de enganche
-    ├── router/          # Router estilo Express sobre net/http (+ middleware)
-    ├── config/          # configuración tipada y validada desde el entorno
-    ├── session/         # sesiones por cookie firmada (HMAC), sin store
-    ├── identity/           # servicio de identidad sobre sesión + Require
-    ├── password/        # hashing PBKDF2-HMAC-SHA256 (stdlib)
-    ├── web/             # Resource[T]: recurso de BD genérico
-    ├── view/            # layout HTML compartido + Render
-    ├── respond/         # respond.JSON / respond.Error
-    ├── jsonld/          # builders schema.org
-    ├── csrf/            # protección CSRF por doble cookie
-    ├── sitemap/         # contrato del sitemap (URL, Source, Entries) — hoja
-    ├── middleware/      # baseline de seguridad: Recover, SecurityHeaders
-    │  ── MÓDULOS (opt-in; cada uno con module.go → Module()) ──
-    ├── logs/            # middleware global de logging de acceso
-    ├── auth/            # autenticación usuario/contraseña (reusa identity)
-    ├── oauth/           # autenticación OAuth 2.0 (reusa identity), stdlib
-    ├── productos/       # recurso de BD
-    ├── blog/            # recurso de BD
-    ├── paginas/         # páginas estáticas (sin BD)
-    ├── contacto/        # formulario (GET muestra, POST procesa)
-    ├── openapi/         # openapi.json + Swagger UI en /docs
+    │  ── CORE + utilities (base, not modules) ──
+    ├── app/             # HOST: App, Module interface, hook points
+    ├── router/          # Express-style router on top of net/http (+ middleware)
+    ├── config/          # typed configuration validated from the environment
+    ├── session/         # signed-cookie sessions (HMAC), no store
+    ├── identity/           # identity service on top of session + Require
+    ├── password/        # PBKDF2-HMAC-SHA256 hashing (stdlib)
+    ├── web/             # Resource[T]: generic DB resource
+    ├── view/            # shared HTML layout + Render
+    ├── respond/         # respond.JSON / respond.Error / respond.ServerError
+    ├── validate/        # minimal, explicit input validator (no reflection)
+    ├── jsonld/          # schema.org builders
+    ├── csrf/            # double-cookie CSRF protection
+    ├── sitemap/         # sitemap contract (URL, Source, Entries) — leaf
+    ├── middleware/      # security baseline: Recover, SecurityHeaders
+    │  ── MODULES (opt-in; each one with module.go → Module()) ──
+    ├── logs/            # global access-logging middleware
+    ├── auth/            # username/password authentication (reuses identity)
+    ├── oauth/           # OAuth 2.0 authentication (reuses identity), stdlib
+    ├── productos/       # DB resource
+    ├── blog/            # DB resource
+    ├── paginas/         # static pages (no DB)
+    ├── contacto/        # form (GET shows, POST processes)
+    ├── openapi/         # openapi.json + Swagger UI at /docs
     └── site/            # robots.txt, sitemap.xml, /static
 ```
 
-**Dirección de dependencias:** los **módulos** importan `app` (el host) y las
-utilidades base; **`app` no importa ningún módulo**. Las hojas (`router`,
-`respond`, `view`, `sitemap`, `csrf`, `config`, `session`, `password`) no
-dependen de otros paquetes internos. Sin ciclos.
+**Direction of dependencies:** the **modules** import `app` (the host) and the
+base utilities; **`app` imports no module**. The leaves (`router`, `respond`,
+`view`, `sitemap`, `csrf`, `config`, `session`, `password`) do not depend on
+other internal packages. No cycles.
 
 ---
 
-## Núcleo + módulos
+## Core + modules
 
-El servidor es un **núcleo mínimo (`app`) al que se le acoplan módulos**. Un
-módulo implementa `Module{ Name() string; Register(*App) error }` y en su
-`Register` se engancha al host: añade rutas (`a.Router.Get`), middleware global
-(`a.UseMiddleware`), migraciones (`a.AddMigration`), fuentes de sitemap
-(`a.AddSitemap`) y usa servicios compartidos (`a.DB`, `a.Session`, `a.Identity`).
+The server is a **minimal core (`app`) onto which modules are plugged**. A module
+implements `Module{ Name() string; Register(*App) error }` and in its `Register`
+it hooks into the host: it adds routes (`a.Router.Get`), global middleware
+(`a.UseMiddleware`), migrations (`a.AddMigration`), sitemap sources
+(`a.AddSitemap`) and uses shared services (`a.DB`, `a.Session`, `a.Identity`).
 
-`main.go` es el "Gemfile": `app.Use(productos.Module(), auth.Module(), ...)`.
-**Lo que no acoplas no se importa, así que no entra al binario** (limpio si no
-se usa). Las rutas de cada dominio viven en su módulo; el panorama global es la
-lista de `app.Use(...)`. Distribución de plugins de terceros = Go modules
-(`go get`) + implementar `Module`; sin registry propio.
+`main.go` is the "Gemfile": `app.Use(productos.Module(), auth.Module(), ...)`.
+**What you don't plug in is not imported, so it doesn't enter the binary** (clean
+if unused). Each domain's routes live in its module; the global picture is the
+list of `app.Use(...)`. Third-party plugin distribution = Go modules (`go get`) +
+implementing `Module`; no registry of our own.
 
 ---
 
-## Las tres formas de dominio
+## The three domain shapes
 
-No todo encaja en el mismo molde. Hay tres formas; cada módulo registra sus
-handlers en su `Register`:
+Not everything fits the same mold. There are three shapes; each module registers
+its handlers in its `Register`:
 
-1. **Recurso de BD — `web.Resource[T]`** (productos, blog).
-   Genérico, escrito una sola vez: lista/detalle × HTML/JSON. El dominio solo
-   aporta comportamiento (queries sqlc, plantillas, metadatos SEO, JSON-LD).
-   Expone `ListHTML`, `DetailHTML`, `ListJSON`, `DetailJSON`.
+1. **DB resource — `web.Resource[T]`** (productos, blog).
+   Generic, written once: list/detail × HTML/JSON. The domain only contributes
+   behavior (sqlc queries, templates, SEO metadata, JSON-LD). It exposes
+   `ListHTML`, `DetailHTML`, `ListJSON`, `DetailJSON`.
 
-2. **Página estática** (paginas).
-   Sin BD: plantilla + SEO. Expone un `http.HandlerFunc` (p. ej.
+2. **Static page** (paginas).
+   No DB: template + SEO. It exposes an `http.HandlerFunc` (e.g.
    `paginas.QuienesSomos(baseURL)`).
 
-3. **Formulario / handler propio** (contacto).
-   Lógica única (validación, CSRF, PRG). Expone sus handlers (`Mostrar`,
+3. **Form / custom handler** (contacto).
+   Unique logic (validation, CSRF, PRG). It exposes its handlers (`Mostrar`,
    `Recibir`).
 
 ---
 
 ## Routing
 
-Cada **módulo registra sus rutas** en su `Register(a *app.App)`, usando el router
-(estilo Express, con middleware por ruta):
+Each **module registers its routes** in its `Register(a *app.App)`, using the
+router (Express-style, with per-route middleware):
 
 ```go
 // internal/productos/module.go
 func (mod) Register(a *app.App) error {
     res := New(db.New(a.DB), a.Config.BaseURL)
     r := a.Router
-    r.Get("/{$}", res.ListHTML)                       // home (match exacto de "/")
+    r.Get("/{$}", res.ListHTML)                       // home (exact match of "/")
     r.Get("/productos/{slug}", res.DetailHTML)
     r.Get("/api/productos", res.ListJSON)
     a.AddSitemap(res.SitemapSource("/", "/productos"))
     a.AddMigration(Migrate)
     return nil
 }
-// internal/auth/module.go — auth como middleware por ruta:
+// internal/auth/module.go — auth as per-route middleware:
 r.Get("/cuenta", h.Cuenta, a.Identity.Require)
 ```
 
-El **panorama global** de qué hace el servidor es la lista `app.Use(...)` en
-`main.go`; el detalle de cada dominio vive en su `module.go`. (Antes hubo un
-`routes.go` central y plano; se cambió por el modelo modular al volver el
-proyecto un framework — el trade fue perder esa tabla única.)
+The **global picture** of what the server does is the `app.Use(...)` list in
+`main.go`; the detail of each domain lives in its `module.go`. (There used to be
+a central, flat `routes.go`; it was swapped for the modular model when the
+project became a framework — the trade was losing that single table.)
 
-Las URLs siguen **desacopladas**: cada handler calcula su `canonical` desde la
-petición (`baseURL + r.URL.Path`), así el mismo handler sirve en cualquier ruta
-donde el módulo lo monte.
+URLs stay **decoupled**: each handler computes its `canonical` from the request
+(`baseURL + r.URL.Path`), so the same handler serves on any route where the
+module mounts it.
 
-Dos niveles de middleware: **global** (módulos vía `a.UseMiddleware`, p. ej.
-`logs`; más el baseline de seguridad del núcleo) y **por ruta** (`r.Get(path, fn,
-mw...)`, p. ej. `a.Identity.Require`).
-
----
-
-## Capa de datos
-
-- **SQLite** vía `modernc.org/sqlite` (Go puro, sin cgo → binario estático). Se
-  abre en modo **WAL** con **`busy_timeout`** (`Config.DSN()`): lecturas
-  concurrentes con una escritura, y las escrituras esperan en vez de fallar con
-  `database is locked`.
-- **sqlc** genera, por dominio, una función tipada por consulta a partir de
-  `internal/<dominio>/sql/queries.sql` y `schema.sql`. El código generado vive
-  en `internal/<dominio>/db/` (no se edita).
-- Las consultas son explícitas y parametrizadas. Una escritura (`:exec`) y una
-  lectura (`:one`/`:many`) tienen el mismo trato.
-
-Flujo para añadir una consulta: editar `queries.sql` → `sqlc generate` → usar la
-función generada.
+Two levels of middleware: **global** (modules via `a.UseMiddleware`, e.g. `logs`;
+plus the core's security baseline) and **per-route** (`r.Get(path, fn, mw...)`,
+e.g. `a.Identity.Require`).
 
 ---
 
-## Desarrollo vs. sitio
+## Data layer
 
-El binario del servidor **no** crea esquema ni siembra datos. Eso vive aparte:
+- **SQLite** via `modernc.org/sqlite` (pure Go, no cgo → static binary). It opens
+  in **WAL** mode with **`busy_timeout`** (`Config.DSN()`): concurrent reads with
+  one writer, and writes wait instead of failing with `database is locked`.
+- **sqlc** generates, per domain, a typed function per query from
+  `internal/<dominio>/sql/queries.sql` and `schema.sql`. The generated code lives
+  in `internal/<dominio>/db/` (not edited).
+- Queries are explicit and parameterized. A write (`:exec`) and a read
+  (`:one`/`:many`) get the same treatment.
 
-- `go run ./cmd/migrate` — aplica el esquema (bootstrap; también en deploy).
-- `go run ./cmd/seed` — datos de ejemplo (solo desarrollo; idempotente).
-
-Ambos comandos **arman el mismo `App` que el servidor** (`app.Use(...)`) y corren
-`app.Migrate(ctx)`, que ejecuta las migraciones que cada módulo registró con
-`a.AddMigration`. Añadir un dominio con BD = acoplarlo a la lista; su esquema se
-aplica solo, sin tocar los `cmd/*`.
-
-Así el "sitio" no contiene lógica de desarrollo, y el linker descarta el código
-de seed del binario del servidor.
-
----
-
-## Seguridad
-
-- Imagen `scratch` (sin SO, sin shell), usuario no-root.
-- Middlewares del núcleo: `Recover` (un panic no tumba el server), `LimitBody`
-  (tope de 1 MiB por petición, antes de cualquier `ParseForm`/decode),
-  `SecurityHeaders` (`Content-Security-Policy: default-src 'self'`,
-  `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`) y `Gzip`
-  (comprime respuestas de texto —HTML/CSS/JS/JSON— si el cliente lo acepta;
-  `compress/gzip` de la stdlib, decide por `Content-Type`, respeta `Range`).
-- Cookies `Secure`: se deducen del esquema de `AGOGO_BASE_URL` (`https://` →
-  `Secure`) y se pueden forzar con `AGOGO_SECURE_COOKIES`. Aplica a la cookie de
-  sesión y a la de CSRF.
-- CSRF por doble cookie en formularios (`internal/csrf`).
-- Páginas autenticadas (`/cuenta`, `/oauth/me`) responden `Cache-Control: no-store`.
-- SQL parametrizado (sqlc) → inyección imposible por diseño.
-- Swagger UI (`/docs`) está **vendorizado** (assets embebidos en
-  `internal/openapi/static`, servidos desde `/docs-assets/`): self-contained, sin
-  CDN, CSP `'self'` (solo `style-src` permite `'unsafe-inline'` por los estilos
-  que Swagger inyecta en runtime).
+Flow to add a query: edit `queries.sql` → `sqlc generate` → use the generated
+function.
 
 ---
 
-## Errores y operación
+## Development vs. site
 
-- **Errores que se ven.** Un fallo del servidor se **registra con método y ruta**
-  (`respond.ServerError` para JSON, `view.ServerError` para HTML) pero al cliente
-  solo le llega un 500 genérico — nunca se filtran detalles internos. Antes el
-  error real se descartaba; ahora queda en el log.
-- **Páginas de error con el sitio.** 404 y 500 se renderizan con el layout
-  (`view.NotFound` / `view.ServerError`, plantilla `error.html`), no como texto
-  pelón. Un catch-all (`/`) en el módulo `site` da el 404 con estilo a cualquier
-  ruta no registrada.
-- **Apagado ordenado.** `main` escucha `SIGINT`/`SIGTERM`, deja de aceptar, da
-  hasta 10s a las peticiones en curso (`srv.Shutdown`) y recién entonces vuelve,
-  así corren los `defer` (incl. cerrar la BD). Stdlib (`os/signal`).
+The server binary does **not** create the schema or seed data. That lives apart:
 
----
+- `go run ./cmd/migrate` — applies the schema (bootstrap; also on deploy).
+- `go run ./cmd/seed` — sample data (development only; idempotent).
 
-## Frontend: misma filosofía, otra capa
+Both commands **assemble the same `App` as the server** (`app.Use(...)`) and run
+`app.Migrate(ctx)`, which runs the migrations each module registered with
+`a.AddMigration`. Adding a domain with a DB = plugging it into the list; its
+schema is applied on its own, without touching the `cmd/*`.
 
-El frontend es libre (agogo solo sirve HTML), pero de cajón se apoya en dos
-proyectos hermanos con **el mismo principio** que agogo —sin build, sin magia,
-primitivas nativas, todo legible y auditable—, uno por cada capa de la web:
-
-- **[scc](https://github.com/dragones-tech/scc)** (CSS): estilo de HTML semántico
-  con primitivas nativas (`@layer`, `@scope`, custom properties). La regla de oro:
-  una clase dice *qué es* (`card`, `field`, `alert`), nunca *cómo se ve*. La
-  presentación vive en el CSS, el HTML queda legible.
-- **[lumen](https://github.com/dragones-tech/lumen)** (JS): UI vanilla-JS sin
-  build, con `<template>` nativo y ES modules (el navegador solo baja lo que
-  importas).
-
-Ambos se **vendorizan** en `internal/site/static/` (servidos desde `'self'`, sin
-CDN, CSP estricta intacta — mismo trato que Swagger UI). Se usan como **mejora
-progresiva**: el servidor renderiza y valida igual sin JS, y lumen solo añade
-comodidad (filtro de catálogo, validación de formulario espejo del servidor).
-
-### Política de vendorizado
-
-scc y lumen **se trabajan en sus repos** (`dragones-tech/scc`, `dragones-tech/lumen`),
-no aquí. En agogo son una **copia pristina** y **no se versionan** (`.gitignore`):
-se re-bajan con `./scripts/vendor-frontend.sh`, como un `npm install`. Por eso el
-vendor se mantiene **sin editar** — cualquier mejora va a su repo, no a esta copia.
-
-Lo específico de agogo NO vive en el vendor, sino en `internal/site/static/style.css`:
-
-- **La marca** (verde): sobrescribe las "perillas" de scc (`--accent`, `--neutral-hue`,
-  `--radius`) desde `:root`. Al estar sin `@layer`, gana a `scc/theme.css` sin tocarlo.
-- **El marco de página** (centrado, footer abajo, rejilla de tarjetas).
-- **`[hidden] { display: none }`**: scc no re-asegura `[hidden]` y un componente con
-  `display` propio (p. ej. `.card`) lo anularía. *(Candidato a aportar al reset de scc.)*
-- **`@view-transition { navigation: auto }`**: crossfade nativo entre páginas (quita
-  el parpadeo del recargo MPA), con fondo opaco en `<html>`.
-
-Para clonar y correr: tras `git clone`, ejecutar `./scripts/vendor-frontend.sh`
-una vez (trae scc/lumen); luego `go run .` como siempre.
-
-### Navegación parcial (estilo Turbo, propia)
-
-Pieza **propia de agogo** (no de lumen), del lado servidor + un JS chico: al
-cambiar de sección no se recarga el documento, solo se reemplaza `<main>`. Header,
-footer, CSS y el propio script quedan fijos → sin parpadeo, sin re-parsear assets.
-
-Aprovecha que el bloque **`content` ya es un partial**:
-
-- **Servidor** (`view.Render`): si la petición trae la cabecera `X-Fragment`,
-  renderiza solo el bloque `fragment` (título + `content` + `scripts`), no la
-  página entera. Responde con `Vary: X-Fragment`.
-- **Cliente** (`static/js/nav.js`): intercepta los clics en enlaces internos,
-  pide el fragmento, y reemplaza `<main>` (con `document.startViewTransition` si
-  hay soporte, para un crossfade en la misma página). Reejecuta los `<script>` de
-  la página con una URL única (`?v=`) para recablear el `<main>` nuevo; sus
-  imports siguen cacheados. Actualiza título e historial (`pushState`/`popstate`).
-
-**Degrada limpio:** sin JS, ante un error de red, una respuesta no-HTML (un
-`/api/...` JSON), un acceso directo, un refresh o un crawler → navegación normal
-del navegador con la página completa. El SEO y la robustez no dependen del JS;
-esto es solo una mejora de experiencia encima. No reemplaza a lumen ni hace
-streaming (no es Turbo completo): solo evita re-renderizar lo que no cambia.
-
-## Configuración y sesiones
-
-- **`config`**: lee el entorno **una sola vez**, tipado y validado
-  (`config.Load() (Config, error)`). Lo usan el servidor y los comandos. Incluye
-  `SecretKey` (firma de sesiones): si falta, cae a una clave de desarrollo
-  insegura y marca `DevSecret` (el servidor avisa); si se define, exige ≥32
-  caracteres.
-- **`session`**: sesiones por **cookie firmada con HMAC-SHA256** (`crypto/hmac`),
-  sin store en servidor y sin dependencias — misma línea que `csrf`. La cookie
-  está firmada (a prueba de manipulación) pero **no cifrada**: no guardar
-  secretos en ella. Lleva una **expiración firmada** (sello `_exp`, 7 días): el
-  servidor la impone aunque el cliente conserve el archivo, así una cookie robada
-  no vale para siempre. Uso actual: mensaje *flash* del formulario de contacto
-  (Post-Redirect-Get) e id de usuario. Límite ~4 KB por cookie.
-
-## Autenticación
-
-- **`password`**: hashing **PBKDF2-HMAC-SHA256** con `crypto/pbkdf2` (stdlib
-  desde Go 1.24), salt aleatorio y comparación en tiempo constante. El hash
-  guardado lleva sus parámetros (`pbkdf2-sha256$iter$salt$hash`), así se puede
-  migrar el algoritmo sin romper hashes existentes. (bcrypt/argon2 serían
-  preferibles pero son dependencia; se eligió stdlib.)
-- **`identity`** (base): el **mecanismo** de identidad sobre la sesión. Guarda
-  `user_id` en la cookie firmada; ofrece `Login`/`Logout`/`UserID` y `Require`,
-  que es un **middleware** normal aplicado por ruta (`r.Get("/cuenta", fn,
-  a.Identity.Require)`) o por bloque (`a.Identity.Group(r)`). Siempre disponible
-  en el núcleo, para que cualquier módulo proteja rutas.
-- **`auth`** (módulo): la **funcionalidad** — tabla `usuarios`, login/logout y la
-  página protegida `/cuenta`. Verifica credenciales (con `password`) y delega en
-  `a.Identity.Login`. No revela si un correo existe; login y logout llevan CSRF.
-  Otro módulo (`oauth`, `apikeys`) podría reusar `identity` sin reescribir nada.
-
-**Dos niveles de middleware:** *global* (el módulo `logs` vía `a.UseMiddleware`, más
-el baseline de seguridad del núcleo en `app.Handler`) y *por ruta* (el router acepta
-`mw ...Middleware` tras el handler). `identity.Require` es solo un middleware más;
-mañana caben rate-limit, roles, etc. por la misma vía.
-
-## Metodología de trabajo
-
-El ciclo que seguimos: **Discutir → decidir → construir → verificar → documentar.**
-
-- Se proponen opciones con **trade-offs honestos**; se decide; se implementa.
-- **Verificar corriendo**: `go build ./...`, `go vet ./...` y `curl` en cada
-  cambio. Nada se da por bueno sin verlo responder.
-- **Refactor sin miedo**: el diseño evoluciona (el routing se rehízo varias
-  veces hasta dar con la forma plana y desacoplada).
-- Las decisiones se capturan; las no urgentes se documentan como pendientes en
-  vez de forzarlas.
+This way the "site" contains no development logic, and the linker drops the seed
+code from the server binary.
 
 ---
 
-## Referencias
+## Security
 
-Proyectos hermanos (mismo ADN, una capa cada uno):
+- `scratch` image (no OS, no shell), non-root user.
+- Core middlewares: `Recover` (a panic doesn't take down the server), `LimitBody`
+  (cap of 1 MiB per request, before any `ParseForm`/decode), `SecurityHeaders`
+  (`Content-Security-Policy: default-src 'self'`, `X-Content-Type-Options`,
+  `X-Frame-Options`, `Referrer-Policy`) and `Gzip` (compresses text responses
+  —HTML/CSS/JS/JSON— if the client accepts it; stdlib's `compress/gzip`, decides
+  by `Content-Type`, respects `Range`).
+- `Secure` cookies: inferred from the scheme of `AGOGO_BASE_URL` (`https://` →
+  `Secure`) and can be forced with `AGOGO_SECURE_COOKIES`. Applies to the session
+  cookie and the CSRF one.
+- Double-cookie CSRF on forms (`internal/csrf`).
+- Authenticated pages (`/cuenta`, `/oauth/me`) respond with `Cache-Control: no-store`.
+- Parameterized SQL (sqlc) → injection impossible by design.
+- Swagger UI (`/docs`) is **vendored** (assets embedded in
+  `internal/openapi/static`, served from `/docs-assets/`): self-contained, no CDN,
+  CSP `'self'` (only `style-src` allows `'unsafe-inline'` because of the styles
+  Swagger injects at runtime).
 
-- **[lumen](https://github.com/dragones-tech/lumen)** — UI vanilla-JS, sin build,
-  sin magia. La capa de cliente.
-- **[scc](https://github.com/dragones-tech/scc)** — Scoped Cascade CSS, semántico,
-  sin build. La capa de estilo.
+---
 
-El diseño coincide, sin haberlo buscado, con las prácticas canónicas de Go:
+## Errors and operations
 
-- **Mat Ryer — "How I write HTTP services in Go after 13 years"** (Grafana): el
-  patrón `routes.go` como único lugar de rutas.
+- **Errors that you can see.** A server failure is **logged with method and
+  route** (`respond.ServerError` for JSON, `view.ServerError` for HTML) but the
+  client only gets a generic 500 — internal details are never leaked. Previously
+  the real error was discarded; now it stays in the log.
+- **Error pages with the site.** 404 and 500 are rendered with the layout
+  (`view.NotFound` / `view.ServerError`, template `error.html`), not as bare
+  text. A catch-all (`/`) in the `site` module gives the styled 404 to any
+  unregistered route.
+- **Graceful shutdown.** `main` listens for `SIGINT`/`SIGTERM`, stops accepting,
+  gives in-flight requests up to 10s (`srv.Shutdown`) and only then returns, so
+  the `defer`s run (including closing the DB). Stdlib (`os/signal`).
+
+---
+
+## Frontend: same philosophy, another layer
+
+The frontend is free (agogo only serves HTML), but out of the box it leans on two
+sibling projects with **the same principle** as agogo —no build, no magic, native
+primitives, everything readable and auditable—, one for each layer of the web:
+
+- **[scc](https://github.com/dragones-tech/scc)** (CSS): styling semantic HTML
+  with native primitives (`@layer`, `@scope`, custom properties). The golden rule:
+  a class says *what it is* (`card`, `field`, `alert`), never *how it looks*.
+  Presentation lives in the CSS, the HTML stays readable.
+- **[lumen](https://github.com/dragones-tech/lumen)** (JS): vanilla-JS UI with no
+  build, with native `<template>` and ES modules (the browser only downloads what
+  you import).
+
+Both are **vendored** in `internal/site/static/` (served from `'self'`, no CDN,
+strict CSP intact — same treatment as Swagger UI). They are used as **progressive
+enhancement**: the server renders and validates the same without JS, and lumen
+only adds convenience (catalog filter, form validation mirroring the server).
+
+### Vendoring policy
+
+scc and lumen **are worked on in their repos** (`dragones-tech/scc`,
+`dragones-tech/lumen`), not here. In agogo they are a **pristine copy** and **are
+not versioned** (`.gitignore`): they are re-downloaded with
+`./scripts/vendor-frontend.sh`, like an `npm install`. That is why the vendor is
+kept **unedited** — any improvement goes to its repo, not to this copy.
+
+What is specific to agogo does NOT live in the vendor, but in
+`internal/site/static/style.css`:
+
+- **The brand** (green): overrides scc's "knobs" (`--accent`, `--neutral-hue`,
+  `--radius`) from `:root`. Being outside any `@layer`, it beats `scc/theme.css`
+  without touching it.
+- **The page frame** (centered, footer at the bottom, card grid).
+- **`[hidden] { display: none }`**: scc does not re-assert `[hidden]` and a
+  component with its own `display` (e.g. `.card`) would override it. *(Candidate
+  to contribute to scc's reset.)*
+- **`@view-transition { navigation: auto }`**: native crossfade between pages
+  (removes the flicker of the MPA reload), with an opaque background on `<html>`.
+
+To clone and run: after `git clone`, run `./scripts/vendor-frontend.sh` once (it
+brings scc/lumen); then `go run .` as usual.
+
+### Partial navigation (Turbo-style, our own)
+
+A piece **of agogo's own** (not lumen's), server-side + a small JS: when changing
+section the document is not reloaded, only `<main>` is replaced. Header, footer,
+CSS and the script itself stay fixed → no flicker, no re-parsing assets.
+
+It takes advantage of the fact that the **`content` block is already a partial**:
+
+- **Server** (`view.Render`): if the request carries the `X-Fragment` header, it
+  renders only the `fragment` block (title + `content` + `scripts`), not the
+  whole page. It responds with `Vary: X-Fragment`.
+- **Client** (`static/js/nav.js`): it intercepts clicks on internal links,
+  requests the fragment, and replaces `<main>` (with `document.startViewTransition`
+  if supported, for a crossfade on the same page). It re-runs the page's
+  `<script>`s with a unique URL (`?v=`) to rewire the new `<main>`; their imports
+  stay cached. It updates the title and history (`pushState`/`popstate`).
+
+**Degrades cleanly:** without JS, on a network error, a non-HTML response (a
+JSON `/api/...`), a direct access, a refresh or a crawler → normal browser
+navigation with the full page. SEO and robustness do not depend on the JS; this
+is just an experience improvement on top. It does not replace lumen nor does it
+stream (it is not full Turbo): it only avoids re-rendering what does not change.
+
+## Configuration and sessions
+
+- **`config`**: reads the environment **once**, typed and validated
+  (`config.Load() (Config, error)`). The server and the commands use it. It
+  includes `SecretKey` (session signing): if missing, it falls back to an
+  insecure development key and flags `DevSecret` (the server warns); if defined,
+  it requires ≥32 characters.
+- **`session`**: sessions via a **cookie signed with HMAC-SHA256**
+  (`crypto/hmac`), with no server-side store and no dependencies — same line as
+  `csrf`. The cookie is signed (tamper-proof) but **not encrypted**: do not store
+  secrets in it. It carries a **signed expiration** (`_exp` stamp, 7 days): the
+  server enforces it even if the client keeps the file, so a stolen cookie is not
+  good forever. Current use: the contact form's *flash* message
+  (Post-Redirect-Get) and the user id. Limit ~4 KB per cookie.
+
+## Authentication
+
+- **`password`**: **PBKDF2-HMAC-SHA256** hashing with `crypto/pbkdf2` (stdlib
+  since Go 1.24), random salt and constant-time comparison. The stored hash
+  carries its parameters (`pbkdf2-sha256$iter$salt$hash`), so the algorithm can
+  be migrated without breaking existing hashes. (bcrypt/argon2 would be
+  preferable but are a dependency; stdlib was chosen.)
+- **`identity`** (base): the identity **mechanism** on top of the session. It
+  stores `user_id` in the signed cookie; it offers `Login`/`Logout`/`UserID` and
+  `Require`, which is a normal **middleware** applied per route (`r.Get("/cuenta",
+  fn, a.Identity.Require)`) or per block (`a.Identity.Group(r)`). Always available
+  in the core, so any module can protect routes.
+- **`auth`** (module): the **functionality** — `usuarios` table, login/logout and
+  the protected `/cuenta` page. It verifies credentials (with `password`) and
+  delegates to `a.Identity.Login`. It does not reveal whether an email exists;
+  login and logout carry CSRF. Another module (`oauth`, `apikeys`) could reuse
+  `identity` without rewriting anything.
+
+**Two levels of middleware:** *global* (the `logs` module via `a.UseMiddleware`,
+plus the core's security baseline in `app.Handler`) and *per-route* (the router
+accepts `mw ...Middleware` after the handler). `identity.Require` is just one more
+middleware; tomorrow rate-limit, roles, etc. fit through the same path.
+
+## Working methodology
+
+The cycle we follow: **Discuss → decide → build → verify → document.**
+
+- Options are proposed with **honest trade-offs**; a decision is made; it is
+  implemented.
+- **Verify by running**: `go build ./...`, `go vet ./...` and `curl` on every
+  change. Nothing is taken for granted without seeing it respond.
+- **Refactor without fear**: the design evolves (the routing was redone several
+  times until landing on the flat, decoupled shape).
+- Decisions are captured; the non-urgent ones are documented as pending instead
+  of being forced.
+
+---
+
+## References
+
+Sibling projects (same DNA, one layer each):
+
+- **[lumen](https://github.com/dragones-tech/lumen)** — vanilla-JS UI, no build,
+  no magic. The client layer.
+- **[scc](https://github.com/dragones-tech/scc)** — Scoped Cascade CSS, semantic,
+  no build. The style layer.
+
+The design coincides, without having sought it, with the canonical Go practices:
+
+- **Mat Ryer — "How I write HTTP services in Go after 13 years"** (Grafana): the
+  `routes.go` pattern as the single place for routes.
 - **Ben Johnson — [`benbjohnson/wtf`](https://github.com/benbjohnson/wtf)**:
-  organización por dominio con interfaces como contratos.
-- **[`pocketbase/pocketbase`](https://github.com/pocketbase/pocketbase)**: misma
-  filosofía de binario único + SQLite embebido.
+  organization by domain with interfaces as contracts.
+- **[`pocketbase/pocketbase`](https://github.com/pocketbase/pocketbase)**: same
+  single-binary + embedded SQLite philosophy.
 - **[`walterwanderley/sqlc-http`](https://github.com/walterwanderley/sqlc-http)**:
-  mismo stack (net/http + sqlc), pero *generando* la capa HTTP desde el SQL —
-  el enfoque opuesto al nuestro (nosotros la escribimos y desacoplamos a mano).
+  same stack (net/http + sqlc), but *generating* the HTTP layer from the SQL —
+  the opposite approach to ours (we write it and decouple it by hand).
