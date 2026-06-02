@@ -250,7 +250,9 @@ Cliente ──h3/h2/TLS──► Caddy / nginx / CDN ──h1.1 o h2──► bi
 ```
 
 El borde habla **HTTP/3 + HTTP/2 + TLS** hacia fuera; el binario sigue simple,
-sin dependencias y sin gestionar certificados. Ejemplo mínimo con Caddy
+sin dependencias y sin gestionar certificados. (El binario ya **comprime con
+gzip** las respuestas de texto por su cuenta —`compress/gzip`, stdlib—, así que
+funciona bien incluso sin proxy; el borde añade zstd/brotli si quieres.) Ejemplo mínimo con Caddy
 (HTTP/2 y HTTP/3 + TLS automático, listo de fábrica):
 
 ```caddyfile

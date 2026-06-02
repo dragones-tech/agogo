@@ -210,9 +210,11 @@ de seed del binario del servidor.
 
 - Imagen `scratch` (sin SO, sin shell), usuario no-root.
 - Middlewares del núcleo: `Recover` (un panic no tumba el server), `LimitBody`
-  (tope de 1 MiB por petición, antes de cualquier `ParseForm`/decode) y
+  (tope de 1 MiB por petición, antes de cualquier `ParseForm`/decode),
   `SecurityHeaders` (`Content-Security-Policy: default-src 'self'`,
-  `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`).
+  `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`) y `Gzip`
+  (comprime respuestas de texto —HTML/CSS/JS/JSON— si el cliente lo acepta;
+  `compress/gzip` de la stdlib, decide por `Content-Type`, respeta `Range`).
 - Cookies `Secure`: se deducen del esquema de `AGOGO_BASE_URL` (`https://` →
   `Secure`) y se pueden forzar con `AGOGO_SECURE_COOKIES`. Aplica a la cookie de
   sesión y a la de CSRF.

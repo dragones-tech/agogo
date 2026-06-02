@@ -87,6 +87,7 @@ func (a *App) Migrate(ctx context.Context) error {
 // siempre) + middleware global de los módulos (p. ej. logs) como capa externa.
 func (a *App) Handler() http.Handler {
 	var h http.Handler = a.Router.Handler()
+	h = middleware.Gzip(h)
 	h = middleware.SecurityHeaders(h)
 	h = middleware.LimitBody(h)
 	h = middleware.Recover(h)
