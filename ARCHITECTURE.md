@@ -196,6 +196,11 @@ El binario del servidor **no** crea esquema ni siembra datos. Eso vive aparte:
 - `go run ./cmd/migrate` — aplica el esquema (bootstrap; también en deploy).
 - `go run ./cmd/seed` — datos de ejemplo (solo desarrollo; idempotente).
 
+Ambos comandos **arman el mismo `App` que el servidor** (`app.Use(...)`) y corren
+`app.Migrate(ctx)`, que ejecuta las migraciones que cada módulo registró con
+`a.AddMigration`. Añadir un dominio con BD = acoplarlo a la lista; su esquema se
+aplica solo, sin tocar los `cmd/*`.
+
 Así el "sitio" no contiene lógica de desarrollo, y el linker descarta el código
 de seed del binario del servidor.
 
@@ -204,10 +209,15 @@ de seed del binario del servidor.
 ## Seguridad
 
 - Imagen `scratch` (sin SO, sin shell), usuario no-root.
-- Middlewares: `Recover` (un panic no tumba el server), `SecurityHeaders`
-  (`Content-Security-Policy: default-src 'self'`, `X-Content-Type-Options`,
-  `X-Frame-Options`, `Referrer-Policy`).
+- Middlewares del núcleo: `Recover` (un panic no tumba el server), `LimitBody`
+  (tope de 1 MiB por petición, antes de cualquier `ParseForm`/decode) y
+  `SecurityHeaders` (`Content-Security-Policy: default-src 'self'`,
+  `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`).
+- Cookies `Secure`: se deducen del esquema de `AGOGO_BASE_URL` (`https://` →
+  `Secure`) y se pueden forzar con `AGOGO_SECURE_COOKIES`. Aplica a la cookie de
+  sesión y a la de CSRF.
 - CSRF por doble cookie en formularios (`internal/csrf`).
+- Páginas autenticadas (`/cuenta`, `/oauth/me`) responden `Cache-Control: no-store`.
 - SQL parametrizado (sqlc) → inyección imposible por diseño.
 - Swagger UI (`/docs`) está **vendorizado** (assets embebidos en
   `internal/openapi/static`, servidos desde `/docs-assets/`): self-contained, sin
@@ -226,8 +236,10 @@ de seed del binario del servidor.
 - **`session`**: sesiones por **cookie firmada con HMAC-SHA256** (`crypto/hmac`),
   sin store en servidor y sin dependencias — misma línea que `csrf`. La cookie
   está firmada (a prueba de manipulación) pero **no cifrada**: no guardar
-  secretos en ella. Uso actual: mensaje *flash* del formulario de contacto
-  (Post-Redirect-Get). Límite ~4 KB por cookie.
+  secretos en ella. Lleva una **expiración firmada** (sello `_exp`, 7 días): el
+  servidor la impone aunque el cliente conserve el archivo, así una cookie robada
+  no vale para siempre. Uso actual: mensaje *flash* del formulario de contacto
+  (Post-Redirect-Get) e id de usuario. Límite ~4 KB por cookie.
 
 ## Autenticación
 
