@@ -1,9 +1,0 @@
-{{define "content"}}
-<article class="card">
-<h1>{{.Item.Titulo}}</h1>
-<p><small>Publicado el {{.Item.Publicado}}</small></p>
-<p>{{.Item.Contenido}}</p>
-<footer><a href="/api/posts/{{.Item.Slug}}" data-button>Ver como JSON →</a></footer>
-</article>
-<p><a href="/blog">← Volver al blog</a></p>
-{{end}}

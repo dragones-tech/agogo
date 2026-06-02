@@ -11,17 +11,11 @@ import (
 	"time"
 
 	"agogo/internal/app"
-	"agogo/internal/auth"
-	"agogo/internal/blog"
 	"agogo/internal/config"
-	"agogo/internal/contacto"
+	"agogo/internal/home"
 	"agogo/internal/logs"
-	"agogo/internal/oauth"
-	"agogo/internal/openapi"
-	"agogo/internal/otw"
-	"agogo/internal/paginas"
-	"agogo/internal/productos"
 	"agogo/internal/site"
+	// "agogo/internal/paginas" // ← breadcrumb: uncomment with its app.Use line below
 
 	_ "modernc.org/sqlite"
 )
@@ -46,19 +40,18 @@ func main() {
 		w.Write([]byte("ok"))
 	})
 
-	// The server's "Gemfile": what this app is = which modules it wires in.
-	// Comment out a line to drop that feature (and strip it from the binary).
+	// The "Gemfile": what this app is = which modules it wires in, one line each.
+	//
+	// Breadcrumb — to ADD a section: copy internal/home (or internal/paginas),
+	// adjust its Register (routes + template), and plug it in here with one line.
+	// What you don't wire in isn't imported, so it stays out of the binary.
 	if err := application.Use(
-		logs.Module(),      // observability
-		productos.Module(), // content
-		blog.Module(),
-		paginas.Module(),
-		contacto.Module(), // form
-		auth.Module(),     // username/password authentication (login/account)
-		oauth.Module(),    // OAuth 2.0 authentication (reuses identity)
-		otw.Module(),      // BFF: HTML over the wire from a token-gated external API
-		openapi.Module(),  // API docs
-		site.Module(),     // robots.txt, sitemap.xml, /static
+		logs.Module(), // observability (access log)
+		home.Module(), // home: "hola mundo" + link to the docs
+		site.Module(), // robots.txt, sitemap.xml, /static, favicon, styled 404
+		// paginas.Module(), // ← example static section (no DB) at /ejemplo.
+		//   Uncomment THIS line and its import above to activate it. It's the
+		//   simplest domain shape; copy it as the template for your own sections.
 	); err != nil {
 		log.Fatalf("módulos: %v", err)
 	}
@@ -72,10 +65,8 @@ func main() {
 		IdleTimeout:       60 * time.Second,
 	}
 
-	// Graceful shutdown: on Ctrl+C or SIGTERM we stop accepting, give in-flight
-	// requests up to 10s to finish, and ONLY then return (so the defers —
-	// including sqldb.Close() — run; with log.Fatal/os.Exit they wouldn't).
-	// Pure stdlib.
+	// Graceful shutdown: stop accepting on SIGINT/SIGTERM, give in-flight requests
+	// up to 10s, and only then return so the defers run (incl. closing the DB).
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 

@@ -1,5 +1,7 @@
-// Package paginas defines static page handlers (no DB). They don't know their
-// URL: the canonical is computed from the route you mount them on (its module.go).
+// Package paginas is an EXAMPLE of the simplest domain shape: a static page (no
+// DB). It's wired (commented out) in main.go's app.Use(...) — uncomment it to
+// serve /ejemplo. Copy this package to add static sections of your own: a route
+// + a template, nothing else.
 package paginas
 
 import (
@@ -12,13 +14,15 @@ import (
 //go:embed templates/*.html
 var tplFS embed.FS
 
-// QuienesSomos returns the handler for the "about us" page.
-func QuienesSomos(baseURL string) http.HandlerFunc {
-	tpl := view.Layout(tplFS, "templates/quienes-somos.html")
+// Example returns the handler for the demo static page. A page handler doesn't
+// know its URL: the canonical is computed from the request path, so the same
+// handler works on any route you mount it on (see module.go).
+func Example(baseURL string) http.HandlerFunc {
+	tpl := view.Layout(tplFS, "templates/example.html")
 	return func(w http.ResponseWriter, r *http.Request) {
 		view.Render(w, r, tpl, struct{ Meta view.Meta }{view.Meta{
-			Title:       "Quiénes somos — Agogo",
-			Description: "Qué es Agogo y por qué lo construimos con Go puro, sin dependencias de más.",
+			Title:       "Sección de ejemplo — agogo",
+			Description: "Una sección estática de ejemplo.",
 			Canonical:   baseURL + r.URL.Path,
 			OGType:      "website",
 		}})

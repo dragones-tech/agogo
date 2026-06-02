@@ -147,8 +147,11 @@ func SecurityHeaders(next http.Handler) http.Handler {
 		h.Set("X-Content-Type-Options", "nosniff")
 		h.Set("X-Frame-Options", "DENY")
 		h.Set("Referrer-Policy", "strict-origin-when-cross-origin")
-		// Everything is same-origin, so default-src 'self' breaks nothing.
-		h.Set("Content-Security-Policy", "default-src 'self'")
+		// Self-hosted by default; scc (CSS) and lumen (JS) load from jsDelivr, so
+		// style-src/script-src also allow that CDN. To go back to a strict 'self',
+		// self-host those assets and drop the CDN from here.
+		h.Set("Content-Security-Policy",
+			"default-src 'self'; style-src 'self' https://cdn.jsdelivr.net; script-src 'self' https://cdn.jsdelivr.net")
 		next.ServeHTTP(w, r)
 	})
 }

@@ -215,7 +215,8 @@ code from the server binary.
 - `scratch` image (no OS, no shell), non-root user.
 - Core middlewares: `Recover` (a panic doesn't take down the server), `LimitBody`
   (cap of 1 MiB per request, before any `ParseForm`/decode), `SecurityHeaders`
-  (`Content-Security-Policy: default-src 'self'`, `X-Content-Type-Options`,
+  (`Content-Security-Policy: default-src 'self'` plus `cdn.jsdelivr.net` allowed
+  on `style-src`/`script-src` for scc/lumen, `X-Content-Type-Options`,
   `X-Frame-Options`, `Referrer-Policy`) and `Gzip` (compresses text responses
   —HTML/CSS/JS/JSON— if the client accepts it; stdlib's `compress/gzip`, decides
   by `Content-Type`, respects `Range`).
@@ -262,25 +263,26 @@ primitives, everything readable and auditable—, one for each layer of the web:
   build, with native `<template>` and ES modules (the browser only downloads what
   you import).
 
-Both are **vendored** in `internal/site/static/` (served from `'self'`, no CDN,
-strict CSP intact — same treatment as Swagger UI). They are used as **progressive
-enhancement**: the server renders and validates the same without JS, and lumen
-only adds convenience (catalog filter, form validation mirroring the server).
+They are used as **progressive enhancement**: the server renders and validates
+the same without JS, and lumen only adds convenience (catalog filter, form
+validation mirroring the server).
 
-### Vendoring policy
+### How they're loaded: jsDelivr CDN
 
 scc and lumen **are worked on in their repos** (`dragones-tech/scc`,
-`dragones-tech/lumen`), not here. In agogo they are a **pristine copy** and **are
-not versioned** (`.gitignore`): they are re-downloaded with
-`./scripts/vendor-frontend.sh`, like an `npm install`. That is why the vendor is
-kept **unedited** — any improvement goes to its repo, not to this copy.
+`dragones-tech/lumen`), not here. agogo loads them from the **jsDelivr CDN**
+(`cdn.jsdelivr.net/gh/dragones-tech/scc@main/scc.css`, `…/lumen@main/src/…`), so
+there is nothing to vendor, build, or fetch — clone and run. The trade is that
+the CSP must allow that CDN for `style-src`/`script-src` (it's no longer strict
+`'self'`); pin a tag/commit (and add SRI where possible) or self-host those
+assets to harden it.
 
-What is specific to agogo does NOT live in the vendor, but in
-`internal/site/static/style.css`:
+What is specific to agogo lives in `internal/site/static/style.css` (not in the
+CDN'd vendor):
 
 - **The brand** (green): overrides scc's "knobs" (`--accent`, `--neutral-hue`,
-  `--radius`) from `:root`. Being outside any `@layer`, it beats `scc/theme.css`
-  without touching it.
+  `--radius`) from `:root`. Being outside any `@layer`, it beats scc's defaults
+  without touching them.
 - **The page frame** (centered, footer at the bottom, card grid).
 - **`[hidden] { display: none }`**: scc does not re-assert `[hidden]` and a
   component with its own `display` (e.g. `.card`) would override it. *(Candidate
@@ -288,8 +290,7 @@ What is specific to agogo does NOT live in the vendor, but in
 - **`@view-transition { navigation: auto }`**: native crossfade between pages
   (removes the flicker of the MPA reload), with an opaque background on `<html>`.
 
-To clone and run: after `git clone`, run `./scripts/vendor-frontend.sh` once (it
-brings scc/lumen); then `go run .` as usual.
+To clone and run: `git clone` then `go run .` — nothing else to install.
 
 ### Partial navigation (Turbo-style, our own)
 

@@ -5,8 +5,3 @@
 *.db
 *.db-shm
 *.db-wal
-
-# frontend hermano vendorizado: se trabaja en sus repos (dragones-tech/scc y
-# /lumen) y se re-baja con scripts/vendor-frontend.sh; agogo no lo versiona.
-/internal/site/static/scc/
-/internal/site/static/lumen/

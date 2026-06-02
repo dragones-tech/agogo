@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/static/scc/scc.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/dragones-tech/scc@main/scc.css">
 <link rel="stylesheet" href="/static/style.css">
 <title>{{.Meta.Title}}</title>
 <meta name="description" content="{{.Meta.Description}}">
@@ -16,18 +16,14 @@
 </head>
 <body>
 <header class="navbar">
-  <a href="/" data-brand>Agogo</a>
-  <a href="/blog">Blog</a>
-  <a href="/quienes-somos">Quiénes somos</a>
-  <a href="/contacto">Contacto</a>
-  <span data-nav-end><a href="/cuenta" data-button>Cuenta</a></span>
+  <a href="/" data-brand>agogo</a>
+  <span data-nav-end><a href="https://github.com/dragones-tech/agogo" data-button>Documentación</a></span>
 </header>
 <main class="shell">
 {{block "content" .}}{{end}}
 </main>
-<footer class="shell"><small>Agogo · Go stdlib + sqlc · estilo con scc · UI con lumen — el mismo no-magia en las tres capas</small></footer>
+<footer class="shell"><small>agogo · servidor web en Go puro · stdlib-first</small></footer>
 {{block "scripts" .}}{{end}}
-<script type="module" src="/static/js/nav.js"></script>
 </body>
 </html>{{end}}
 
