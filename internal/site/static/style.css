@@ -1,6 +1,19 @@
-/* Marco de la página (SOLO layout). El sistema de diseño lo pone scc
-   (scc/scc.css): tipografía, color, componentes. Aquí solo centramos el
-   contenido y fijamos el footer abajo, usando los tokens de scc. */
+/* Marco de la página (SOLO layout) + la MARCA de agogo. El sistema de diseño lo
+   pone scc (scc/scc.css); scc se mantiene PRISTINO (no editamos el vendor, se
+   trabaja en su repo). Las "perillas" de scc las sobrescribimos aquí: al estar
+   sin @layer, estos valores ganan a los por defecto de scc/theme.css. */
+:root {
+  --accent:         #2f6f4e;   /* verde agogo */
+  --accent-fg:      #ffffff;
+  --neutral-hue:    150;       /* grises teñidos de verde */
+  --neutral-chroma: 6%;
+  --radius:         0.625rem;
+}
+
+/* Fondo del tema en la RAÍZ (no solo en body): así no se ve el lienzo del
+   navegador (negro en modo oscuro) ni en el hueco de la navegación ni durante
+   el crossfade de las View Transitions. */
+html { background: var(--bg); }
 
 body {
   min-height: 100dvh;
@@ -11,8 +24,19 @@ body {
 /* El atributo [hidden] debe ocultar SIEMPRE. Un componente de scc como .card
    fija display:flex y, al estar en una @layer, perdería contra el display:none
    del user-agent; esta regla (sin capa, así gana a cualquier @layer) lo asegura.
-   Lo usa el filtro del catálogo (static/js/catalogo.js). */
+   Lo usa el catálogo (static/js/catalog/). */
 [hidden] { display: none; }
+
+/* Transición entre páginas: el navegador hace un crossfade NATIVO en cada
+   navegación same-origin, tapando el "parpadeo" en blanco/negro del recargo
+   clásico de MPA. CSS puro, sin JS ni build. Los navegadores sin soporte
+   navegan normal (degrada limpio). */
+@view-transition { navigation: auto; }
+
+/* Respeta a quien pidió menos movimiento: sin crossfade. */
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+}
 
 /* contenedor centrado y de ancho cómodo para leer */
 .shell {
