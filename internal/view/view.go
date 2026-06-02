@@ -4,6 +4,7 @@
 package view
 
 import (
+	"bytes"
 	"embed"
 	"html/template"
 	"io/fs"
@@ -30,10 +31,15 @@ func Layout(contentFS fs.FS, files ...string) *template.Template {
 	return template.Must(t.ParseFS(contentFS, files...))
 }
 
-// Render ejecuta el layout "base" con los datos de la página.
+// Render ejecuta el layout "base" con los datos de la página. Renderiza primero
+// a un buffer: si la plantilla falla a mitad, aún podemos responder 500 limpio
+// en vez de un 200 con HTML truncado ya enviado al cliente.
 func Render(w http.ResponseWriter, t *template.Template, data any) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	if err := t.ExecuteTemplate(w, "base", data); err != nil {
+	var buf bytes.Buffer
+	if err := t.ExecuteTemplate(&buf, "base", data); err != nil {
 		http.Error(w, "error de plantilla", http.StatusInternalServerError)
+		return
 	}
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	_, _ = buf.WriteTo(w)
 }
