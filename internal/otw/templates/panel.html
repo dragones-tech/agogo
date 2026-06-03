@@ -1,0 +1,9 @@
+<article class="card">
+  <h2>{{.Title}}</h2>
+  {{if .Rows}}
+  <dl>
+    {{range .Rows}}<dt>{{.Label}}</dt><dd>{{.Value}}</dd>{{end}}
+  </dl>
+  {{end}}
+  {{with .Note}}<p><small>{{.}}</small></p>{{end}}
+</article>

@@ -14,8 +14,12 @@ import (
 	"agogo/internal/config"
 	"agogo/internal/home"
 	"agogo/internal/logs"
+	"agogo/internal/otw"
 	"agogo/internal/site"
-	// "agogo/internal/paginas" // ← breadcrumb: uncomment with its app.Use line below
+	// Breadcrumbs — uncomment the import together with its app.Use line below:
+	// "agogo/internal/paginas" // example static section (no DB) at /ejemplo
+	// "agogo/internal/auth"    // username/password login (needs the DB; see cmd/migrate)
+	// "agogo/internal/oauth"   // OAuth 2.0 login (no DB; configure via OAUTH_* env)
 
 	_ "modernc.org/sqlite"
 )
@@ -47,11 +51,18 @@ func main() {
 	// What you don't wire in isn't imported, so it stays out of the binary.
 	if err := application.Use(
 		logs.Module(), // observability (access log)
-		home.Module(), // home: "hola mundo" + link to the docs
+		home.Module(), // home: "hola mundo" + link to the docs + the otw demo
+		otw.Module(),  // BFF "HTML over the wire": fragment from a token-gated API
 		site.Module(), // robots.txt, sitemap.xml, /static, favicon, styled 404
-		// paginas.Module(), // ← example static section (no DB) at /ejemplo.
-		//   Uncomment THIS line and its import above to activate it. It's the
-		//   simplest domain shape; copy it as the template for your own sections.
+
+		// Breadcrumbs — uncomment a line (and its import above) to plug it in.
+		// What you don't wire in isn't imported, so it stays out of the binary.
+		//
+		// paginas.Module(), // simplest domain shape (no DB); copy it for your sections
+		// oauth.Module(),   // OAuth login; routes answer 503 until OAUTH_* is set
+		// auth.Module(),    // username/password login. Needs the DB: run
+		//                   //   `go run ./cmd/migrate` (and `./cmd/seed` for a demo
+		//                   //   user) once before enabling it.
 	); err != nil {
 		log.Fatalf("módulos: %v", err)
 	}

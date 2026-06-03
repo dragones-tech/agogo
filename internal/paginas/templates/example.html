@@ -8,4 +8,17 @@
   <code>Register</code> (ruta + plantilla) y acóplala con una línea en
   <code>app.Use(...)</code>.</p>
 </article>
+
+<!-- Demo "HTML over the wire" (módulo otw): el botón pide un FRAGMENTO ya
+     renderizado por el servidor —que llama a una API con un token que nunca
+     llega al navegador— y lo inyecta con innerHTML. Sin JSON ni framework.
+     La herramienta (otw + otw.js) está lista; esto solo la muestra en acción. -->
+<section class="otw-demo" data-otw="/otw/panel">
+  <button type="button" data-otw-load data-variant="primary">Cargar panel externo</button>
+  <div data-otw-target></div>
+</section>
+{{end}}
+
+{{define "scripts"}}
+<script type="module" src="/static/js/otw.js"></script>
 {{end}}
