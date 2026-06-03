@@ -7,8 +7,10 @@
 
 Key facts for an agent working here:
 
-- **Runtime:** Go 1.26+. No build step; scc (CSS) and lumen (JS) load from a CDN.
-  The only dependency is `modernc.org/sqlite` (pure Go, no cgo → static binary).
+- **Runtime:** Go 1.26+. No build step; scc (CSS) and lumen (JS) load from the
+  jsDelivr CDN (lumen via an inline import map; `scripts/vendor-frontend.sh`
+  self-hosts both for a strict-`'self'` CSP). The only dependency is
+  `modernc.org/sqlite` (pure Go, no cgo → static binary).
 - **Shape:** a host (`app`) you plug opt-in modules into with `app.Use(...)` in
   `main.go`. A module implements `Module{ Name() string; Register(*App) error }`
   and hooks into the host (routes, middleware, migrations, sitemap, services).
@@ -44,9 +46,14 @@ Key facts for an agent working here:
 ## Modules (sections)
 
 - [home](https://github.com/dragones-tech/agogo/tree/main/internal/home): the active "hello world" section — the smallest module, a good template to copy.
-- [paginas](https://github.com/dragones-tech/agogo/tree/main/internal/paginas): an example static section, wired but commented out in `main.go` (serves `/ejemplo` once uncommented).
+- [otw](https://github.com/dragones-tech/agogo/tree/main/internal/otw): active "HTML over the wire" BFF — calls a token-gated external API server-side and returns a rendered HTML fragment (the token never reaches the client). Works without credentials via a built-in simulated endpoint; its demo button lives on the `/ejemplo` page.
+- [paginas](https://github.com/dragones-tech/agogo/tree/main/internal/paginas): an example static section + the otw demo, wired but commented out in `main.go` (serves `/ejemplo` once uncommented).
+- [auth](https://github.com/dragones-tech/agogo/tree/main/internal/auth): opt-in username/password login (`/login`, `/cuenta`) — PBKDF2, CSRF, reuses `identity`. Needs the DB: run `cmd/migrate` (and `cmd/seed`) before enabling it in `main.go`.
+- [oauth](https://github.com/dragones-tech/agogo/tree/main/internal/oauth): opt-in OAuth 2.0 login (authorization-code flow), pure stdlib, reuses `identity`. No DB; routes answer 503 until `OAUTH_*` env is set.
 - [site](https://github.com/dragones-tech/agogo/tree/main/internal/site): robots.txt, sitemap.xml, `/static`, favicon and the styled 404.
 - [logs](https://github.com/dragones-tech/agogo/tree/main/internal/logs): opt-in access-logging middleware.
+
+The dev commands [cmd/migrate](https://github.com/dragones-tech/agogo/tree/main/cmd/migrate) and [cmd/seed](https://github.com/dragones-tech/agogo/tree/main/cmd/seed) live outside the server: each builds the same App and runs `app.Migrate(ctx)` to apply a DB module's schema / seed demo data.
 
 ## Optional
 

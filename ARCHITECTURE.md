@@ -12,8 +12,8 @@ instructions (running, routes, env vars) see the [README](README.md).
 ## Principles
 
 1. **Stdlib first — "only the essentials".**
-   The HTTP server, the templates, the JSON, the CSRF, the middlewares and the
-   OpenAPI spec are **our own code on top of Go's standard library**. There is no
+   The HTTP server, the templates, the JSON, the CSRF and the middlewares are
+   **our own code on top of Go's standard library**. There is no
    web framework. The only unavoidable dependency is the SQLite driver
    (`modernc.org/sqlite`, pure Go, to keep the binary static and the `scratch`
    image).
@@ -27,7 +27,7 @@ instructions (running, routes, env vars) see the [README](README.md).
 3. **Package-by-feature.**
    Each domain is self-sufficient: its `handler.go`, its `sql/`, its
    `templates/`, and (if it has a DB) `migrate.go` and `seed.go`. To understand
-   "productos" you open one folder, you don't jump between technical layers.
+   `auth` you open one folder, you don't jump between technical layers.
 
 4. **Hand-written SQL with sqlc, no ORM (Repository pattern).**
    One typed function per query, parameterized (injection impossible by design).
@@ -87,15 +87,13 @@ instructions (running, routes, env vars) see the [README](README.md).
     ├── sitemap/         # sitemap contract (URL, Source, Entries) — leaf
     ├── middleware/      # security baseline: Recover, SecurityHeaders
     │  ── MODULES (opt-in; each one with module.go → Module()) ──
-    ├── logs/            # global access-logging middleware
-    ├── auth/            # username/password authentication (reuses identity)
-    ├── oauth/           # OAuth 2.0 authentication (reuses identity), stdlib
-    ├── productos/       # DB resource
-    ├── blog/            # DB resource
-    ├── paginas/         # static pages (no DB)
-    ├── contacto/        # form (GET shows, POST processes)
-    ├── openapi/         # openapi.json + Swagger UI at /docs
-    └── site/            # robots.txt, sitemap.xml, /static
+    ├── logs/            # global access-logging middleware (active)
+    ├── home/            # "hola mundo" landing (active)
+    ├── otw/             # BFF: renders a token-gated API as an HTML fragment (active)
+    ├── paginas/         # static page example + the otw demo (no DB; opt-in breadcrumb)
+    ├── auth/            # username/password login, reuses identity (needs the DB; opt-in)
+    ├── oauth/           # OAuth 2.0 login, reuses identity, stdlib (no DB; opt-in)
+    └── site/            # robots.txt, sitemap.xml, /static, favicon, styled 404
 ```
 
 **Direction of dependencies:** the **modules** import `app` (the host) and the
@@ -113,7 +111,8 @@ it hooks into the host: it adds routes (`a.Router.Get`), global middleware
 (`a.UseMiddleware`), migrations (`a.AddMigration`), sitemap sources
 (`a.AddSitemap`) and uses shared services (`a.DB`, `a.Session`, `a.Identity`).
 
-`main.go` is the "Gemfile": `app.Use(productos.Module(), auth.Module(), ...)`.
+`main.go` is the "Gemfile": `app.Use(logs.Module(), home.Module(), otw.Module(),
+site.Module())`, with `auth`/`oauth`/`paginas` sitting one commented line away.
 **What you don't plug in is not imported, so it doesn't enter the binary** (clean
 if unused). Each domain's routes live in its module; the global picture is the
 list of `app.Use(...)`. Third-party plugin distribution = Go modules (`go get`) +
@@ -126,18 +125,20 @@ implementing `Module`; no registry of our own.
 Not everything fits the same mold. There are three shapes; each module registers
 its handlers in its `Register`:
 
-1. **DB resource — `web.Resource[T]`** (productos, blog).
-   Generic, written once: list/detail × HTML/JSON. The domain only contributes
-   behavior (sqlc queries, templates, SEO metadata, JSON-LD). It exposes
-   `ListHTML`, `DetailHTML`, `ListJSON`, `DetailJSON`.
+1. **DB resource — `web.Resource[T]`** (the toolbox for list/detail resources).
+   Generic, written once: list/detail × HTML/JSON. A domain only contributes
+   behavior (sqlc queries, templates, SEO metadata, JSON-LD) and gets
+   `ListHTML`, `DetailHTML`, `ListJSON`, `DetailJSON`. The starter ships the
+   generic in `internal/web`; a `productos`/`blog`-style module is the canonical
+   thing you'd build on top of it.
 
-2. **Static page** (paginas).
+2. **Static page** (home, paginas).
    No DB: template + SEO. It exposes an `http.HandlerFunc` (e.g.
-   `paginas.QuienesSomos(baseURL)`).
+   `paginas.Example(baseURL)`).
 
-3. **Form / custom handler** (contacto).
-   Unique logic (validation, CSRF, PRG). It exposes its handlers (`Mostrar`,
-   `Recibir`).
+3. **Form / custom handler** (auth, otw).
+   Unique logic (validation, CSRF, PRG, or a BFF call). It exposes its own
+   handlers (`auth.Login`, `otw.panel`, …).
 
 ---
 
@@ -147,18 +148,18 @@ Each **module registers its routes** in its `Register(a *app.App)`, using the
 router (Express-style, with per-route middleware):
 
 ```go
-// internal/productos/module.go
+// a productos-style DB resource you'd add (uses internal/web.Resource[T]):
 func (mod) Register(a *app.App) error {
     res := New(db.New(a.DB), a.Config.BaseURL)
     r := a.Router
-    r.Get("/{$}", res.ListHTML)                       // home (exact match of "/")
+    r.Get("/productos", res.ListHTML)
     r.Get("/productos/{slug}", res.DetailHTML)
     r.Get("/api/productos", res.ListJSON)
-    a.AddSitemap(res.SitemapSource("/", "/productos"))
+    a.AddSitemap(res.SitemapSource("/productos", "/productos"))
     a.AddMigration(Migrate)
     return nil
 }
-// internal/auth/module.go — auth as per-route middleware:
+// internal/auth/module.go (shipped) — identity as per-route middleware:
 r.Get("/cuenta", h.Cuenta, a.Identity.Require)
 ```
 
@@ -216,7 +217,8 @@ code from the server binary.
 - Core middlewares: `Recover` (a panic doesn't take down the server), `LimitBody`
   (cap of 1 MiB per request, before any `ParseForm`/decode), `SecurityHeaders`
   (`Content-Security-Policy: default-src 'self'` plus `cdn.jsdelivr.net` allowed
-  on `style-src`/`script-src` for scc/lumen, `X-Content-Type-Options`,
+  on `style-src`/`script-src` for scc/lumen, and a `sha256` that whitelists the
+  inline lumen import map without `'unsafe-inline'`; `X-Content-Type-Options`,
   `X-Frame-Options`, `Referrer-Policy`) and `Gzip` (compresses text responses
   —HTML/CSS/JS/JSON— if the client accepts it; stdlib's `compress/gzip`, decides
   by `Content-Type`, respects `Range`).
@@ -226,10 +228,6 @@ code from the server binary.
 - Double-cookie CSRF on forms (`internal/csrf`).
 - Authenticated pages (`/cuenta`, `/oauth/me`) respond with `Cache-Control: no-store`.
 - Parameterized SQL (sqlc) → injection impossible by design.
-- Swagger UI (`/docs`) is **vendored** (assets embedded in
-  `internal/openapi/static`, served from `/docs-assets/`): self-contained, no CDN,
-  CSP `'self'` (only `style-src` allows `'unsafe-inline'` because of the styles
-  Swagger injects at runtime).
 
 ---
 
@@ -264,18 +262,28 @@ primitives, everything readable and auditable—, one for each layer of the web:
   you import).
 
 They are used as **progressive enhancement**: the server renders and validates
-the same without JS, and lumen only adds convenience (catalog filter, form
-validation mirroring the server).
+the same without JS, and lumen only adds convenience on top.
 
-### How they're loaded: jsDelivr CDN
+### How they're loaded: jsDelivr CDN (with a vendor escape hatch)
 
 scc and lumen **are worked on in their repos** (`dragones-tech/scc`,
-`dragones-tech/lumen`), not here. agogo loads them from the **jsDelivr CDN**
-(`cdn.jsdelivr.net/gh/dragones-tech/scc@main/scc.css`, `…/lumen@main/src/…`), so
-there is nothing to vendor, build, or fetch — clone and run. The trade is that
-the CSP must allow that CDN for `style-src`/`script-src` (it's no longer strict
-`'self'`); pin a tag/commit (and add SRI where possible) or self-host those
-assets to harden it.
+`dragones-tech/lumen`), not here, and they **change often** — so agogo loads
+them from the **jsDelivr CDN** instead of vendoring a copy that would drift:
+
+- **scc** via a `<link>` to `…/scc@main/scc.css` in `view/base.html`.
+- **lumen** via an inline **import map** in `base.html` that maps the bare
+  `lumen` / `lumen/` specifiers to `…/lumen@main/src/`, so any page script can
+  `import { … } from 'lumen'` out of the box (the browser only fetches what it
+  imports). The import map is inline, so the CSP whitelists it with a `sha256`
+  hash (no `'unsafe-inline'`); recompute the hash in `internal/middleware` if you
+  edit the block.
+
+The trade is that the CSP must allow that CDN for `style-src`/`script-src`. To go
+back to a strict `'self'`, **vendor** the assets: `scripts/vendor-frontend.sh`
+downloads scc + lumen into `internal/site/static/{scc,lumen}` (git-ignored,
+re-fetchable like `npm install`); then point the `base.html` URLs at
+`/static/scc/scc.css` and `/static/lumen/src/`, and drop the CDN (and the inline
+import map's hash) from the CSP.
 
 What is specific to agogo lives in `internal/site/static/style.css` (not in the
 CDN'd vendor):
@@ -325,7 +333,7 @@ repo's stats (the GitHub API, which you call with a PAT for a higher rate limit
 or private repos):
 
 1. The browser asks the server for a section (`GET /otw/panel`), triggered by a
-   button on the *Quiénes somos* page.
+   button on the example page (`/ejemplo`, the `paginas` module).
 2. The **server** calls the GitHub API with the bearer token (the token lives
    only on the server, never reaches the client), gets JSON, and renders it as
    an **HTML fragment** (`html/template`, so external data is auto-escaped).
