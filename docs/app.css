@@ -1,0 +1,562 @@
+/* Demo chrome — the app shell + per-module layout. NOT part of scc; it just consumes
+   scc tokens. The scc components themselves are styled entirely by scc.css. */
+
+/* i18n is handled by Lumen's I18n (app/i18n.js): views fill their [data-i18n] prose
+   from a per-locale dictionary and re-render when the navbar toggle switches locale. */
+
+.shell {
+  min-block-size: 100svh;
+  display: flex;
+  flex-direction: column;
+}
+
+.shell {
+  --nav-h: 3.5rem;   /* approximate navbar height; used to offset the sticky menu */
+}
+
+.shell .navbar {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 10;
+}
+
+/* Icon-only link (GitHub) — sized like a ghost button, square */
+.icon-link {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 2.25rem;
+  block-size: 2.25rem;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+}
+.icon-link:hover { color: var(--text); background: color-mix(in oklab, transparent, var(--text) 8%); }
+
+.shell-body {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 13rem 1fr;
+}
+
+/* Sidebar nav — fixed in place: it stays put below the navbar while content scrolls.
+   NOTE: named .sidebar (not .menu) on purpose — .menu is scc's dropdown component
+   (details.menu), and this file's rules are unlayered, so a shared name would leak
+   the sticky/overflow styles onto the dropdown. */
+.sidebar {
+  position: sticky;
+  inset-block-start: var(--nav-h);
+  align-self: start;
+  max-block-size: calc(100svh - var(--nav-h));
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  border-inline-end: var(--border-width) solid var(--border);
+}
+.sidebar a {
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+}
+.sidebar a:hover { color: var(--text); background: color-mix(in oklab, transparent, var(--text) 8%); }
+.sidebar a[aria-current] {
+  color: var(--accent);
+  font-weight: 600;
+  background: color-mix(in oklab, var(--accent), transparent 88%);
+}
+
+/* Content fills the available width on desktop */
+.content { padding: var(--space-6) var(--space-8) var(--space-8); }
+
+/* Each section now opens with a compact <section class="hero"> (an scc component),
+   so the old .section-head styles are gone. Give that hero some breathing room
+   before the modules below it. */
+.section > .hero { margin-block-end: var(--space-6); }
+
+/* A module: description on top (full width), then preview + code side by side */
+.demo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4) var(--space-6);
+  align-items: start;
+  padding-block: var(--space-8);
+}
+.demo + .demo { border-block-start: var(--border-width) solid var(--border); }
+.demo-head { grid-column: 1 / -1; }
+.demo-head h2 {
+  margin-block-end: var(--space-1);
+  padding-inline-start: var(--space-3);
+  border-inline-start: 3px solid var(--accent);   /* accent rail, like the home's rule */
+}
+.demo-head p { color: var(--text-muted); max-inline-size: var(--measure); }
+
+/* The live result panel — a clean card with a corner label */
+.demo-preview {
+  position: relative;
+  padding: var(--space-8) var(--space-6) var(--space-6);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+}
+.demo-preview::before {
+  content: "Resultado";
+  position: absolute;
+  inset-block-start: var(--space-2);
+  inset-inline-end: var(--space-3);
+  font-size: calc(var(--text-sm) / var(--ratio));
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+/* Base code panel — used as-is by the hero & the home comparison */
+.demo-code {
+  margin: 0;
+  font-size: var(--text-sm);
+  max-block-size: 26rem;
+  overflow: auto;
+  white-space: pre-wrap;        /* wrap long lines (e.g. the SVG data URI) */
+  overflow-wrap: anywhere;      /* break very long unbroken tokens */
+}
+
+/* Inside a module (or the guide), dress the code panel as a faux editor window.
+   The title bar (three dots + divider) is painted with backgrounds pinned to the
+   element, so it stays put while the code scrolls — no extra markup, no JS. */
+.demo .demo-code,
+.guide .demo-code {
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  background-color: var(--surface);
+  background-image:
+    radial-gradient(circle, var(--danger)  49%, transparent 51%),
+    radial-gradient(circle, var(--warning) 49%, transparent 51%),
+    radial-gradient(circle, var(--success) 49%, transparent 51%),
+    linear-gradient(var(--border), var(--border));
+  background-repeat: no-repeat;
+  background-size: 0.6rem 0.6rem, 0.6rem 0.6rem, 0.6rem 0.6rem, 100% var(--border-width);
+  background-position:
+    var(--space-4) var(--space-3),
+    calc(var(--space-4) + 0.95rem) var(--space-3),
+    calc(var(--space-4) + 1.9rem) var(--space-3),
+    0 calc(var(--space-3) * 2 + 0.6rem);
+  padding: calc(var(--space-3) * 2 + 0.6rem + var(--space-2)) var(--space-4) var(--space-4);
+}
+
+/* Syntax colors — derived from scc tokens, so the code re-themes with the site */
+.demo-code .tok-tag     { color: var(--accent); }
+.demo-code .tok-attr    { color: var(--warning); }
+.demo-code .tok-str     { color: var(--success); }
+.demo-code .tok-comment { color: var(--text-muted); font-style: italic; }
+.demo-code .tok-punct   { color: var(--text-muted); }
+
+/* Token customizer drawer (right side) */
+.drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;            /* closed: doesn't block the page */
+}
+.drawer.open { pointer-events: auto; }
+
+.drawer-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / 0.4);
+  opacity: 0;
+  transition: opacity var(--dur) var(--ease);
+}
+.drawer.open .drawer-scrim { opacity: 1; }
+
+.drawer-panel {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  inline-size: min(92vw, 22rem);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  overflow-y: auto;
+  background: var(--surface);
+  border-inline-start: var(--border-width) solid var(--border);
+  box-shadow: var(--shadow);
+  translate: 100% 0;               /* off-screen when closed */
+  transition: translate var(--dur-slow) var(--ease);
+}
+.drawer.open .drawer-panel { translate: 0 0; }
+
+.drawer-head { display: flex; align-items: center; justify-content: space-between; }
+.drawer-note { margin: 0; font-size: var(--text-sm); color: var(--text-muted); }
+.drawer-controls { display: flex; flex-direction: column; gap: var(--space-3); }
+
+.ctl { display: flex; flex-direction: column; gap: var(--space-1); }
+.ctl-label { display: flex; justify-content: space-between; gap: var(--space-2); font-size: var(--text-sm); font-weight: 600; }
+.ctl-label output { color: var(--text-muted); font-weight: 400; font-family: var(--font-mono); }
+.ctl input[type="range"] { inline-size: 100%; accent-color: var(--accent); }
+.ctl input[type="color"] {
+  inline-size: 100%;
+  block-size: 2.25rem;
+  padding: 2px;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  cursor: pointer;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   Home / landing — a "marketing" page that shows scc off. Everything is built
+   from scc tokens + components, so the whole landing re-themes with the site.
+   ════════════════════════════════════════════════════════════════════ */
+
+/* Generous vertical rhythm between landing / guide sections */
+.home,
+.guide { display: flex; flex-direction: column; gap: calc(var(--space-base) * 14); }
+.guide > .hero { margin-block-end: 0; }   /* the flex gap already separates it */
+
+.block-head { margin-block-end: var(--space-6); }
+.block-head h2 {
+  font-size: clamp(var(--text-xl), 1.4rem + 1.4vw, calc(var(--text-xl) * 1.5));
+  letter-spacing: -0.02em;
+  margin-block-end: var(--space-2);
+}
+.block-head p { color: var(--text-muted); max-inline-size: var(--measure); margin: 0; }
+
+/* The hero stretches a touch wider and its content can breathe */
+.home .hero h1 { font-weight: 800; }
+.home .hero .badge { font-size: var(--text-sm); }
+
+/* ── Split hero: copy on the left, code→result on the right ──────────── */
+.hero-split { display: grid; gap: var(--space-6); align-items: center; }
+@media (min-width: 56rem) {
+  .hero-split { grid-template-columns: 1.05fr 0.95fr; gap: var(--space-8); }
+}
+.hero-copy { display: flex; flex-direction: column; align-items: start; gap: var(--space-4); }
+.hero-media { display: flex; flex-direction: column; gap: var(--space-2); min-inline-size: 0; }
+
+/* A faux editor window for the snippet */
+.code-window {
+  margin: 0;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.code-window-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-block-end: var(--border-width) solid var(--border);
+  background: var(--surface);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: 1;
+  color: var(--text-muted);
+}
+.code-window-bar .dots { display: inline-flex; gap: 0.35rem; }
+.code-window-bar .dots i { inline-size: 0.7rem; block-size: 0.7rem; border-radius: 50%; }
+.code-window-bar .dots i:nth-child(1) { background: var(--danger); }
+.code-window-bar .dots i:nth-child(2) { background: var(--warning); }
+.code-window-bar .dots i:nth-child(3) { background: var(--success); }
+.code-window .demo-code { padding: var(--space-3) var(--space-4); white-space: pre; overflow-x: auto; }
+
+.code-arrow { align-self: center; font-size: var(--text-sm); color: var(--text-muted); font-family: var(--font-mono); }
+.hero-live .card { box-shadow: var(--shadow); }
+
+/* ── Section heroes: copy on the left, a live mini-preview on the right ── */
+.hero-section { display: grid; gap: var(--space-6); align-items: center; }
+@media (min-width: 52rem) {
+  .hero-section { grid-template-columns: 1fr minmax(15rem, 20rem); }
+}
+.hero-demo {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-6);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  background: color-mix(in oklab, var(--surface), transparent 25%);
+}
+.hero-demo table { font-size: var(--text-sm); }
+.hero-demo > * { margin: 0; }
+
+/* ── Guide section ──────────────────────────────────────────────────── */
+/* The one rule, set apart with an accent rail */
+.rule {
+  margin: 0 0 var(--space-3);
+  padding: var(--space-4) var(--space-6);
+  border-inline-start: 3px solid var(--accent);
+  border-radius: var(--radius-sm);
+  background: color-mix(in oklab, var(--accent), transparent 92%);
+  font-size: var(--text-lg);
+  line-height: 1.4;
+}
+
+/* Numbered steps — the count comes from a CSS counter, not the markup */
+.steps {
+  list-style: none;
+  counter-reset: step;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+.step {
+  counter-increment: step;
+  position: relative;
+  padding-inline-start: calc(var(--space-8) + var(--space-3));
+}
+.step::before {
+  content: counter(step);
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block-start: 0;
+  inline-size: var(--space-8);
+  block-size: var(--space-8);
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-fg);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.step h3 { margin: 0 0 var(--space-1); }
+.step > p { color: var(--text-muted); margin: 0; max-inline-size: var(--measure); }
+.step > p + *, .step > * + p { margin-block-start: var(--space-3); }
+.step .demo-code, .step table { margin-block-start: var(--space-3); }
+
+/* Checklist with native-looking check marks */
+.checklist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-2); }
+.checklist li { position: relative; padding-inline-start: var(--space-6); color: var(--text-muted); }
+.checklist li::before { content: "✓"; position: absolute; inset-inline-start: 0; color: var(--success); font-weight: 700; }
+
+/* The guide's WORKED EXAMPLE made live — this is the `stat` component exactly as
+   the guide authors it (it is not part of scc itself; it lives here so the example
+   on the page renders for real and matches the code shown beside it). */
+@scope (.stat) {
+  :scope {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding: var(--space-4);
+    background: var(--surface);
+    border: var(--border-width) solid var(--border);
+    border-radius: var(--radius);
+  }
+  p      { margin: 0; color: var(--text-muted); font-size: var(--text-sm); }
+  strong { font-size: var(--text-xl); font-weight: 700; line-height: 1; }
+  small  { color: var(--text-muted); }
+
+  :scope[data-trend="up"]   small { color: var(--success); }
+  :scope[data-trend="down"] small { color: var(--danger); }
+}
+/* keep the live example a sensible KPI width (not part of the shown code) */
+.guide .demo-preview .stat { max-inline-size: 16rem; }
+
+/* ── Stats band ─────────────────────────────────────────────────────── */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: var(--space-4);
+  padding: var(--space-6);
+  border: var(--border-width) solid var(--border);
+  border-radius: calc(var(--radius) * 1.5);
+  background: var(--surface);
+}
+.metric { text-align: center; }
+.metric strong {
+  display: block;
+  font-size: clamp(2rem, 1rem + 3vw, 3rem);
+  line-height: 1;
+  font-weight: 800;
+  color: var(--tone, var(--accent));
+  font-variant-numeric: tabular-nums;
+}
+.metric span { color: var(--text-muted); font-size: var(--text-sm); }
+
+/* ── Feature cards — small + colored, tinted by --tone ──────────────── */
+.features {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+}
+.feature {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: var(--border-width) solid color-mix(in oklab, var(--tone), var(--border) 55%);
+  border-radius: var(--radius);
+  background: color-mix(in oklab, var(--tone), var(--surface) 90%);
+  transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+}
+.feature:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+.feature-icon {
+  display: grid;
+  place-items: center;
+  inline-size: 2.25rem;
+  block-size: 2.25rem;
+  border-radius: var(--radius-sm);
+  background: color-mix(in oklab, var(--tone), transparent 80%);
+  color: var(--tone);
+  font-size: 1.2rem;
+}
+.feature h3 { font-size: var(--text-lg); margin: 0; }
+.feature p { color: var(--text-muted); margin: 0; font-size: var(--text-sm); }
+
+/* ── Golden-rule comparison ─────────────────────────────────────────── */
+.compare,
+.split {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+}
+.split { align-items: start; }
+.compare .card { gap: var(--space-2); padding: var(--space-4); }
+.compare .demo-code { margin-block-start: var(--space-2); }
+
+/* A card carrying a verdict gets a colored top rail */
+.card[data-rule] { border-block-start: 3px solid var(--rule-tone); }
+.card[data-rule="bad"]  { --rule-tone: var(--danger); }
+.card[data-rule="good"] { --rule-tone: var(--success); }
+.card[data-rule="bad"]  h3 { color: var(--danger); }
+.card[data-rule="good"] h3 { color: var(--success); }
+
+/* ── The six cascade layers as chips joined by arrows ───────────────── */
+.layer-flow { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.layer-flow .chip { font-family: var(--font-mono); }
+.layer-arrow { color: var(--text-muted); }
+
+.home-req {
+  padding-block-start: var(--space-4);
+  border-block-start: var(--border-width) solid var(--border);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+/* ── Motion: scroll-driven reveal + hero parallax ───────────────────────
+   Native scroll-driven animations (animation-timeline) — no JS, no library, on
+   brand. Gated behind @supports so unsupporting browsers just show everything.
+   prefers-reduced-motion neutralizes it via scc's reset. */
+@supports (animation-timeline: view()) {
+  .reveal,
+  .demo {
+    animation: home-reveal linear both;
+    animation-timeline: view();
+    animation-range: entry 0% cover 30%;
+  }
+  /* Parallax: the hero's glow lags the scroll for depth */
+  .home .hero::before {
+    animation: scc-hero-drift 14s var(--ease) infinite alternate,
+               home-parallax linear both;
+    animation-timeline: auto, view();
+    animation-range: auto, cover;
+  }
+}
+@keyframes home-reveal {
+  from { opacity: 0; translate: 0 2.5rem; }
+  to   { opacity: 1; translate: 0 0; }
+}
+@keyframes home-parallax {
+  from { translate: 0 -12%; }
+  to   { translate: 0 18%; }
+}
+
+/* Page-level breakpoints (page layout is the one place @media fits) */
+@media (max-width: 60rem) {
+  .demo { grid-template-columns: 1fr; }  /* stack preview over code */
+}
+@media (max-width: 44rem) {
+  .shell-body { grid-template-columns: 1fr; }
+  .sidebar {
+    flex-direction: row;
+    max-block-size: none;        /* horizontal bar: no vertical cap */
+    overflow-y: visible;
+    overflow-x: auto;
+    background: var(--bg);       /* opaque while it sticks over scrolling content */
+    border-inline-end: 0;
+    border-block-end: var(--border-width) solid var(--border);
+  }
+  .content { padding: var(--space-4); }
+}
+
+/* ── agogo "à gogo" theme: 1960s psychedelic palette ─────────────────────
+   scc knobs tuned to a neon palette; the rainbow gradient is the signature. */
+:root {
+  --accent:        #c026d3;   /* fuchsia (links, buttons) */
+  --accent-fg:     #ffffff;
+  --neutral-hue:   305;       /* grays tinted violet */
+  --neutral-chroma: 7%;
+  --radius:        0.625rem;
+  --success:       #2fd95f;
+  --warning:       #ffb300;
+  --danger:        #ff3b6b;
+  /* the psychedelic rainbow — used for brand, hero and accents */
+  --psy: linear-gradient(100deg, #ff2d9b, #ff6a00, #ffd400, #7cff3f, #00e5ff, #8a2be2);
+}
+html { background: var(--bg); }
+
+/* Brand + hero headings painted with the rainbow (clipped to the text). */
+.navbar [data-brand],
+.home h1 {
+  background: var(--psy);
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent;
+}
+.home h1 { font-size: calc(var(--text-xl) * var(--ratio)); }
+
+/* A soft multi-color glow behind the home hero. */
+.home .hero-copy { position: relative; }
+.home .hero-copy::before {
+  content: ""; position: absolute; inset: -20% -10% auto -10%; height: 8rem; z-index: -1;
+  background: var(--psy); filter: blur(70px); opacity: .25; border-radius: 999px;
+}
+
+/* Feature cards: a rotating neon top bar (psychedelic, but the card stays readable). */
+.feature { border-block-start: 3px solid var(--accent); }
+.features .feature:nth-child(1) { border-block-start-color: #ff2d9b; }
+.features .feature:nth-child(2) { border-block-start-color: #ff6a00; }
+.features .feature:nth-child(3) { border-block-start-color: #00e5ff; }
+.features .feature:nth-child(4) { border-block-start-color: #7cff3f; }
+
+/* syntax highlighting — neon (adapts to light/dark) */
+pre code .hl-c { color: var(--text-muted); font-style: italic; }
+pre code .hl-k { color: light-dark(#c026d3, #ff6ae6); font-weight: 600; }
+pre code .hl-s { color: light-dark(#0e8a3e, #7cff3f); }
+pre code .hl-n { color: light-dark(#0c84c2, #00e5ff); }
+
+/* API reference */
+.apiindex { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-2); margin-block: var(--space-3) var(--space-6); }
+.apiindex a { font-family: var(--font-mono); font-size: var(--text-sm); }
+.apipkg + .apipkg { margin-block-start: var(--space-6); }
+.apipkg h2 { font-family: var(--font-mono); scroll-margin-top: 4.5rem; }
+
+/* ── sidebar tree (Guía / Módulos → symbols) ─────────────────────────── */
+.sidebar a { display: block; } /* links inside <details> are inline by default */
+.sidebar .navgroup > summary,
+.sidebar .navpkg > summary {
+  cursor: pointer; list-style: none; padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm); color: var(--text);
+}
+.sidebar .navgroup > summary { font-weight: 600; }
+.sidebar .navpkg > summary { font-family: var(--font-mono); font-size: var(--text-sm); color: var(--text-muted); }
+.sidebar summary::-webkit-details-marker { display: none; }
+.sidebar summary::before { content: "▸"; display: inline-block; inline-size: 1em; color: var(--text-muted); }
+.sidebar details[open] > summary::before { content: "▾"; }
+.sidebar summary:hover { background: color-mix(in oklab, transparent, var(--text) 8%); }
+.sidebar .navgroup > a { padding-inline-start: var(--space-4); }
+.sidebar .navpkg { margin-inline-start: var(--space-3); }
+.sidebar .navpkg > a { padding-inline-start: var(--space-4); font-family: var(--font-mono); font-size: var(--text-sm); }
+
+/* ── module / symbol reference pages ─────────────────────────────────── */
+.apidoc p { max-inline-size: var(--measure); }
+.apidoc p + p { margin-block-start: var(--space-3); }
+.apiback { font-family: var(--font-mono); font-size: var(--text-sm); color: var(--text-muted); text-decoration: none; }
+.apikind { color: var(--text-muted); font-family: var(--font-mono); font-size: 0.55em; text-transform: uppercase; letter-spacing: .05em; vertical-align: middle; }
+.apimethod { font-family: var(--font-mono); margin-block-start: var(--space-5); }

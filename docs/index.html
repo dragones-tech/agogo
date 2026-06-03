@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>agogo — documentación</title>
+  <meta name="description" content="agogo: servidor web compacto en Go puro. HTML para SEO + API JSON, sin frameworks ni magia.">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/dragones-tech/scc@main/scc.css">
+  <link rel="stylesheet" href="app.css">
+
+  <script type="importmap">
+  {
+    "imports": {
+      "lumenjs": "https://cdn.jsdelivr.net/gh/dragones-tech/lumen@main/src/index.js",
+      "lumenjs/": "https://cdn.jsdelivr.net/gh/dragones-tech/lumen@main/src/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div id="app"></div>
+
+  <!-- ════════ app shell ════════ -->
+  <template id="layout">
+    <div class="shell">
+      <nav class="navbar">
+        <a href="#/" data-brand>agogo</a>
+        <span data-nav-end>
+          <button data-variant="ghost" data-ref="langBtn" aria-label="Idioma / Language">🌐 ES</button>
+          <button data-variant="ghost" data-ref="modeBtn" aria-label="Modo claro/oscuro">🌗 auto</button>
+          <a class="icon-link" href="https://github.com/dragones-tech/agogo" target="_blank" rel="noopener" aria-label="agogo en GitHub">
+            <svg viewBox="0 0 16 16" width="20" height="20" aria-hidden="true" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path></svg>
+          </a>
+        </span>
+      </nav>
+      <div class="shell-body">
+        <aside class="sidebar" data-ref="menu">
+          <a href="#/" data-i18n="nav.home">Inicio</a>
+          <details class="navgroup" open>
+            <summary data-i18n="nav.guide">Guía</summary>
+            <a href="#/empezar" data-i18n="nav.start">Empezar</a>
+            <a href="#/modulo" data-i18n="nav.module">Crear un módulo</a>
+            <a href="#/estructura" data-i18n="nav.structure">Estructura</a>
+            <a href="#/activar" data-i18n="nav.activate">Activar módulos</a>
+            <a href="#/otw" data-i18n="nav.otw">Over the wire</a>
+            <a href="#/config" data-i18n="nav.config">Configuración</a>
+          </details>
+          <details class="navgroup" open data-ref="modtree">
+            <summary data-i18n="nav.modules">Módulos</summary>
+            <!-- per-package <details> built by layout.js from the API data -->
+          </details>
+        </aside>
+        <main class="content" data-ref="outlet"></main>
+      </div>
+    </div>
+  </template>
+
+  <!-- ════════ Inicio ════════ -->
+  <template id="home">
+    <div class="home">
+      <section class="hero hero-split">
+        <div class="hero-copy">
+          <h1>agogo</h1>
+          <p data-i18n="home.lead"></p>
+          <p>
+            <a href="#/empezar" data-button data-variant="primary" data-i18n="home.cta1"></a>
+            <a href="https://github.com/dragones-tech/agogo" data-button data-variant="ghost" target="_blank" rel="noopener" data-i18n="home.cta2"></a>
+          </p>
+        </div>
+        <div class="hero-media">
+          <div class="code-window"><div class="code-window-bar">terminal</div><pre><code>git clone https://github.com/dragones-tech/agogo
+cd agogo
+go run .          # → http://localhost:46060</code></pre></div>
+        </div>
+      </section>
+      <section class="features reveal">
+        <article class="feature"><h3 data-i18n="home.f1t"></h3><p data-i18n="home.f1d"></p></article>
+        <article class="feature"><h3 data-i18n="home.f2t"></h3><p data-i18n="home.f2d"></p></article>
+        <article class="feature"><h3 data-i18n="home.f3t"></h3><p data-i18n="home.f3d"></p></article>
+        <article class="feature"><h3 data-i18n="home.f4t"></h3><p data-i18n="home.f4d"></p></article>
+      </section>
+    </div>
+  </template>
+
+  <!-- ════════ Empezar ════════ -->
+  <template id="empezar">
+    <section class="section">
+      <header class="block-head"><h1 data-i18n="start.title"></h1><p data-i18n="start.lead"></p></header>
+      <ol class="steps">
+        <li class="step"><h3 data-i18n="start.s1t"></h3>
+          <div class="code-window"><div class="code-window-bar">terminal</div><pre><code>git clone https://github.com/dragones-tech/agogo
+cd agogo
+go run .</code></pre></div>
+        </li>
+        <li class="step"><h3 data-i18n="start.s2t"></h3><p data-i18n="start.s2d"></p></li>
+        <li class="step"><h3 data-i18n="start.s3t"></h3><p data-i18n="start.s3d"></p></li>
+      </ol>
+    </section>
+  </template>
+
+  <!-- ════════ Estructura ════════ -->
+  <template id="estructura">
+    <section class="section">
+      <header class="block-head"><h1 data-i18n="structure.title"></h1><p data-i18n="structure.lead"></p></header>
+      <div class="code-window"><div class="code-window-bar">.</div><pre><code>main.go              # el "Gemfile": crea el App y acopla módulos con app.Use(...)
+internal/
+  app/               # HOST: App, interfaz Module, puntos de enganche
+  router/ config/    # router estilo Express · config tipada (DSN: WAL)
+  view/ middleware/  # layout + Render · Recover, LimitBody, SecurityHeaders, Gzip
+  respond/ validate/ # respuestas JSON · validador de entrada
+  session/ identity/ password/ csrf/   # toolbox de auth/sesión
+  web/ jsonld/ sitemap/                 # Resource[T], schema.org, sitemap
+  home/              # la sección activa ("hola mundo")
+  paginas/           # sección estática de EJEMPLO (acoplada pero comentada)
+  site/              # robots.txt, sitemap.xml, /static, favicon, 404</code></pre></div>
+      <p data-i18n="structure.body"></p>
+    </section>
+  </template>
+
+  <!-- ════════ Crear un módulo ════════ -->
+  <template id="modulo">
+    <section class="section">
+      <header class="block-head"><h1 data-i18n="module.title"></h1><p data-i18n="module.lead"></p></header>
+      <ol class="steps">
+        <li class="step"><h3 data-i18n="module.s1t"></h3><p data-i18n="module.s1d"></p>
+          <div class="code-window"><div class="code-window-bar">internal/app/app.go</div><pre><code>type Module interface {
+    Name() string
+    Register(*App) error
+}</code></pre></div>
+        </li>
+        <li class="step"><h3 data-i18n="module.s2t"></h3><p data-i18n="module.s2d"></p>
+          <div class="code-window"><div class="code-window-bar">internal/saludo/saludo.go</div><pre><code>package saludo
+
+import (
+    "embed"
+    "net/http"
+
+    "agogo/internal/app"
+    "agogo/internal/view"
+)
+
+//go:embed templates/*.html
+var tplFS embed.FS
+var tpl = view.Layout(tplFS, "templates/saludo.html")
+
+func Module() app.Module { return mod{} }
+
+type mod struct{}
+
+func (mod) Name() string { return "saludo" }
+
+func (mod) Register(a *app.App) error {
+    a.Router.Get("/saludo", func(w http.ResponseWriter, r *http.Request) {
+        view.Render(w, r, tpl, struct{ Meta view.Meta }{view.Meta{Title: "Saludo"}})
+    })
+    return nil
+}</code></pre></div>
+        </li>
+        <li class="step"><h3 data-i18n="module.s3t"></h3><p data-i18n="module.s3d"></p>
+          <div class="code-window"><div class="code-window-bar">main.go</div><pre><code>application.Use(
+    home.Module(),
+    saludo.Module(),   // ← tu nueva sección
+    site.Module(),
+)</code></pre></div>
+        </li>
+      </ol>
+      <p data-i18n="module.hooks"></p>
+      <ul>
+        <li><code>a.Router.Get(path, fn, mw...)</code> — <span data-i18n="module.hRoutes"></span></li>
+        <li><code>a.UseMiddleware(mw)</code> — <span data-i18n="module.hMw"></span></li>
+        <li><code>a.AddMigration(fn)</code> — <span data-i18n="module.hMig"></span></li>
+        <li><code>a.AddSitemap(src)</code> — <span data-i18n="module.hMap"></span></li>
+        <li><code>a.DB</code>, <code>a.Session</code>, <code>a.Identity</code> — <span data-i18n="module.hSvc"></span></li>
+      </ul>
+    </section>
+  </template>
+
+  <!-- ════════ Module reference: General + Symbol (English; built by JS) ════════ -->
+  <template id="modulepage">
+    <section class="section">
+      <header class="block-head"><h1 data-ref="name"></h1></header>
+      <div class="apidoc" data-ref="doc"></div>
+      <div data-ref="example"></div>
+      <h2>Symbols</h2>
+      <nav class="apiindex" data-ref="syms"></nav>
+    </section>
+  </template>
+
+  <template id="symbolpage">
+    <section class="section">
+      <p><a data-ref="back" class="apiback"></a></p>
+      <header class="block-head"><h1><span data-ref="kind" class="apikind"></span> <span data-ref="name"></span></h1></header>
+      <pre data-ref="sig"><code></code></pre>
+      <div class="apidoc" data-ref="doc"></div>
+      <div data-ref="methods"></div>
+    </section>
+  </template>
+
+  <!-- ════════ Activar módulos ════════ -->
+  <template id="activar">
+    <section class="section">
+      <header class="block-head"><h1 data-i18n="activate.title"></h1><p data-i18n="activate.lead"></p></header>
+      <div class="code-window"><div class="code-window-bar">main.go</div><pre><code>application.Use(
+    logs.Module(),   // observabilidad
+    home.Module(),
+    oauth.Module(),  // login OAuth 2.0
+    site.Module(),
+)</code></pre></div>
+      <header class="block-head"><h2 data-i18n="activate.logsT"></h2></header>
+      <p data-i18n="activate.logsD"></p>
+      <header class="block-head"><h2 data-i18n="activate.oauthT"></h2></header>
+      <p data-i18n="activate.oauthD"></p>
+      <div class="alert" data-variant="warning" role="note"><p data-i18n="activate.note"></p></div>
+    </section>
+  </template>
+
+  <!-- ════════ Over the wire ════════ -->
+  <template id="otw">
+    <section class="section">
+      <header class="block-head"><h1 data-i18n="otw.title"></h1><p data-i18n="otw.lead"></p></header>
+      <header class="block-head"><h2 data-i18n="otw.partialT"></h2></header>
+      <p data-i18n="otw.partialD"></p>
+      <header class="block-head"><h2 data-i18n="otw.bffT"></h2></header>
+      <p data-i18n="otw.bffD"></p>
+      <div class="code-window"><div class="code-window-bar">flujo</div><pre><code>navegador  ──GET /otw/panel──▶  agogo  ──Bearer &lt;token&gt;──▶  API externa
+                                  │                            │
+          ◀──── HTML (innerHTML) ─┘   ◀──── JSON ──────────────┘
+          (el token NUNCA sale del servidor)</code></pre></div>
+      <div class="alert" data-variant="warning" role="note"><p data-i18n="otw.note"></p></div>
+    </section>
+  </template>
+
+  <!-- ════════ Configuración ════════ -->
+  <template id="config">
+    <section class="section">
+      <header class="block-head"><h1 data-i18n="config.title"></h1><p data-i18n="config.lead"></p></header>
+      <table>
+        <thead><tr><th data-i18n="config.thVar"></th><th data-i18n="config.thDef"></th><th data-i18n="config.thDesc"></th></tr></thead>
+        <tbody>
+          <tr><td><code>AGOGO_ADDR</code></td><td><code>:46060</code></td><td data-i18n="config.addr"></td></tr>
+          <tr><td><code>AGOGO_DB</code></td><td><code>agogo.db</code></td><td data-i18n="config.db"></td></tr>
+          <tr><td><code>AGOGO_BASE_URL</code></td><td><code>http://localhost:46060</code></td><td data-i18n="config.baseurl"></td></tr>
+          <tr><td><code>AGOGO_SECRET_KEY</code></td><td><span data-i18n="config.insecure"></span></td><td data-i18n="config.secret"></td></tr>
+          <tr><td><code>AGOGO_SECURE_COOKIES</code></td><td><span data-i18n="config.derived"></span></td><td data-i18n="config.secure"></td></tr>
+        </tbody>
+      </table>
+    </section>
+  </template>
+
+  <!-- ════════ 404 ════════ -->
+  <template id="notfound">
+    <section class="section">
+      <header class="block-head"><h1 data-i18n="err.title"></h1><p data-i18n="err.desc"></p></header>
+      <p><a href="#/" data-button data-variant="primary" data-i18n="err.back"></a></p>
+    </section>
+  </template>
+
+  <script type="module" src="app/main.js"></script>
+</body>
+</html>
