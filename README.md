@@ -23,6 +23,23 @@ go run .          # → http://localhost:46060
 
 You'll see a centered "¡Hola, mundo!" and a link to the documentation.
 
+### Live reload (optional)
+
+Go has no built-in hot reload, but the dev loop is just "rebuild + restart on
+save" — sub-second here. agogo ships no watcher (clone-and-run stays the default);
+bring your own global tool. The de-facto standard is [**air**](https://github.com/air-verse/air):
+
+```bash
+go install github.com/air-verse/air@latest   # installs to $GOBIN, not your go.mod
+air                                           # watches, recompiles and restarts on save
+```
+
+It's an external binary, so it never touches `go.mod` or the `scratch` image.
+([`wgo`](https://github.com/bokwoon95/wgo) is a minimalist alternative.) Note that
+templates and `/static` are embedded (`//go:embed`), so a CSS/JS edit also needs a
+rebuild — by default air watches `.go`/`.html`; add a `.air.toml` to include
+`.css`/`.js` if you want those to trigger it too.
+
 ## Philosophy
 
 - **Only the essentials.** HTTP server, templates and JSON come from Go's stdlib
@@ -67,8 +84,11 @@ Read once at startup, typed and validated (`internal/config`).
     ├── web/ jsonld/ sitemap/                 # generic DB resource, schema.org, sitemap
     ├── logs/                # opt-in access-logging middleware
     │  ── SECTIONS (modules) ──
-    ├── home/                # the active "hello world" section
-    ├── paginas/             # EXAMPLE static section (wired but commented in main.go)
+    ├── home/                # the active "hello world" landing
+    ├── otw/                 # active: BFF that renders a token-gated API as HTML
+    ├── paginas/             # EXAMPLE static section + the otw demo (commented in main.go)
+    ├── auth/                # OPT-IN: username/password login (needs the DB)
+    ├── oauth/               # OPT-IN: OAuth 2.0 login, stdlib (no DB)
     └── site/                # robots.txt, sitemap.xml, /static, favicon, styled 404
 ```
 
@@ -86,12 +106,28 @@ A section is a module. The smallest one is `internal/home`:
 2. In its `Register`, register the routes and adjust the template.
 3. Wire it in `main.go`'s `app.Use(...)` with one line.
 
-`main.go` keeps a commented `paginas.Module()` line as a live example (it serves
-`/ejemplo` once you uncomment it).
+`main.go` keeps `paginas`, `auth` and `oauth` as commented `app.Use(...)` lines
+(breadcrumbs): uncomment one (and its import) to plug it in.
+
+## Optional login (`auth` / `oauth`)
+
+The hello-world runs with **no database**. Two login modules sit ready to plug in:
+
+- **`oauth`** — OAuth 2.0 (authorization-code flow), pure stdlib, reuses the core
+  `identity` service. No DB. Its routes answer `503` until you set `OAUTH_*` env.
+- **`auth`** — username/password (`/login`, `/cuenta`), PBKDF2 hashing, CSRF. It
+  needs the DB, so before enabling it create the schema once:
+
+  ```bash
+  go run ./cmd/migrate     # apply each DB module's schema (bootstrap / deploy)
+  go run ./cmd/seed        # demo user: admin@agogo.com / demo1234 (dev only)
+  ```
+
+Then uncomment `auth.Module()` in `main.go`.
 
 ## Data layer (when you add a DB section)
 
-The starter ships no database section, but the toolbox is ready:
+The toolbox is ready and `auth` is a working example:
 
 - **SQLite** via `modernc.org/sqlite` (pure Go, no cgo → static binary), opened
   in **WAL** with **`busy_timeout`** (`config.DSN()`).
@@ -100,18 +136,22 @@ The starter ships no database section, but the toolbox is ready:
 - **`web.Resource[T]`** writes the 4 handlers (list/detail × HTML/JSON), route
   registration and sitemap contribution **once**; a domain only configures its
   types, queries, templates and SEO metadata.
-- The schema/seed live **outside the server** as small commands (the server only
-  serves). Add a `cmd/migrate` that builds the App and runs `app.Migrate(ctx)`.
+- The schema/seed live **outside the server** as small commands (`cmd/migrate`,
+  `cmd/seed`): each builds the App and runs `app.Migrate(ctx)`. The server only
+  serves.
 
 ## Frontend
 
 The frontend is your choice. Out of the box agogo styles its HTML with **scc**
-(semantic CSS — classes say *what it is*, not *how it looks*) and can enhance it
-with **lumen** (vanilla-JS UI, no build), two sibling projects with the same
-no-build, no-magic DNA. They load from the **jsDelivr CDN**, so there's nothing
-to vendor or build. agogo's branding lives in `internal/site/static/style.css`
+(semantic CSS — classes say *what it is*, not *how it looks*) and loads **lumen**
+(vanilla-JS UI, no build) via an import map, so any page can `import … from
+'lumen'`. Two sibling projects with the same no-build, no-magic DNA. They
+**change often**, so they load from the **jsDelivr CDN** — nothing to vendor or
+build, clone and run. agogo's branding lives in `internal/site/static/style.css`
 (it overrides scc's "knobs"). The CSP allows that CDN on `style-src`/`script-src`
-— pin a tag/commit or self-host to go back to a strict `'self'`.
+(plus a `sha256` for the inline import map). To go back to a strict `'self'`,
+run `scripts/vendor-frontend.sh` to self-host scc + lumen and point `base.html`
+at `/static/`.
 
 ## Security
 
