@@ -15,6 +15,7 @@ type Config struct {
 	SecretKey []byte // key for signing sessions (HMAC)
 	DevSecret bool   // true if it fell back to the (insecure) development key
 	Secure    bool   // marks cookies as Secure (only sent over HTTPS)
+	Dev       bool   // serve templates and /static from disk (dev), not the embedded copy
 }
 
 // devSecret is used if AGOGO_SECRET_KEY isn't defined. It's stable across
@@ -51,7 +52,27 @@ func Load() (Config, error) {
 		c.SecretKey = []byte(secret)
 	}
 
+	// Dev mode: serve templates and /static from disk so edits show up with just
+	// a browser refresh (no rebuild). Auto-detected — on when the source tree is
+	// next to us (e.g. `go run .`), off in the embedded production binary (a
+	// `scratch` image has no source). AGOGO_DEV forces it: 1/true → on, 0/false → off.
+	c.Dev = sourcePresent()
+	switch strings.ToLower(os.Getenv("AGOGO_DEV")) {
+	case "1", "true", "yes":
+		c.Dev = true
+	case "0", "false", "no":
+		c.Dev = false
+	}
+
 	return c, nil
+}
+
+// sourcePresent reports whether agogo runs from its source tree (so the files it
+// would read from disk in dev exist) rather than as a standalone binary. It
+// checks for a file it would actually need; the embedded copy is the fallback.
+func sourcePresent() bool {
+	_, err := os.Stat("internal/view/base.html")
+	return err == nil
 }
 
 // DSN is the SQLite connection string: the path + PRAGMAs that the modernc

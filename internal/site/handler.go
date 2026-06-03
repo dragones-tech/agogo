@@ -12,6 +12,8 @@ import (
 	"io/fs"
 	"log"
 	"net/http"
+	"path/filepath"
+	"runtime"
 
 	"agogo/internal/app"
 	"agogo/internal/sitemap"
@@ -35,7 +37,7 @@ func (mod) Register(a *app.App) error {
 	r.Get("/sitemap.xml", func(w http.ResponseWriter, req *http.Request) {
 		writeSitemap(req.Context(), w, base, a.SitemapSources())
 	})
-	r.Handle("GET /static/", Static())
+	r.Handle("GET /static/", Static(a.Config.Dev))
 
 	r.Get("/favicon.ico", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "image/svg+xml")
@@ -54,8 +56,20 @@ func (mod) Register(a *app.App) error {
 //go:embed static
 var staticFS embed.FS
 
-// Static returns the handler for the embedded static files (with caching).
-func Static() http.Handler {
+// staticDir is this package's static dir on disk (captured at build via
+// runtime.Caller). Used in Dev to serve /static from source.
+var staticDir = func() string {
+	_, file, _, _ := runtime.Caller(0) // this file: internal/site/handler.go
+	return filepath.Join(filepath.Dir(file), "static")
+}()
+
+// Static returns the handler for the static files. In production it serves the
+// EMBEDDED copy with caching; in dev (dev=true) it serves from disk with
+// no-store, so editing a CSS/JS shows up with just a browser refresh.
+func Static(dev bool) http.Handler {
+	if dev {
+		return http.StripPrefix("/static/", noStore(http.FileServer(http.Dir(staticDir))))
+	}
 	static, _ := fs.Sub(staticFS, "static")
 	return http.StripPrefix("/static/", cacheControl(http.FileServerFS(static)))
 }
@@ -63,6 +77,15 @@ func Static() http.Handler {
 func cacheControl(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Cache-Control", "public, max-age=3600")
+		next.ServeHTTP(w, r)
+	})
+}
+
+// noStore tells the browser not to cache, so a refresh always re-fetches the
+// just-edited asset. Dev only.
+func noStore(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-store")
 		next.ServeHTTP(w, r)
 	})
 }

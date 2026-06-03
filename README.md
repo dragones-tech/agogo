@@ -23,22 +23,39 @@ go run .          # → http://localhost:46060
 
 You'll see a centered "¡Hola, mundo!" and a link to the documentation.
 
-### Live reload (optional)
+### The development loop
 
-Go has no built-in hot reload, but the dev loop is just "rebuild + restart on
-save" — sub-second here. agogo ships no watcher (clone-and-run stays the default);
-bring your own global tool. The de-facto standard is [**air**](https://github.com/air-verse/air):
+The one Go truth: **Go compiles**, so a change to *Go code* means recompiling.
+That's it — and it only applies to Go. Here's the whole workflow, in two levels.
+
+**Level 0 — nothing to install, one command:**
+
+```bash
+go run .
+```
+
+- Edit **HTML / CSS / JS** → just **refresh the browser**. When agogo runs from
+  its source tree it serves templates and `/static` straight from disk
+  (auto-detected; it logs `modo desarrollo` at startup), so frontend edits show
+  up with no rebuild. The embedded copy still ships in the binary — production
+  (`scratch`, no source) uses that. Force it either way with `AGOGO_DEV=1` / `=0`.
+- Edit **Go code** → `Ctrl+C` and `go run .` again (sub-second).
+
+That's the complete, required loop: no dependencies, no env vars, no config files.
+
+**Level 1 — optional comfort, one global tool:**
+
+If retyping `go run .` after a Go change bugs you, [**air**](https://github.com/air-verse/air)
+automates the rebuild+restart:
 
 ```bash
 go install github.com/air-verse/air@latest   # installs to $GOBIN, not your go.mod
-air                                           # watches, recompiles and restarts on save
+air                                           # use instead of `go run .`
 ```
 
-It's an external binary, so it never touches `go.mod` or the `scratch` image.
-([`wgo`](https://github.com/bokwoon95/wgo) is a minimalist alternative.) Note that
-templates and `/static` are embedded (`//go:embed`), so a CSS/JS edit also needs a
-rebuild — by default air watches `.go`/`.html`; add a `.air.toml` to include
-`.css`/`.js` if you want those to trigger it too.
+It's an external binary — it never touches `go.mod` or the `scratch` image.
+([`wgo`](https://github.com/bokwoon95/wgo) is a minimalist alternative.) With the
+disk serving above, you rarely need it for frontend work; it's for the Go loop.
 
 ## Philosophy
 
@@ -65,6 +82,7 @@ Read once at startup, typed and validated (`internal/config`).
 | `AGOGO_BASE_URL` | `http://localhost:46060` | Base URL (canonical, sitemap) |
 | `AGOGO_SECRET_KEY` | (insecure dev key) | Session signing key (HMAC). In production, ≥32 chars. |
 | `AGOGO_SECURE_COOKIES` | (derived from `https://` in base URL) | Force `Secure` cookies on/off |
+| `AGOGO_DEV` | (auto: on when run from source) | Serve templates/`/static` from disk for live reload. Force with `1`/`0` |
 
 ## Structure
 

@@ -9,7 +9,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"html/template"
 	"net/http"
 
 	"agogo/internal/respond"
@@ -35,7 +34,7 @@ type Resource[T any] struct {
 	Get  func(context.Context, string) (T, error)
 	Slug func(T) string
 
-	TplList, TplItem *template.Template
+	TplList, TplItem *view.Template
 	ListMeta         func(url string) view.Meta
 	ItemMeta         func(it T, url string) view.Meta
 

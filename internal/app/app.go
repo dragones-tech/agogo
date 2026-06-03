@@ -18,6 +18,7 @@ import (
 	"agogo/internal/router"
 	"agogo/internal/session"
 	"agogo/internal/sitemap"
+	"agogo/internal/view"
 )
 
 // Middleware is global: it wraps the whole server (unlike the per-route kind).
@@ -45,6 +46,7 @@ type App struct {
 func New(cfg config.Config, db *sql.DB) *App {
 	sess := session.NewManager(cfg.SecretKey)
 	sess.Secure = cfg.Secure
+	view.Dev = cfg.Dev // render templates from disk in dev (auto-detected in config)
 	return &App{
 		Config:   cfg,
 		DB:       db,

@@ -32,6 +32,9 @@ func main() {
 	if cfg.DevSecret {
 		log.Printf("AVISO: usando clave de sesión de desarrollo (define AGOGO_SECRET_KEY en producción)")
 	}
+	if cfg.Dev {
+		log.Printf("modo desarrollo: sirviendo plantillas y /static desde disco (editá y refrescá, sin recompilar)")
+	}
 
 	sqldb, err := sql.Open("sqlite", cfg.DSN())
 	if err != nil {
