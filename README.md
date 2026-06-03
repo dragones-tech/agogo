@@ -8,6 +8,8 @@ This repo is a **clean starter**: clone it, run it, and you get a "hello world"
 home with a link to the docs. You grow your app by adding sections (modules);
 the framework toolbox already lives in `internal/`.
 
+📚 **Documentation:** https://dragones-tech.github.io/agogo/
+
 ## Quickstart
 
 Requires **Go 1.26+**. No build step, nothing to install (scc/lumen load from a
@@ -144,5 +146,7 @@ agogo.com {
 
 ## Documentation
 
-Full design notes, patterns and examples live in the documentation site (linked
-from the home page) and in [ARCHITECTURE.md](ARCHITECTURE.md).
+Full design notes, patterns and examples — plus a tree-navigated technical API
+reference — live in the documentation site:
+
+**https://dragones-tech.github.io/agogo/**
