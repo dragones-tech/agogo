@@ -1,0 +1,16 @@
+{{define "content"}}
+<h1>Acceder</h1>
+{{if .Error}}<div class="alert" data-variant="danger" role="alert">{{.Error}}</div>{{end}}
+<form method="POST" action="/login">
+  <input type="hidden" name="csrf_token" value="{{.Token}}">
+  <p class="field">
+    <label for="email">Email</label>
+    <input id="email" name="email" type="email" value="{{.Email}}" autocomplete="username" placeholder="tu@correo.com">
+  </p>
+  <p class="field">
+    <label for="password">Contraseña</label>
+    <input id="password" name="password" type="password" autocomplete="current-password" placeholder="••••••••">
+  </p>
+  <button type="submit" data-variant="primary">Entrar</button>
+</form>
+{{end}}
