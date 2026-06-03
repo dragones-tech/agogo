@@ -1,13 +1,32 @@
 /* Page frame (layout ONLY) + agogo's BRANDING. The design system is provided
-   by scc (scc/scc.css); scc is kept PRISTINE (we don't edit the vendor, that's
-   worked on in its own repo). We override scc's "knobs" here: being outside any
-   @layer, these values win over scc/theme.css's defaults. */
+   by scc; scc is kept PRISTINE. We override scc's "knobs" here: being outside
+   any @layer, these values win over scc's defaults.
+
+   The "à gogo" theme: a 1960s psychedelic palette (same as the docs site). */
 :root {
-  --accent:         #2f6f4e;   /* agogo green */
+  --accent:         #c026d3;   /* fuchsia */
   --accent-fg:      #ffffff;
-  --neutral-hue:    150;       /* green-tinted grays */
-  --neutral-chroma: 6%;
+  --neutral-hue:    305;        /* violet-tinted grays */
+  --neutral-chroma: 7%;
   --radius:         0.625rem;
+  --success:        #2fd95f;
+  --warning:        #ffb300;
+  --danger:         #ff3b6b;
+  --psy: linear-gradient(100deg, #ff2d9b, #ff6a00, #ffd400, #7cff3f, #00e5ff, #8a2be2);
+}
+
+/* Brand + the "¡Hola, mundo!" painted with the psychedelic rainbow. */
+.navbar [data-brand],
+.home h1 {
+  background: var(--psy);
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent;
+}
+.home h1 { font-size: calc(var(--text-xl) * var(--ratio)); }
+.home::before { /* soft multi-color glow behind the hero */
+  content: ""; position: absolute; inset: 0; margin: auto;
+  inline-size: min(28rem, 80vw); block-size: 9rem; z-index: -1;
+  background: var(--psy); filter: blur(70px); opacity: .25; border-radius: 999px;
 }
 
 /* Theme background on the ROOT (not just on body): this way the browser canvas
@@ -63,8 +82,17 @@ footer.shell {
    but its content aligns to the same width as the rest */
 .navbar { padding-inline: max(var(--space-4), (100% - 48rem) / 2); }
 
+/* icon-only link (GitHub) — square, sized like a ghost button */
+.icon-link {
+  display: inline-grid; place-items: center;
+  inline-size: 2.25rem; block-size: 2.25rem;
+  border-radius: var(--radius-sm); color: var(--text-muted);
+}
+.icon-link:hover { color: var(--text); background: color-mix(in oklab, transparent, var(--text) 8%); }
+
 /* home: the "hello world", centered in the viewport */
 .home {
+  position: relative;
   min-height: 60vh;
   display: flex;
   flex-direction: column;
