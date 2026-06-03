@@ -1,0 +1,54 @@
+# agogo
+
+> A compact, stdlib-first web server in pure Go. It renders HTML (for SEO) and a
+> JSON API from a single source of truth, with no web framework — just the
+> standard library (`net/http`, `html/template`, `encoding/json`) and a few niche
+> tools. This repository is a clean starter you grow by adding modules.
+
+Key facts for an agent working here:
+
+- **Runtime:** Go 1.26+. No build step; scc (CSS) and lumen (JS) load from a CDN.
+  The only dependency is `modernc.org/sqlite` (pure Go, no cgo → static binary).
+- **Shape:** a host (`app`) you plug opt-in modules into with `app.Use(...)` in
+  `main.go`. A module implements `Module{ Name() string; Register(*App) error }`
+  and hooks into the host (routes, middleware, migrations, sitemap, services).
+  What you don't wire in never enters the binary.
+- **Layout:** the framework toolbox lives in `internal/` (core packages, not
+  modules); sections are modules (`internal/home`, `internal/site`, …).
+- **Philosophy:** only the essentials, no magic (no ORM, no reflection config),
+  minimal core + pluggable modules, YAGNI first / DRY later. The code that runs
+  is the code you read — it all lives in `internal/`.
+- **Conventions:** identifiers (variables, functions, types) in English; the
+  documentation site and user-facing strings are bilingual ES/EN; the technical
+  API reference is English-only.
+
+## Documentation
+
+- [Documentation site](https://dragones-tech.github.io/agogo/): bilingual ES/EN guide (getting started, creating a module, structure, activating modules, over-the-wire) plus a tree-navigated technical API reference generated with go/doc.
+- [README](https://github.com/dragones-tech/agogo/blob/main/README.md): quickstart, philosophy, configuration, structure, security, deploy.
+- [ARCHITECTURE](https://github.com/dragones-tech/agogo/blob/main/ARCHITECTURE.md): design notes and patterns.
+- [main.go](https://github.com/dragones-tech/agogo/blob/main/main.go): the wiring — creates the App and plugs modules with `app.Use(...)`. The clearest overview of what the server does.
+
+## Core toolbox (internal/)
+
+- [app](https://github.com/dragones-tech/agogo/tree/main/internal/app): the host — App, the Module interface, and the hook points modules register into.
+- [router](https://github.com/dragones-tech/agogo/tree/main/internal/router): an Express-style router on top of `net/http`, with middleware support.
+- [config](https://github.com/dragones-tech/agogo/tree/main/internal/config): typed environment config, including the SQLite DSN (WAL + `busy_timeout`).
+- [middleware](https://github.com/dragones-tech/agogo/tree/main/internal/middleware): baseline middlewares — Recover, LimitBody, SecurityHeaders (CSP), Gzip.
+- [view](https://github.com/dragones-tech/agogo/tree/main/internal/view): shared HTML layout and Render (renders to a buffer; supports X-Fragment partial navigation).
+- [respond](https://github.com/dragones-tech/agogo/tree/main/internal/respond) and [validate](https://github.com/dragones-tech/agogo/tree/main/internal/validate): JSON responses and a tiny input validator.
+- [web](https://github.com/dragones-tech/agogo/tree/main/internal/web): generic `Resource[T]` that writes the list/detail × HTML/JSON handlers, route registration and sitemap contribution once.
+- [session](https://github.com/dragones-tech/agogo/tree/main/internal/session), [identity](https://github.com/dragones-tech/agogo/tree/main/internal/identity), [password](https://github.com/dragones-tech/agogo/tree/main/internal/password), [csrf](https://github.com/dragones-tech/agogo/tree/main/internal/csrf): the auth/session toolbox — signed-cookie sessions (HMAC), login/logout, PBKDF2 hashing, double-cookie CSRF.
+- [jsonld](https://github.com/dragones-tech/agogo/tree/main/internal/jsonld) and [sitemap](https://github.com/dragones-tech/agogo/tree/main/internal/sitemap): schema.org JSON-LD and sitemap generation.
+
+## Modules (sections)
+
+- [home](https://github.com/dragones-tech/agogo/tree/main/internal/home): the active "hello world" section — the smallest module, a good template to copy.
+- [paginas](https://github.com/dragones-tech/agogo/tree/main/internal/paginas): an example static section, wired but commented out in `main.go` (serves `/ejemplo` once uncommented).
+- [site](https://github.com/dragones-tech/agogo/tree/main/internal/site): robots.txt, sitemap.xml, `/static`, favicon and the styled 404.
+- [logs](https://github.com/dragones-tech/agogo/tree/main/internal/logs): opt-in access-logging middleware.
+
+## Optional
+
+- [Dockerfile](https://github.com/dragones-tech/agogo/blob/main/Dockerfile): multi-stage build to a `scratch` image, non-root user.
+- [sqlc.yaml](https://github.com/dragones-tech/agogo/blob/main/sqlc.yaml): sqlc config — one typed function per SQL query, no ORM.
