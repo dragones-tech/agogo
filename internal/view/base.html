@@ -6,6 +6,17 @@
 <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/dragones-tech/scc@main/scc.css">
 <link rel="stylesheet" href="/static/style.css">
+<!-- lumen (JS) loaded out of the box from the jsDelivr CDN: any page script can
+     `import { ... } from 'lumen'`. To vendor it (CSP 'self'), run
+     scripts/vendor-frontend.sh and point these URLs at /static/lumen/src/.
+     NOTE: this inline block is whitelisted by a sha256 in the CSP
+     (internal/middleware) — if you edit it, recompute that hash. -->
+<script type="importmap">
+{ "imports": {
+    "lumen": "https://cdn.jsdelivr.net/gh/dragones-tech/lumen@main/src/index.js",
+    "lumen/": "https://cdn.jsdelivr.net/gh/dragones-tech/lumen@main/src/"
+} }
+</script>
 <title>{{.Meta.Title}}</title>
 <meta name="description" content="{{.Meta.Description}}">
 <link rel="canonical" href="{{.Meta.Canonical}}">
@@ -29,6 +40,9 @@
 </main>
 <footer class="shell"><small>agogo · servidor web en Go puro · stdlib-first</small></footer>
 {{block "scripts" .}}{{end}}
+<!-- partial navigation (agogo's own, not lumen): swaps <main> without a full
+     reload. Degrades to normal browser navigation without JS. -->
+<script type="module" src="/static/js/nav.js"></script>
 </body>
 </html>{{end}}
 

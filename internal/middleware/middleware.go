@@ -148,10 +148,13 @@ func SecurityHeaders(next http.Handler) http.Handler {
 		h.Set("X-Frame-Options", "DENY")
 		h.Set("Referrer-Policy", "strict-origin-when-cross-origin")
 		// Self-hosted by default; scc (CSS) and lumen (JS) load from jsDelivr, so
-		// style-src/script-src also allow that CDN. To go back to a strict 'self',
-		// self-host those assets and drop the CDN from here.
+		// style-src/script-src also allow that CDN. The sha256 hash whitelists the
+		// inline <script type="importmap"> in view/base.html WITHOUT 'unsafe-inline'
+		// (recompute it if you edit that block). To go back to a strict 'self',
+		// vendor those assets (scripts/vendor-frontend.sh) and drop the CDN + hash.
 		h.Set("Content-Security-Policy",
-			"default-src 'self'; style-src 'self' https://cdn.jsdelivr.net; script-src 'self' https://cdn.jsdelivr.net")
+			"default-src 'self'; style-src 'self' https://cdn.jsdelivr.net; "+
+				"script-src 'self' https://cdn.jsdelivr.net 'sha256-jmwk9tP059xS/pD9pUfGahdmGYFo2xpCp+y6O1LIYWQ='")
 		next.ServeHTTP(w, r)
 	})
 }
