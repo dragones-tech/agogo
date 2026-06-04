@@ -216,12 +216,26 @@
 .guide > .hero { margin-block-end: 0; }   /* the flex gap already separates it */
 
 .block-head { margin-block-end: var(--space-6); }
-.block-head h2 {
+.block-head h1 {
   font-size: clamp(var(--text-xl), 1.4rem + 1.4vw, calc(var(--text-xl) * 1.5));
   letter-spacing: -0.02em;
   margin-block-end: var(--space-2);
 }
 .block-head p { color: var(--text-muted); max-inline-size: var(--measure); margin: 0; }
+
+/* Sub-section heading inside a guide section — clearly SMALLER than the page
+   title (h1) and with room above so it doesn't crowd the previous content. */
+.subhead {
+  font-size: var(--text-lg);
+  letter-spacing: -0.01em;
+  margin-block: var(--space-8) var(--space-3);
+}
+.subhead:first-child { margin-block-start: 0; }
+
+/* A list of modules: "<code>name</code> — description", with breathing room. */
+.modlist { margin: 0; padding-inline-start: var(--space-5); display: grid; gap: var(--space-3); }
+.modlist li { color: var(--text-muted); max-inline-size: var(--measure); }
+.modlist code { color: var(--text); }
 
 /* The hero stretches a touch wider and its content can breathe */
 .home .hero h1 { font-weight: 800; }
@@ -262,6 +276,22 @@
 .code-window-bar .dots i:nth-child(2) { background: var(--warning); }
 .code-window-bar .dots i:nth-child(3) { background: var(--success); }
 .code-window .demo-code { padding: var(--space-3) var(--space-4); white-space: pre; overflow-x: auto; }
+
+/* A code window / table / <pre> that flows DIRECTLY in a section (the API
+   reference and the guide pages without steps) needs vertical room from the
+   prose and headings around it. Inside a .step the step has its own rhythm, and
+   inside a gap container (.hero-media) the gap handles it — both are nested
+   deeper, so this `>`-scoped rule leaves them untouched. (Margins collapse, so
+   adjacent block margins don't double up.) */
+.section > .code-window,
+.section > pre,
+.section > table,
+[data-ref="example"] > .code-window,
+[data-ref="methods"] > .code-window { margin-block: var(--space-6); }
+
+/* the API "Methods" subsection: separate each method from the previous block */
+[data-ref="methods"] > h2 { margin-block-start: var(--space-8); }
+[data-ref="methods"] .apimethod { margin-block: var(--space-5) var(--space-2); }
 
 .code-arrow { align-self: center; font-size: var(--text-sm); color: var(--text-muted); font-family: var(--font-mono); }
 .hero-live .card { box-shadow: var(--shadow); }

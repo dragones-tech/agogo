@@ -43,7 +43,6 @@ export class Empezar extends Section { static template = '#empezar'; }
 export class Estructura extends Section { static template = '#estructura'; }
 export class Modulo extends Section { static template = '#modulo'; }
 export class Activar extends Section { static template = '#activar'; }
-export class Otw extends Section { static template = '#otw'; }
 export class Config extends Section { static template = '#config'; }
 export class NotFound extends Section { static template = '#notfound'; }
 

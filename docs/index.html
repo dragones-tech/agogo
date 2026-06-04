@@ -44,7 +44,6 @@
             <a href="#/modulo" data-i18n="nav.module">Crear un módulo</a>
             <a href="#/estructura" data-i18n="nav.structure">Estructura</a>
             <a href="#/activar" data-i18n="nav.activate">Activar módulos</a>
-            <a href="#/otw" data-i18n="nav.otw">Over the wire</a>
             <a href="#/config" data-i18n="nav.config">Configuración</a>
           </details>
           <details class="navgroup" open data-ref="modtree">
@@ -113,7 +112,8 @@ internal/
   session/ identity/ password/ csrf/   # toolbox de auth/sesión
   web/ jsonld/ sitemap/                 # Resource[T], schema.org, sitemap
   home/              # la sección activa ("hola mundo")
-  paginas/           # sección estática de EJEMPLO (acoplada pero comentada)
+  paginas/           # sección estática de EJEMPLO en /ejemplo
+  otw/               # BFF "HTML over the wire" (fragmento desde una API con token)
   site/              # robots.txt, sitemap.xml, /static, favicon, 404</code></pre></div>
       <p data-i18n="structure.body"></p>
     </section>
@@ -203,32 +203,35 @@ func (mod) Register(a *app.App) error {
     <section class="section">
       <header class="block-head"><h1 data-i18n="activate.title"></h1><p data-i18n="activate.lead"></p></header>
       <div class="code-window"><div class="code-window-bar">main.go</div><pre><code>application.Use(
-    logs.Module(),   // observabilidad
-    home.Module(),
-    oauth.Module(),  // login OAuth 2.0
-    site.Module(),
-)</code></pre></div>
-      <header class="block-head"><h2 data-i18n="activate.logsT"></h2></header>
-      <p data-i18n="activate.logsD"></p>
-      <header class="block-head"><h2 data-i18n="activate.oauthT"></h2></header>
-      <p data-i18n="activate.oauthD"></p>
-      <div class="alert" data-variant="warning" role="note"><p data-i18n="activate.note"></p></div>
-    </section>
-  </template>
+    logs.Module(),    // observabilidad
+    home.Module(),    // landing "¡Hola, mundo!"
+    paginas.Module(), // sección de ejemplo en /ejemplo
+    otw.Module(),     // BFF "HTML over the wire"
+    site.Module(),    // robots, sitemap, /static, 404
 
-  <!-- ════════ Over the wire ════════ -->
-  <template id="otw">
-    <section class="section">
-      <header class="block-head"><h1 data-i18n="otw.title"></h1><p data-i18n="otw.lead"></p></header>
-      <header class="block-head"><h2 data-i18n="otw.partialT"></h2></header>
-      <p data-i18n="otw.partialD"></p>
-      <header class="block-head"><h2 data-i18n="otw.bffT"></h2></header>
-      <p data-i18n="otw.bffD"></p>
-      <div class="code-window"><div class="code-window-bar">flujo</div><pre><code>navegador  ──GET /otw/panel──▶  agogo  ──Bearer &lt;token&gt;──▶  API externa
-                                  │                            │
-          ◀──── HTML (innerHTML) ─┘   ◀──── JSON ──────────────┘
-          (el token NUNCA sale del servidor)</code></pre></div>
-      <div class="alert" data-variant="warning" role="note"><p data-i18n="otw.note"></p></div>
+    // oauth.Module(), // login OAuth 2.0 (sin BD; 503 hasta configurar OAUTH_*)
+    // auth.Module(),  // login usuario/contraseña (necesita BD: corre cmd/migrate)
+)</code></pre></div>
+
+      <h2 class="subhead" data-i18n="activate.baseT"></h2>
+      <ul class="modlist">
+        <li data-i18n="activate.mLogs"></li>
+        <li data-i18n="activate.mHome"></li>
+        <li data-i18n="activate.mPaginas"></li>
+        <li data-i18n="activate.mOtw"></li>
+        <li data-i18n="activate.mSite"></li>
+      </ul>
+
+      <h2 class="subhead" data-i18n="activate.integrateT"></h2>
+      <p data-i18n="activate.integrateLead"></p>
+      <ul class="modlist">
+        <li data-i18n="activate.mAuth"></li>
+        <li data-i18n="activate.mOauth"></li>
+      </ul>
+
+      <h2 class="subhead" data-i18n="activate.addT"></h2>
+      <p data-i18n="activate.addD"></p>
+      <div class="alert" data-variant="warning" role="note"><p data-i18n="activate.note"></p></div>
     </section>
   </template>
 

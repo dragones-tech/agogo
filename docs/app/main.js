@@ -2,7 +2,7 @@
 import { Router } from 'lumenjs';
 import { Layout } from './layout.js';
 import {
-  Home, Empezar, Estructura, Modulo, Activar, Otw, Config, NotFound,
+  Home, Empezar, Estructura, Modulo, Activar, Config, NotFound,
   ModulePage, SymbolPage,
 } from './sections.js';
 
@@ -18,7 +18,6 @@ new Router()
   .add('/modulo',     () => outlet.show(new Modulo()))
   .add('/estructura', () => outlet.show(new Estructura()))
   .add('/activar',    () => outlet.show(new Activar()))
-  .add('/otw',        () => outlet.show(new Otw()))
   .add('/config',     () => outlet.show(new Config()))
   // Module reference (English): /m/<pkg> and /m/<pkg>/<symbol>
   .add('/m/:pkg/:sym', (p) => outlet.show(new SymbolPage({ pkg: p.pkg, name: p.sym })))
