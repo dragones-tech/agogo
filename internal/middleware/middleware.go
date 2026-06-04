@@ -150,11 +150,14 @@ func SecurityHeaders(next http.Handler) http.Handler {
 		// Self-hosted by default; scc (CSS) and lumen (JS) load from jsDelivr, so
 		// style-src/script-src also allow that CDN. The sha256 hash whitelists the
 		// inline <script type="importmap"> in view/base.html WITHOUT 'unsafe-inline'
-		// (recompute it if you edit that block). To go back to a strict 'self',
-		// vendor those assets (scripts/vendor-frontend.sh) and drop the CDN + hash.
+		// (recompute it if you edit that block). connect-src allows the public JSON
+		// the /ejemplo lumen demo fetches client-side (drop it if you remove that
+		// demo). To go back to a strict 'self', vendor the CDN assets
+		// (scripts/vendor-frontend.sh) and drop the CDN + hash.
 		h.Set("Content-Security-Policy",
 			"default-src 'self'; style-src 'self' https://cdn.jsdelivr.net; "+
-				"script-src 'self' https://cdn.jsdelivr.net 'sha256-jmwk9tP059xS/pD9pUfGahdmGYFo2xpCp+y6O1LIYWQ='")
+				"script-src 'self' https://cdn.jsdelivr.net 'sha256-jmwk9tP059xS/pD9pUfGahdmGYFo2xpCp+y6O1LIYWQ='; "+
+				"connect-src 'self' https://jsonplaceholder.typicode.com")
 		next.ServeHTTP(w, r)
 	})
 }

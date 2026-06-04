@@ -30,7 +30,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 	"time"
 
 	"agogo/internal/app"
@@ -80,16 +79,18 @@ func (mod) Register(a *app.App) error {
 	return nil
 }
 
-// panelData is what the fragment template renders.
+// panelData is what the fragment template renders: a GitHub repo card.
 type panelData struct {
-	Title string
-	Rows  []row
-	Note  string
-}
-
-type row struct {
-	Label string `json:"label"`
-	Value string `json:"value"`
+	OK          bool // true → repo data; false → unavailable (upstream failed)
+	FullName    string
+	URL         string
+	Description string
+	Stars       int
+	Forks       int
+	OpenIssues  int
+	Language    string
+	License     string
+	Note        string
 }
 
 // panel renders the section as an HTML fragment (no page layout): the client
@@ -102,9 +103,8 @@ func (h *handler) panel(w http.ResponseWriter, r *http.Request) {
 		// friendly fragment (the client just injects whatever HTML we return).
 		log.Printf("otw panel: %v", err)
 		render(w, panelData{
-			Title: "Panel externo",
-			Rows:  []row{{Label: "Estado", Value: "no disponible"}},
-			Note:  "No pudimos contactar el servicio externo.",
+			FullName: "Panel no disponible",
+			Note:     "No pudimos contactar el servicio externo; inténtalo de nuevo en un momento.",
 		})
 		return
 	}
@@ -155,16 +155,16 @@ func (h *handler) fetch(ctx context.Context) (panelData, error) {
 		note = "API de GitHub SIMULADA (demo): el servidor la llamaría con un token —para más rate-limit o repos privados— que nunca llega al navegador. Pon OTW_API_URL=https://api.github.com/repos/<owner>/<repo> y un PAT para datos reales."
 	}
 	return panelData{
-		Title: repo.FullName,
-		Rows: []row{
-			{Label: "Descripción", Value: repo.Description},
-			{Label: "Estrellas", Value: strconv.Itoa(repo.Stars)},
-			{Label: "Forks", Value: strconv.Itoa(repo.Forks)},
-			{Label: "Issues abiertas", Value: strconv.Itoa(repo.OpenIssues)},
-			{Label: "Lenguaje", Value: repo.Language},
-			{Label: "Licencia", Value: repo.License.SPDXID},
-		},
-		Note: note,
+		OK:          true,
+		FullName:    repo.FullName,
+		URL:         "https://github.com/" + repo.FullName,
+		Description: repo.Description,
+		Stars:       repo.Stars,
+		Forks:       repo.Forks,
+		OpenIssues:  repo.OpenIssues,
+		Language:    repo.Language,
+		License:     repo.License.SPDXID,
+		Note:        note,
 	}, nil
 }
 

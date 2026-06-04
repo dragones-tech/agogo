@@ -2,23 +2,65 @@
 <article class="card">
   <h1>Sección de ejemplo</h1>
   <p>Esta es una sección estática (sin base de datos). Vive en
-  <code>internal/paginas</code> y está acoplada —pero comentada— en
-  <code>main.go</code>. Descoméntala para verla en <code>/ejemplo</code>.</p>
+  <code>internal/paginas</code> y está acoplada en <code>main.go</code> con una
+  línea en <code>app.Use(...)</code>.</p>
   <p>Para crear las tuyas: copia <code>internal/paginas</code>, ajusta su
-  <code>Register</code> (ruta + plantilla) y acóplala con una línea en
-  <code>app.Use(...)</code>.</p>
+  <code>Register</code> (ruta + plantilla) y acóplala con una línea.</p>
 </article>
 
 <!-- Demo "HTML over the wire" (módulo otw): el botón pide un FRAGMENTO ya
-     renderizado por el servidor —que llama a una API con un token que nunca
-     llega al navegador— y lo inyecta con innerHTML. Sin JSON ni framework.
-     La herramienta (otw + otw.js) está lista; esto solo la muestra en acción. -->
+     renderizado por el servidor —que llama a la API de GitHub con un token que
+     nunca llega al navegador— y lo inyecta con innerHTML. Sin JSON ni framework. -->
 <section class="otw-demo" data-otw="/otw/panel">
-  <button type="button" data-otw-load data-variant="primary">Cargar panel externo</button>
+  <h2>HTML over the wire (otw)</h2>
+  <p>El servidor llama a una API con un token que nunca llega al navegador y
+  devuelve HTML ya renderizado. El cliente solo hace <code>innerHTML</code>.</p>
+  <button type="button" data-otw-load data-variant="primary">Cargar repo de GitHub</button>
   <div data-otw-target></div>
 </section>
+
+<!-- Demo lumen: una Collection respaldada por un JSON PÚBLICO, traído con el
+     cliente Http de lumen EN EL NAVEGADOR (no por el servidor) y renderizado con
+     un CollectionView, más buscador, paginador, contador y "quitar de la vista".
+     Ver internal/site/static/js/ejemplo/{model,collection,view}.js. -->
+<section class="lumen-demo" data-ejemplo>
+  <h2>Collection con lumen (JSON en el cliente)</h2>
+  <p>lumen trae un JSON público con su cliente <code>Http</code> y renderiza una
+  tarjeta por usuario con <code>Model</code> / <code>Collection</code> /
+  <code>CollectionView</code> — con búsqueda, paginación y borrado en vivo.</p>
+
+  <div class="demo-toolbar">
+    <input type="search" data-ejemplo-search placeholder="Buscar por nombre, email o empresa…" aria-label="Buscar usuarios">
+    <span class="demo-count" data-ejemplo-count></span>
+  </div>
+
+  <p data-ejemplo-status aria-busy="true">Cargando usuarios…</p>
+  <div data-ejemplo-list></div>
+
+  <nav class="demo-pager" data-ejemplo-pager aria-label="Paginación" hidden>
+    <button type="button" data-ejemplo-prev>← Anterior</button>
+    <span data-ejemplo-page></span>
+    <button type="button" data-ejemplo-next>Siguiente →</button>
+  </nav>
+</section>
+
+<!-- Markup de cada tarjeta: la UserView lo clona y rellena sus [data-ref]. -->
+<template id="ejemplo-user">
+  <article class="card user-card">
+    <header class="user-card__head">
+      <span class="avatar" data-ref="avatar" aria-hidden="true"></span>
+      <div class="user-card__id">
+        <h3 data-ref="name"></h3>
+        <a data-ref="email"></a>
+      </div>
+      <button type="button" class="user-card__remove" data-ref="remove" title="Quitar de la vista" aria-label="Quitar de la vista">×</button>
+    </header>
+    <p class="user-card__company"><small data-ref="company"></small></p>
+  </article>
+</template>
 {{end}}
 
 {{define "scripts"}}
 <script type="module" src="/static/js/otw.js"></script>
+<script type="module" src="/static/js/ejemplo/view.js"></script>
 {{end}}
