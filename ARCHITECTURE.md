@@ -90,7 +90,7 @@ instructions (running, routes, env vars) see the [README](README.md).
     ├── logs/            # global access-logging middleware (active)
     ├── home/            # "hola mundo" landing (active)
     ├── otw/             # BFF: renders a token-gated API as an HTML fragment (active)
-    ├── paginas/         # static page example + the otw demo (no DB; opt-in breadcrumb)
+    ├── paginas/         # active: static page example at /ejemplo + the otw demo (no DB)
     ├── auth/            # username/password login, reuses identity (needs the DB; opt-in)
     ├── oauth/           # OAuth 2.0 login, reuses identity, stdlib (no DB; opt-in)
     └── site/            # robots.txt, sitemap.xml, /static, favicon, styled 404
@@ -111,8 +111,9 @@ it hooks into the host: it adds routes (`a.Router.Get`), global middleware
 (`a.UseMiddleware`), migrations (`a.AddMigration`), sitemap sources
 (`a.AddSitemap`) and uses shared services (`a.DB`, `a.Session`, `a.Identity`).
 
-`main.go` is the "Gemfile": `app.Use(logs.Module(), home.Module(), otw.Module(),
-site.Module())`, with `auth`/`oauth`/`paginas` sitting one commented line away.
+`main.go` is the "Gemfile": `app.Use(logs.Module(), home.Module(),
+paginas.Module(), otw.Module(), site.Module())`, with `auth`/`oauth` sitting one
+commented line away.
 **What you don't plug in is not imported, so it doesn't enter the binary** (clean
 if unused). Each domain's routes live in its module; the global picture is the
 list of `app.Use(...)`. Third-party plugin distribution = Go modules (`go get`) +

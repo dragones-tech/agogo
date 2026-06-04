@@ -104,7 +104,7 @@ Read once at startup, typed and validated (`internal/config`).
     │  ── SECTIONS (modules) ──
     ├── home/                # the active "hello world" landing
     ├── otw/                 # active: BFF that renders a token-gated API as HTML
-    ├── paginas/             # EXAMPLE static section + the otw demo (commented in main.go)
+    ├── paginas/             # active: example static section at /ejemplo + the otw demo
     ├── auth/                # OPT-IN: username/password login (needs the DB)
     ├── oauth/               # OPT-IN: OAuth 2.0 login, stdlib (no DB)
     └── site/                # robots.txt, sitemap.xml, /static, favicon, styled 404
@@ -124,8 +124,9 @@ A section is a module. The smallest one is `internal/home`:
 2. In its `Register`, register the routes and adjust the template.
 3. Wire it in `main.go`'s `app.Use(...)` with one line.
 
-`main.go` keeps `paginas`, `auth` and `oauth` as commented `app.Use(...)` lines
-(breadcrumbs): uncomment one (and its import) to plug it in.
+`main.go` keeps `auth` and `oauth` as commented `app.Use(...)` lines
+(breadcrumbs): uncomment one (and its import) to plug it in. `paginas` is already
+wired as a live example you can copy.
 
 ## Optional login (`auth` / `oauth`)
 

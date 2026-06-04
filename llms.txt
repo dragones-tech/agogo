@@ -47,7 +47,7 @@ Key facts for an agent working here:
 
 - [home](https://github.com/dragones-tech/agogo/tree/main/internal/home): the active "hello world" section — the smallest module, a good template to copy.
 - [otw](https://github.com/dragones-tech/agogo/tree/main/internal/otw): active "HTML over the wire" BFF — calls a token-gated external API server-side and returns a rendered HTML fragment (the token never reaches the client). Works without credentials via a built-in simulated endpoint; its demo button lives on the `/ejemplo` page.
-- [paginas](https://github.com/dragones-tech/agogo/tree/main/internal/paginas): an example static section + the otw demo, wired but commented out in `main.go` (serves `/ejemplo` once uncommented).
+- [paginas](https://github.com/dragones-tech/agogo/tree/main/internal/paginas): active example static section at `/ejemplo` (also hosts the otw demo button) — the simplest domain shape (no DB); copy it for your own sections.
 - [auth](https://github.com/dragones-tech/agogo/tree/main/internal/auth): opt-in username/password login (`/login`, `/cuenta`) — PBKDF2, CSRF, reuses `identity`. Needs the DB: run `cmd/migrate` (and `cmd/seed`) before enabling it in `main.go`.
 - [oauth](https://github.com/dragones-tech/agogo/tree/main/internal/oauth): opt-in OAuth 2.0 login (authorization-code flow), pure stdlib, reuses `identity`. No DB; routes answer 503 until `OAUTH_*` env is set.
 - [site](https://github.com/dragones-tech/agogo/tree/main/internal/site): robots.txt, sitemap.xml, `/static`, favicon and the styled 404.
